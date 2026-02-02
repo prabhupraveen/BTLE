@@ -2,11 +2,32 @@
 # SPDX-FileCopyrightText: 2025 Xianjun Jiao <putaoshu@msn.com>
 # SPDX-License-Identifier: Apache-2.0
 
+# -------------------------------------------------------------------------
+# 1. MANUALLY CREATE THE RX CLOCK
+# -------------------------------------------------------------------------
+# Since the IP isn't doing it, we MUST do it here. 
+# "rgmii_rx_clk" is the name we are giving it for use in the next steps.
+create_clock -period 8.000 -name rgmii_rx_clk [get_ports rgmii_rxc]
+
+# -------------------------------------------------------------------------
+# 2. DEFINE INPUT DELAYS (Fixes SSH/Packet Errors)
+# -------------------------------------------------------------------------
+# Now we reference the clock name "rgmii_rx_clk" directly.
+# These values tell Vivado the data is center-aligned (PHY adds delay).
+# If your PHY does NOT add delay, you might need to adjust these later.
+set_input_delay -clock rgmii_rx_clk -max 2.8 [get_ports {rgmii_rd* rgmii_rx_ctl}]
+set_input_delay -clock rgmii_rx_clk -min 1.2 [get_ports {rgmii_rd* rgmii_rx_ctl}]
+set_input_delay -clock rgmii_rx_clk -max 2.8 -clock_fall -add_delay [get_ports {rgmii_rd* rgmii_rx_ctl}]
+set_input_delay -clock rgmii_rx_clk -min 1.2 -clock_fall -add_delay [get_ports {rgmii_rd* rgmii_rx_ctl}]
+
+
 #set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_system_wrapper/system_i/util_ad9361_divclk/inst/clk_divide_sel_0/O]] -group [get_clocks -of_objects [get_pins i_system_wrapper/system_i/clk_wiz_0/inst/mmcm_adv_inst/CLKOUT0]]
 
 #set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_system_wrapper/system_i/util_ad9361_divclk/inst/clk_divide_sel_1/O]] -group [get_clocks -of_objects [get_pins i_system_wrapper/system_i/clk_wiz_0/inst/mmcm_adv_inst/CLKOUT0]]
 
 set_clock_groups -asynchronous -group [get_clocks clk_fpga_0] -group [get_clocks -of_objects [get_pins i_system_wrapper/system_i/clk_wiz_1/inst/mmcm_adv_inst/CLKOUT1]]
+
+
 
 ## rx iq
 #set_max_delay -datapath_only -from [get_pins {i_system_wrapper/system_i/util_ad9361_adc_pack/inst/i_cpack/packed_fifo_wr_data_reg[*]/C}] -to [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/clock_domain_conversion_iq_i/rx_i_signal_reg[*]/D}] 10.000
@@ -152,4 +173,3 @@ set_property -dict {PACKAGE_PIN U17 IOSTANDARD LVDS_25} [get_ports {tx_data_out_
 # clocks
 
 create_clock -period 4.000 -name rx_clk [get_ports rx_clk_in_p]
-
