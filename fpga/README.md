@@ -24,10 +24,10 @@ For BOOT partition:
   git checkout fpga_dev
   git submodule update
   cd fpga/helpers/
-  ./save_fpga_img_ila.sh antsdr
-  ./BOOT_BIN_gen.sh antsdr
-  (Please change antsdr accordingly if your board is not antsdr)
-  (Please change the ~/Xilinx/ directory in the .sh if your Vivado is not installed in ~/Xilinx)
+  ./save_fpga_img_ila.sh antsdr_e200
+  ./build_boot_gen.sh antsdr_e200
+  (Please change antsdr_e200 accordingly if your board is not antsdr_e200)
+  (Please change the env.sh if your Vivado is not installed in ~/Xilinx)
   ```
 - Use the BTLE/fpga/helpers/BOOT.BIN to replace the file in the SD card BOOT partition.
 - Use the following bootargs for uEnv.txt in the BOOT partition.
@@ -81,10 +81,10 @@ cd BTLE
 git checkout fpga_dev
 git submodule update
 
-# Change the Vivado install directory ~/Xilinx/ in all the following scripts accordingly!
+# Change the Vivado install directory ~/Xilinx/ in helpers/env.sh accordingly!
 
 cd fpga/
-./build-adi-ip.sh ~/Xilinx/
+./build-adi-ip.sh
 # take a while...
 cd $HARDWARE/
 ./btle.sh &
@@ -94,7 +94,15 @@ cd $HARDWARE/
 # In Vivado: File --> Export --> Export Hardware --> Next --> Include bitstream --> Next --> Next --> Finish
 
 cd ../helpers/
-./all_gen_and_scp.sh $HARDWARE
+  ./save_fpga_img_ila.sh $HARDWARE
+  ./build_boot_gen.sh $HARDWARE
+
+Then transfer the BOOT.BIN to the /root folder of the fpga board.
+
+Then ssh into the board and rename /boot/BOOT.BIN to /boot/BOOT.BIN_OLD
+Them move /root/BOOT.BIN to /boot/BOOT.BIN
+
+reboot the board.
 
 # Wait for board fully rebooting
 # Start from ssh root@10.10.10.10 in the quick start guide
