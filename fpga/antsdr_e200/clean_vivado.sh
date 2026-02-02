@@ -14,4 +14,6 @@ rm -Rf src/sim
 rm src/system.bxml
 rm src/system.bda
 rm src/system_ooc.xdc
+rm vivado*.log
+rm vivado*.jou
 
