@@ -408,7 +408,7 @@
       #address-cells = <0x1>;
       #size-cells = <0x0>;
       phy-handle = <&phy0>;
-      phy-mode = "rgmii-id";
+      phy-mode = "rgmii-rxid";
       xlnx,has-mdio = <0x1>;
       gmii2rgmii-phy-handle = <&gmii_to_rgmii_0>;
 
@@ -419,7 +419,7 @@
       };
 
       gmii_to_rgmii_0:  gmiitorgmii@8 {
-        compatible = "xlnx,gmii-to-rgmii-1.0";
+        compatible = "xlnx,gmii-to-rgmii-4.1";
         reg = <0x8>;
         phy-handle = <&phy0>;
       };

@@ -182,7 +182,7 @@ set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
 set_property -name "file_type" -value "Verilog" -objects $file_obj
 set_property -name "is_enabled" -value "1" -objects $file_obj
 set_property -name "is_global_include" -value "0" -objects $file_obj
-set_property -name "library" -value "xil_defaultlib" -objects $file_obj
+#set_property -name "library" -value "xil_defaultlib" -objects $file_obj
 set_property -name "path_mode" -value "RelativeFirst" -objects $file_obj
 set_property -name "used_in" -value "synthesis implementation simulation" -objects $file_obj
 set_property -name "used_in_implementation" -value "1" -objects $file_obj
@@ -195,7 +195,7 @@ set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
 set_property -name "file_type" -value "Verilog" -objects $file_obj
 set_property -name "is_enabled" -value "1" -objects $file_obj
 set_property -name "is_global_include" -value "0" -objects $file_obj
-set_property -name "library" -value "xil_defaultlib" -objects $file_obj
+#set_property -name "library" -value "xil_defaultlib" -objects $file_obj
 set_property -name "path_mode" -value "RelativeFirst" -objects $file_obj
 set_property -name "used_in" -value "synthesis implementation simulation" -objects $file_obj
 set_property -name "used_in_implementation" -value "1" -objects $file_obj
@@ -209,7 +209,7 @@ set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
 set_property -name "exclude_debug_logic" -value "0" -objects $file_obj
 set_property -name "is_enabled" -value "1" -objects $file_obj
 set_property -name "is_global_include" -value "0" -objects $file_obj
-set_property -name "library" -value "xil_defaultlib" -objects $file_obj
+#set_property -name "library" -value "xil_defaultlib" -objects $file_obj
 set_property -name "path_mode" -value "RelativeFirst" -objects $file_obj
 set_property -name "pfm_name" -value "" -objects $file_obj
 set_property -name "registered_with_manager" -value "1" -objects $file_obj
@@ -223,7 +223,7 @@ set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
 set_property -name "file_type" -value "Verilog" -objects $file_obj
 set_property -name "is_enabled" -value "1" -objects $file_obj
 set_property -name "is_global_include" -value "0" -objects $file_obj
-set_property -name "library" -value "xil_defaultlib" -objects $file_obj
+#set_property -name "library" -value "xil_defaultlib" -objects $file_obj
 set_property -name "path_mode" -value "RelativeFirst" -objects $file_obj
 set_property -name "used_in" -value "synthesis implementation simulation" -objects $file_obj
 set_property -name "used_in_implementation" -value "1" -objects $file_obj
@@ -266,7 +266,7 @@ set file_obj [get_files -of_objects [get_filesets constrs_1] [list "*$file"]]
 set_property -name "file_type" -value "XDC" -objects $file_obj
 set_property -name "is_enabled" -value "1" -objects $file_obj
 set_property -name "is_global_include" -value "0" -objects $file_obj
-set_property -name "library" -value "xil_defaultlib" -objects $file_obj
+#set_property -name "library" -value "xil_defaultlib" -objects $file_obj
 set_property -name "path_mode" -value "RelativeFirst" -objects $file_obj
 set_property -name "processing_order" -value "NORMAL" -objects $file_obj
 set_property -name "scoped_to_cells" -value "" -objects $file_obj
@@ -283,7 +283,7 @@ set file_obj [get_files -of_objects [get_filesets constrs_1] [list "*$file"]]
 set_property -name "file_type" -value "XDC" -objects $file_obj
 set_property -name "is_enabled" -value "1" -objects $file_obj
 set_property -name "is_global_include" -value "0" -objects $file_obj
-set_property -name "library" -value "xil_defaultlib" -objects $file_obj
+#set_property -name "library" -value "xil_defaultlib" -objects $file_obj
 set_property -name "path_mode" -value "RelativeFirst" -objects $file_obj
 set_property -name "processing_order" -value "NORMAL" -objects $file_obj
 set_property -name "scoped_to_cells" -value "" -objects $file_obj

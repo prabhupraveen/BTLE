@@ -1,82 +1,156 @@
 #!/bin/bash
-set -ex
+set -euo pipefail
+set -x
 
-XSA_FILE=$1
-UBOOT_FILE=$2
+###############################################################################
+# Load toolchain environment
+###############################################################################
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+ENV_FILE="$SCRIPT_DIR/env.sh"
+
+if [ ! -f "$ENV_FILE" ]; then
+    echo "ERROR: env.sh not found in repo root"
+    echo "Expected: $ENV_FILE"
+    exit 1
+fi
+
+source "$ENV_FILE"
+
+###############################################################################
+# Environment validation
+###############################################################################
+: "${XILINX_VIVADO_ROOT:?env.sh must define XILINX_VIVADO_ROOT}"
+: "${XILINX_VITIS_ROOT:?env.sh must define XILINX_VITIS_ROOT}"
+
+VIVADO_SETTINGS="$XILINX_VIVADO_ROOT/settings64.sh"
+VITIS_SETTINGS="$XILINX_VITIS_ROOT/settings64.sh"
+
+if [ ! -f "$VIVADO_SETTINGS" ]; then
+    echo "ERROR: Vivado settings not found: $VIVADO_SETTINGS"
+    exit 1
+fi
+
+if [ ! -f "$VITIS_SETTINGS" ]; then
+    echo "ERROR: Vitis settings not found: $VITIS_SETTINGS"
+    exit 1
+fi
+
+#echo "Using Vivado: $XILINX_VIVADO_ROOT"
+echo "Using Vitis : $XILINX_VITIS_ROOT"
+
+###############################################################################
+# Source tools
+###############################################################################
+source "$VIVADO_SETTINGS"
+source "$VITIS_SETTINGS"
+
+###############################################################################
+# Tool sanity checks
+###############################################################################
+command -v vitis   >/dev/null 2>&1 || { echo "ERROR: vitis not in PATH"; exit 1; }
+command -v bootgen >/dev/null 2>&1 || { echo "ERROR: bootgen not in PATH"; exit 1; }
+
+###############################################################################
+# Arguments
+###############################################################################
+if [ "$#" -lt 1 ]; then
+  echo "Usage: $0 <hardware>"
+  echo "  hardware: antsdr | sdrpi | antsdr_e200"
+  exit 1
+fi
+
+HARDWARE=$1
+
+HW_BASE_DIR=../../BTLE-hw-img/fpga
+UBOOT_IMAGE=./u-boot.elf
+
 BUILD_DIR=build_boot_bin
 OUTPUT_DIR=output_boot_bin
 
-usage () {
-	echo "usage: $0 system_top.xsa u-boot.elf [output-archive]"
-	exit 1
-}
+XSA_FILE=${HW_BASE_DIR}/${HARDWARE}/system_top.xsa
 
-depends () {
-	echo Xilinx $1 must be installed and in your PATH
-	echo try: source /opt/Xilinx/Vivado/202x.x/settings64.sh
-	exit 1
-}
-
-### Check command line parameters
-echo $XSA_FILE | grep -q ".xsa" || usage
-echo $UBOOT_FILE | grep -q -e ".elf" -e "uboot" -e "u-boot"|| usage
-
-if [ ! -f $XSA_FILE ]; then
-	echo $XSA_FILE: File not found!
-	usage
+###############################################################################
+# Sanity checks
+###############################################################################
+if [ ! -f "$XSA_FILE" ]; then
+    echo "ERROR: XSA not found: $XSA_FILE"
+    exit 1
 fi
 
-if [ ! -f $UBOOT_FILE ]; then
-	echo $UBOOT_FILE: File not found!
-	usage
+if [ ! -f "$UBOOT_IMAGE" ]; then
+    echo "ERROR: u-boot image not found: $UBOOT_IMAGE"
+    exit 1
 fi
 
-### Check for required Xilinx tools (xcst is equivalent with 'xsdk -batch')
-command -v xsct >/dev/null 2>&1 || depends xsct
-command -v bootgen >/dev/null 2>&1 || depends bootgen
+###############################################################################
+# Prepare directories
+###############################################################################
+rm -rf "$BUILD_DIR" "$OUTPUT_DIR"
+mkdir -p "$BUILD_DIR" "$OUTPUT_DIR"
 
-rm -Rf $BUILD_DIR $OUTPUT_DIR
-mkdir -p $OUTPUT_DIR
-mkdir -p $BUILD_DIR
+cp "$XSA_FILE"      "$BUILD_DIR/"
+cp "$XSA_FILE"      "$OUTPUT_DIR/"
+cp "$UBOOT_IMAGE"   "$OUTPUT_DIR/u-boot.elf"
 
-cp $XSA_FILE $BUILD_DIR/
-cp $UBOOT_FILE $OUTPUT_DIR/u-boot.elf
-cp $XSA_FILE $OUTPUT_DIR/
+XSA_BASENAME=$(basename "$XSA_FILE")
 
-### Create create_fsbl_project.tcl file used by xsct to create the fsbl.
-echo "hsi open_hw_design `basename $XSA_FILE`" > $BUILD_DIR/create_fsbl_project.tcl
-echo 'set cpu_name [lindex [hsi get_cells -filter {IP_TYPE==PROCESSOR}] 0]' >> $BUILD_DIR/create_fsbl_project.tcl
-echo 'platform create -name hw0 -hw system_top.xsa -os standalone -out ./build/sdk -proc $cpu_name' >> $BUILD_DIR/create_fsbl_project.tcl
-echo 'platform generate' >> $BUILD_DIR/create_fsbl_project.tcl
+###############################################################################
+# Build FSBL using Vitis Python API
+###############################################################################
+echo "==== Building FSBL using Vitis Python ===="
 
-FSBL_PATH="$BUILD_DIR/build/sdk/hw0/export/hw0/sw/hw0/boot/fsbl.elf"
-SYSTEM_TOP_BIT_PATH="$BUILD_DIR/build/sdk/hw0/hw/system_top.bit"
+vitis -s build_fsbl.py "$BUILD_DIR" "$XSA_BASENAME"
 
-### Create zynq.bif file used by bootgen
-echo 'the_ROM_image:' > $OUTPUT_DIR/zynq.bif
-echo '{' >> $OUTPUT_DIR/zynq.bif
-echo '[bootloader] fsbl.elf' >> $OUTPUT_DIR/zynq.bif
-echo 'system_top.bit' >> $OUTPUT_DIR/zynq.bif
-echo 'u-boot.elf' >> $OUTPUT_DIR/zynq.bif
-echo '}' >> $OUTPUT_DIR/zynq.bif
+###############################################################################
+# Locate generated outputs
+###############################################################################
+FSBL_PATH=$(find "$BUILD_DIR" -name fsbl.elf | head -n 1)
+BIT_PATH=$(find "$BUILD_DIR" -name "*.bit" | grep system_top | head -n 1)
 
-### Build fsbl.elf
+if [ -z "$FSBL_PATH" ]; then
+    echo "ERROR: fsbl.elf not found!"
+    exit 1
+fi
+
+if [ -z "$BIT_PATH" ]; then
+    echo "ERROR: system_top.bit not found!"
+    exit 1
+fi
+
+echo "FSBL      : $FSBL_PATH"
+echo "BITSTREAM : $BIT_PATH"
+
+cp "$FSBL_PATH" "$OUTPUT_DIR/fsbl.elf"
+cp "$BIT_PATH"  "$OUTPUT_DIR/system_top.bit"
+
+###############################################################################
+# Create BIF
+###############################################################################
+cat > "$OUTPUT_DIR/zynq.bif" <<EOF
+the_ROM_image:
+{
+    [bootloader] fsbl.elf
+    system_top.bit
+    u-boot.elf
+}
+EOF
+
+###############################################################################
+# Build BOOT.BIN
+###############################################################################
+echo "==== Generating BOOT.BIN ===="
+
 (
-	cd $BUILD_DIR
-	xsct create_fsbl_project.tcl
+    cd "$OUTPUT_DIR"
+    bootgen -arch zynq -image zynq.bif -o BOOT.BIN -w
 )
 
-### Copy fsbl and system_top.bit into the output folder
-cp $FSBL_PATH $OUTPUT_DIR/fsbl.elf
-cp $SYSTEM_TOP_BIT_PATH $OUTPUT_DIR/system_top.bit
+###############################################################################
+# Publish result
+###############################################################################
+cp "$OUTPUT_DIR/BOOT.BIN" ./
 
-### Build BOOT.BIN
-(
-	cd $OUTPUT_DIR
-	bootgen -arch zynq -image zynq.bif -o BOOT.BIN -w
-)
-
-### Optionally tar.gz the entire output folder with the name given in argument 3
-if [ ${#3} -ne 0 ]; then
-	tar czvf $3.tar.gz $OUTPUT_DIR
-fi
+echo "===================================================="
+echo "BOOT.BIN generated successfully for hardware: $HARDWARE"
+echo "===================================================="
