@@ -95,7 +95,7 @@ set proj_dir [get_property directory [current_project]]
 
 # Set project properties
 set obj [current_project]
-set_property -name "board_part_repo_paths" -value "[file normalize "$origin_dir/../../.Xilinx/Vivado/2022.2/xhub/board_store/xilinx_board_store"]" -objects $obj
+set_property -name "board_part_repo_paths" -value "[file normalize "/opt/Xilinx/2025.1/data/xhub/boards/XilinxBoardStore/boards/Xilinx"]" -objects $obj
 # set_property -name "board_part" -value "avnet.com:zedboard:part0:1.4" -objects $obj
 #set_property -name "classic_soc_boot" -value "0" -objects $obj
 set_property -name "compxlib.activehdl_compiled_library_dir" -value "$proj_dir/${_xil_proj_name_}.cache/compile_simlib/activehdl" -objects $obj
@@ -799,7 +799,7 @@ set_property -name "steps.synth_design.args.flatten_hierarchy" -value "rebuilt" 
 set_property -name "steps.synth_design.args.gated_clock_conversion" -value "off" -objects $obj
 set_property -name "steps.synth_design.args.bufg" -value "12" -objects $obj
 set_property -name "steps.synth_design.args.directive" -value "Default" -objects $obj
-set_property -name "steps.synth_design.args.retiming" -value "0" -objects $obj
+set_property STEPS.SYNTH_DESIGN.ARGS.GLOBAL_RETIMING off $obj
 set_property -name "steps.synth_design.args.fsm_extraction" -value "auto" -objects $obj
 set_property -name "steps.synth_design.args.keep_equivalent_registers" -value "0" -objects $obj
 set_property -name "steps.synth_design.args.resource_sharing" -value "auto" -objects $obj
