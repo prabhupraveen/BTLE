@@ -44,8 +44,14 @@
 
 #define FREQ_HZ_STRING_BUF_SIZE 32
 
-// #define DEBUG_PRINT(...) printf(__VA_ARGS__)
-#define DEBUG_PRINT(...)
+#define DEBUG 3
+
+#if defined(DEBUG) && DEBUG > 0
+ #define DEBUG_PRINT(fmt, args...) fprintf(stderr, "DEBUG: %s:%d:%s(): " fmt, \
+    __FILE__, __LINE__, __func__, ##args)
+#else
+ #define DEBUG_PRINT(fmt, args...) /* Don't do anything in release builds */
+#endif
 
 char ad9361_rx0_lo_file[] = "/sys/bus/iio/devices/iio:device0/out_altvoltage0_RX_LO_frequency";
 
@@ -96,7 +102,7 @@ static inline void pin_to_cpu(int cpu_id) {
     perror("sched_setaffinity");
     exit(1);
   }
-  DEBUG_PRINT(printf("Pinned to CPU %d\n", cpu_id);)
+  DEBUG_PRINT("Pinned to CPU %d\n", cpu_id);
 }
 
 static inline void set_realtime_priority(void) {
@@ -106,8 +112,9 @@ static inline void set_realtime_priority(void) {
     perror("sched_setscheduler");
     exit(1);
   }
-  DEBUG_PRINT(printf("Real-time priority set (SCHED_FIFO, prio 99)\n");)
+  DEBUG_PRINT("Real-time priority set (SCHED_FIFO, prio 99)\n");
 }
+
 
 static inline int set_irq_affinity(int irq, const char *mask)
 {
@@ -566,6 +573,8 @@ int main(int argc, char *argv[])
       return 1;
   }
 
+  DEBUG_PRINT("PID is: %u\n", pid);
+
   if (pid == 0) {
     // CHILD PROCESS: pin to CPU 1, and exit when parent dies
     if (prctl(PR_SET_PDEATHSIG, SIGTERM) == -1) {
@@ -593,17 +602,17 @@ int main(int argc, char *argv[])
     pin_to_cpu(1);            // Bind to CPU1
     set_realtime_priority();  // RT scheduling
     
-    if (set_irq_affinity(56, "2") == 0) {
-      DEBUG_PRINT(printf("IRQ %d affinity set to mask %s\n", 56, "2");)
+    if (set_irq_affinity(56, "2") == 0) {  // 56 IRQ for btle_controller
+      DEBUG_PRINT("IRQ %d affinity set to mask %s\n", 56, "2");
     } else {
       printf("Failed to set IRQ affinity\n");
       // close(fd_uio0);
       // return -1;
     }
 
-    for (i = 33; i<= 38; i++) {
+    for (i = 33; i<= 38; i++) { // IRQs for eth, mmc, spi etc.
       if (set_irq_affinity(i, "1") == 0) {
-        DEBUG_PRINT(printf("IRQ %d affinity set to mask %s\n", i, "1");)
+        DEBUG_PRINT("IRQ %d affinity set to mask %s\n", i, "1");
       } else {
         printf("Failed to set IRQ affinity\n");
         // close(fd_uio0);
@@ -654,7 +663,7 @@ int main(int argc, char *argv[])
       num_rx_pkt_hw2 = fpga_regs[53];
       num_rx_pkt_hw1 = fpga_regs[55];
       if ( num_rx_pkt_hw != num_rx_pkt_hw1 || num_rx_pkt_hw2 != num_rx_pkt_hw1) {
-        DEBUG_PRINT(printf("num rx pkt hw %d %d %d\n", num_rx_pkt_hw, num_rx_pkt_hw1, num_rx_pkt_hw2);)
+        DEBUG_PRINT("num rx pkt hw %d %d %d\n", num_rx_pkt_hw, num_rx_pkt_hw1, num_rx_pkt_hw2);
         __sync_synchronize();
         // break;
       }
@@ -662,7 +671,7 @@ int main(int argc, char *argv[])
       reg_val = fpga_regs[41];
       if (reg_val > decode_end_to_host_read_counter_max) {
         decode_end_to_host_read_counter_max = reg_val;
-        DEBUG_PRINT(printf("max latency %d time %ds\n", decode_end_to_host_read_counter_max, get_time_s() - start_time_s);)
+        DEBUG_PRINT("max latency %d time %ds\n", decode_end_to_host_read_counter_max, get_time_s() - start_time_s);
       }
 
       num_rx_pkt_crc_ok_hw = fpga_regs[51];
@@ -727,7 +736,7 @@ int main(int argc, char *argv[])
       // rx_decode_run_old = (rx_decode_reg_val&(1<<18));
     }
 
-    DEBUG_PRINT(printf("payload len %d pkt total %d crc ok %d hw pkt total %d total1 %d crc ok %d\n", rx_payload_length, num_rx_pkt, num_rx_pkt_crc_ok, num_rx_pkt_hw, num_rx_pkt_hw1, num_rx_pkt_crc_ok_hw);)
+    DEBUG_PRINT("payload len %d pkt total %d crc ok %d hw pkt total %d total1 %d crc ok %d\n", rx_payload_length, num_rx_pkt, num_rx_pkt_crc_ok, num_rx_pkt_hw, num_rx_pkt_hw1, num_rx_pkt_crc_ok_hw);
 
     munmap((void *)map_base, BTLE_LL_REG_SIZE);
     // close(fd);
