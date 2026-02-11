@@ -1,5 +1,5 @@
 /dts-v1/;
-//to compile: dtc -O dtb devicetree.dtb devicetree.dts
+//to compile: dtc -O dtb -o devicetree.dtb devicetree.dts
 
 / {
   #address-cells = <0x1>;
