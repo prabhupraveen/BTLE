@@ -1,5 +1,6 @@
 /dts-v1/;
 //to compile: dtc -O dtb -o devicetree.dtb devicetree.dts
+//to reverse: dtc -I dtb -O dts -o dt_reverse.dts devicetree.dtb
 
 / {
   #address-cells = <0x1>;
@@ -420,7 +421,7 @@
       };
 
       gmii_to_rgmii_0:  gmiitorgmii@8 {
-        compatible = "xlnx,gmii-to-rgmii-4.1";
+        compatible = "xlnx,gmii-to-rgmii-1.0";
         reg = <0x8>;
         phy-handle = <&phy0>;
       };
