@@ -371,6 +371,20 @@ static inline int host_intf(uint16_t cmd_listen_port) {
           }
           
           printf("child: write 0x%08X to register %d\n", unit_field1, unit_field0);
+        } else if (control == 1) { // NEW: Transmit Packet Command
+          printf("child: TX Packet command received!\n");
+          
+          runtime_len = runtime_len + control_len;
+          char *msg_ptr = (char *)(buffer_child + runtime_len);
+
+          // For your Pentarisc startup hardware:
+          // You likely want to move this message to the FPGA Tx Buffer.
+          // Example: Copying the first 32 bytes of the message to a hypothetical TX register
+          printf("child: Message to Transmit: %.32s\n", msg_ptr);
+
+          // TODO: Trigger your actual FPGA Tx IRQ or DMA here
+          // fpga_regs[TX_TRIGGER_REG] = 1;
+
         } else {
           printf("child: Invalid control field: 0x%08X, ignoring packet\n", control);
         }
@@ -426,7 +440,7 @@ int main(int argc, char *argv[])
   uint16_t cmd_listen_port = BLE_CMD_PORT;
   uint32_t channel_number = 37; // default to channel 37
   uint32_t crc_init = 0x555555; // default to 0x555555
-  uint32_t unique_bit_seq = 0x8E89BED6; // default to 0x8E89BED6packet_word
+  uint32_t unique_bit_seq = 0x8E89BED6; // default to 0x8E89BED6 packet_word
 
   while ((opt = getopt(argc, argv, "n:c:a:H:P:L:")) != -1) {
     switch (opt) {
