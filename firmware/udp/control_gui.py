@@ -52,13 +52,13 @@ class AppConfig:
     data_port:           int  = 50001
     ssh_user:            str  = "root"
     ssh_password:        str  = ""
-    remote_work_dir:     str  = "/root/vis"
+    btle_ll_dir:         str  = "/root/vis"
     default_channel:     str  = "37"
     default_aa:          str  = "0x8E89BED6"
     default_crc_init:    str  = "0x555555"
     sudo_password:       str  = ""
     use_sudo_fpga_ctl:   bool = True
-    use_sudo_send_cmd:   bool = False
+    use_sudo_send_cmd:   bool = True
 
     def save(self, path: str = CONFIG_FILE) -> None:
         data = asdict(self)
@@ -77,6 +77,10 @@ class AppConfig:
         try:
             with open(path) as f:
                 data = json.load(f)
+            # Backward compatibility: old configs used `remote_work_dir`
+            if "btle_ll_dir" not in data and "remote_work_dir" in data:
+                data["btle_ll_dir"] = data.get("remote_work_dir", "/root/vis")
+
             valid = {k: v for k, v in data.items() if k in cls.__dataclass_fields__}
             cfg = cls(**valid)
             # Always blank sensitive fields
@@ -474,10 +478,10 @@ class ConfigDialog(QDialog):
         f = QFormLayout(g)
         self.ssh_user    = self._le(self.cfg.ssh_user)
         self.ssh_pass    = self._le(self.cfg.ssh_password, password=True)
-        self.remote_dir  = self._le(self.cfg.remote_work_dir)
+        self.remote_dir  = self._le(self.cfg.btle_ll_dir)
         self._row(f, "Username:",     self.ssh_user)
         self._row(f, "Password:",     self.ssh_pass)
-        self._row(f, "Remote Dir:",   self.remote_dir)
+        self._row(f, "btle_ll Dir:",  self.remote_dir)
         lay.addWidget(g)
 
         # ── BLE defaults ─────────────────────────────
@@ -529,7 +533,7 @@ class ConfigDialog(QDialog):
             data_port=_int(self.data_port.text(), 50001),
             ssh_user=self.ssh_user.text().strip(),
             ssh_password=self.ssh_pass.text(),
-            remote_work_dir=self.remote_dir.text().strip(),
+            btle_ll_dir=self.remote_dir.text().strip() or "/root/vis",
             default_channel=self.def_ch.text().strip(),
             default_aa=self.def_aa.text().strip(),
             default_crc_init=self.def_crc.text().strip(),
@@ -624,7 +628,7 @@ class BtleLLPanel(QGroupBox):
 
     def _build_cmd(self) -> str:
         c = self.cfg
-        return (f"cd {c.remote_work_dir} && ./btle_ll"
+        return (f"cd {c.btle_ll_dir} && ./btle_ll"
                 f" -H {c.host_ip}"
                 f" -P {c.data_port}"
                 f" -L {c.cmd_port}"
@@ -702,15 +706,6 @@ class SendCmdPanel(QGroupBox):
             placeholder="max 26 chars", maxlen=26)
         lay.addLayout(grid)
 
-        # Mismatch warning (hidden by default)
-        self._mismatch_lbl = QLabel()
-        self._mismatch_lbl.setStyleSheet(
-            "color:#fbbf24; font-weight:bold; background:#1c1a0a;"
-            "padding:5px 8px; border-radius:4px; font-size:10px;")
-        self._mismatch_lbl.setWordWrap(True)
-        self._mismatch_lbl.hide()
-        lay.addWidget(self._mismatch_lbl)
-
         # Command preview
         self._preview = QLabel()
         self._preview.setStyleSheet(
@@ -764,11 +759,8 @@ class SendCmdPanel(QGroupBox):
         self._update_preview()
 
     def set_mismatch(self, text: str):
-        if text:
-            self._mismatch_lbl.setText(f"⚠  Parameter mismatch with btle_ll:\n{text}")
-            self._mismatch_lbl.show()
-        else:
-            self._mismatch_lbl.hide()
+        # Mismatch warnings are shown in the main log instead of occupying panel space.
+        pass
 
     def get_n(self) -> Optional[str]:
         return self.n_edit.text().strip() if self.n_cb.isChecked() else None
@@ -823,6 +815,7 @@ class MainWindow(QMainWindow):
         self.capture_worker: Optional[CaptureWorker] = None
         self.send_worker:    Optional[SendCmdWorker] = None
         self.ping_worker:    Optional[PingWorker]    = None
+        self._last_mismatch_text: str = ""
 
         self.setWindowTitle("BLE FPGA Control  —  AntSDR E200")
         self.setMinimumSize(860, 720)
@@ -1054,7 +1047,22 @@ class MainWindow(QMainWindow):
         if sc_a and norm(self.btle_panel.get_a()) != norm(sc_a):
             msgs.append(f"-a: btle_ll={self.btle_panel.get_a()}  vs  send_cmd={sc_a}")
 
-        self.send_panel.set_mismatch("\n".join(msgs))
+        mismatch_text = "\n".join(msgs)
+        self.send_panel.set_mismatch(mismatch_text)
+
+        if mismatch_text != self._last_mismatch_text:
+            if mismatch_text:
+                self.log.append_line(
+                    "Parameter mismatch detected between btle_ll and send_cmd:\n"
+                    + mismatch_text,
+                    "info"
+                )
+            elif self._last_mismatch_text:
+                self.log.append_line(
+                    "Parameter mismatch resolved between btle_ll and send_cmd.",
+                    "info"
+                )
+            self._last_mismatch_text = mismatch_text
 
     # ── Ping ─────────────────────────────────────────────────────────────────
     def _do_ping(self):
@@ -1076,6 +1084,7 @@ class MainWindow(QMainWindow):
         self.log.append_line(f"Ping → {msg}", cat)
         if ok:
             self.dot_antsdr.set_state("ok", msg)
+            self.dot_vpn.set_state("ok", msg)
         else:
             self.dot_antsdr.set_state("error", msg)
             box = QMessageBox(self)
@@ -1192,7 +1201,7 @@ class MainWindow(QMainWindow):
 # Startup dialogs
 # ─────────────────────────────────────────────────────────────────────────────
 
-def run_startup_checks() -> bool:
+def run_startup_checks(cfg: AppConfig) -> bool:
     """Returns False if the user chose to quit."""
 
     # ── Dialog 1: VPN ──────────────────────────────
@@ -1219,7 +1228,7 @@ def run_startup_checks() -> bool:
         "<b>Host</b> (same dir as this script):<br>"
         "&nbsp;&nbsp;• <code>gcc -O2 -o ble_send_cmd ble_send_cmd.c -lpthread</code><br>"
         "&nbsp;&nbsp;• <code>gcc -O2 -o ble_fpga_ctl ble_fpga_ctl.c</code><br><br>"
-        "<b>AntSDR</b> (<code>/root/vis/</code> on device):<br>"
+        f"<b>AntSDR</b> (<code>{cfg.btle_ll_dir}/</code> on device):<br>"
         "&nbsp;&nbsp;• <code>gcc -O2 -o btle_ll btle_ll.c -lpthread</code>"
     )
     d2.addButton("✓  Binaries are up-to-date", QMessageBox.ButtonRole.AcceptRole)
@@ -1241,7 +1250,7 @@ def main():
     cfg = AppConfig.load(CONFIG_FILE)
 
     # Startup checks — these show before the main window appears
-    if not run_startup_checks():
+    if not run_startup_checks(cfg):
         sys.exit(0)
 
     win = MainWindow(cfg)
