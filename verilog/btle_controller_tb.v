@@ -6,7 +6,7 @@
 // python3 test_vector_for_btle_verilog.py
 // (arguments can be added: example_idx snr ppm_value)
 // Run verilog simulation:
-// iverilog -o btle_controller_tb btle_controller_tb.v btle_controller.v btle_ll_stub.v btle_phy.v btle_rx.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
+// iverilog -o btle_controller_tb.vvp auxiliary_daemon.v btle_controller_tb.v btle_controller.v clock_domain_conversion_iq.v btle_ll/btle_ll_stub.v btle_phy.v btle_rx.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
 // vvp btle_controller_tb
 // Check verilog outputs to see whether test pass.
 
@@ -34,6 +34,10 @@ module btle_controller_tb #
   parameter GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
   parameter GFSK_DEMODULATION_BIT_WIDTH = 16,
   parameter LEN_UNIQUE_BIT_SEQUENCE = 32,
+  parameter NUM_BIT_PAYLOAD_LENGTH = 8,
+
+  parameter RF_IQ_BIT_WIDTH = 64,
+  parameter RF_I_OR_Q_BIT_WIDTH = (RF_IQ_BIT_WIDTH/4),
 
   parameter PREAMBLE_BIT_WIDTH = 8
 ) (
@@ -305,9 +309,13 @@ reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] channel_number;
 reg channel_number_load;
 
 reg [7:0] tx_pdu_octet_mem_data;
-reg [5:0] tx_pdu_octet_mem_addr;
+reg [NUM_BIT_PAYLOAD_LENGTH:0] tx_pdu_octet_mem_addr;
 
 wire tx_start;
+
+wire [RF_IQ_BIT_WIDTH-1:0] tx_iq_signal_ext;
+wire tx_iq_valid_ext;
+wire tx_iq_valid_last_ext;
 
 wire signed [(IQ_BIT_WIDTH-1) : 0] tx_i_signal;
 wire signed [(IQ_BIT_WIDTH-1) : 0] tx_q_signal;
@@ -338,10 +346,25 @@ wire rx_decode_end;
 wire rx_crc_ok;
 reg  rx_crc_ok_store;
 wire [2:0] rx_best_phase;
-wire [6:0] rx_payload_length;
+wire [(NUM_BIT_PAYLOAD_LENGTH-1):0] rx_payload_length;
 
 wire [7:0] rx_pdu_octet_mem_data;
-reg  [5:0] rx_pdu_octet_mem_addr;
+reg  [NUM_BIT_PAYLOAD_LENGTH:0] rx_pdu_octet_mem_addr;
+
+reg [7:0] gpio;
+reg [7:0] rf_gpio;
+wire [15:0] ll_gpio;
+wire ll_itrpt0;
+wire ll_itrpt1;
+wire ll_itrpt2;
+wire ll_itrpt3;
+wire ll_itrpt4;
+wire ll_itrpt5;
+wire ll_itrpt6;
+wire ll_itrpt7;
+
+wire [RF_IQ_BIT_WIDTH-1:0] rx_iq_signal_ext;
+wire rx_iq_valid_ext;
 
 reg [S_AXI_ADDR_WIDTH-1 : 0] s00_axi_awaddr;
 reg [2 : 0] s00_axi_awprot;
@@ -364,6 +387,18 @@ wire s00_axi_rvalid;
 wire s00_axi_rready;
 
 assign baremetal_phy_intf_mode = 1;
+
+assign tx_i_signal = tx_iq_signal_ext[(IQ_BIT_WIDTH-1):0];
+assign tx_q_signal = tx_iq_signal_ext[(RF_I_OR_Q_BIT_WIDTH+IQ_BIT_WIDTH-1):RF_I_OR_Q_BIT_WIDTH];
+assign tx_iq_valid = tx_iq_valid_ext;
+assign tx_iq_valid_last = tx_iq_valid_last_ext;
+
+assign rx_iq_signal_ext = {
+  {(RF_IQ_BIT_WIDTH-2*RF_I_OR_Q_BIT_WIDTH){1'b0}},
+  {{(RF_I_OR_Q_BIT_WIDTH-GFSK_DEMODULATION_BIT_WIDTH){rx_q_signal[GFSK_DEMODULATION_BIT_WIDTH-1]}}, rx_q_signal},
+  {{(RF_I_OR_Q_BIT_WIDTH-GFSK_DEMODULATION_BIT_WIDTH){rx_i_signal[GFSK_DEMODULATION_BIT_WIDTH-1]}}, rx_i_signal}
+};
+assign rx_iq_valid_ext = rx_iq_valid;
 
 // test process
 reg [31:0] clk_count;
@@ -406,6 +441,8 @@ always @ (posedge clk) begin
     preamble <= PREAMBLE;
 
     uart_rx <= 0;
+    gpio <= 0;
+    rf_gpio <= 0;
 
     rx_i_signal <= 0;
     rx_q_signal <= 0;
@@ -672,13 +709,16 @@ always @ (posedge clk) begin
 end
 
 btle_controller # (
-  .S_AXI_DATA_WIDTH(S_AXI_DATA_WIDTH),
-  .S_AXI_ADDR_WIDTH(S_AXI_ADDR_WIDTH),
+  .C_S00_AXI_DATA_WIDTH(S_AXI_DATA_WIDTH),
+  .C_S00_AXI_ADDR_WIDTH(S_AXI_ADDR_WIDTH),
 
   .CLK_FREQUENCE(CLK_FREQUENCE),
   .BAUD_RATE(BAUD_RATE),
   .PARITY(PARITY),
   .FRAME_WD(FRAME_WD),
+
+  .RF_IQ_BIT_WIDTH(RF_IQ_BIT_WIDTH),
+  .RF_I_OR_Q_BIT_WIDTH(RF_I_OR_Q_BIT_WIDTH),
 
   .CRC_STATE_BIT_WIDTH(CRC_STATE_BIT_WIDTH),
   .CHANNEL_NUMBER_BIT_WIDTH(CHANNEL_NUMBER_BIT_WIDTH),
@@ -691,24 +731,38 @@ btle_controller # (
   .GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT(GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT),
 
   .GFSK_DEMODULATION_BIT_WIDTH(GFSK_DEMODULATION_BIT_WIDTH),
-  .LEN_UNIQUE_BIT_SEQUENCE(LEN_UNIQUE_BIT_SEQUENCE)
+  .LEN_UNIQUE_BIT_SEQUENCE(LEN_UNIQUE_BIT_SEQUENCE),
+  .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH)
 ) btle_controller_i (
-  .clk(clk),
-  .rst(rst),
+  .rf_clk(clk),
+  .rf_rst(rst),
+
+  .bb_clk(clk),
+  .bb_rst(rst),
+
+  .gpio(gpio),
+  .ll_gpio(ll_gpio),
+  .ll_itrpt0(ll_itrpt0),
+  .ll_itrpt1(ll_itrpt1),
+  .ll_itrpt2(ll_itrpt2),
+  .ll_itrpt3(ll_itrpt3),
+  .ll_itrpt4(ll_itrpt4),
+  .ll_itrpt5(ll_itrpt5),
+  .ll_itrpt6(ll_itrpt6),
+  .ll_itrpt7(ll_itrpt7),
   
   // ============================to host: UART HCI=========================
   .uart_rx(uart_rx),
   .uart_tx(uart_tx),
 
   // =========================to zero-IF RF transceiver====================
-  .tx_i_signal(tx_i_signal),
-  .tx_q_signal(tx_q_signal),
-  .tx_iq_valid(tx_iq_valid),
-  .tx_iq_valid_last(tx_iq_valid_last),
+  .rf_gpio(rf_gpio),
+  .tx_iq_signal_ext(tx_iq_signal_ext),
+  .tx_iq_valid_ext(tx_iq_valid_ext),
+  .tx_iq_valid_last_ext(tx_iq_valid_last_ext),
 
-  .rx_i_signal(rx_i_signal),
-  .rx_q_signal(rx_q_signal),
-  .rx_iq_valid(rx_iq_valid),
+  .rx_iq_signal_ext(rx_iq_signal_ext),
+  .rx_iq_valid_ext(rx_iq_valid_ext),
 
   .s00_axi_aclk(s00_axi_aclk),
   .s00_axi_aresetn(s00_axi_aresetn),

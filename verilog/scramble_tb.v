@@ -6,7 +6,7 @@
 // python3 test_vector_for_btle_verilog.py
 // (arguments can be added: example_idx snr ppm_value)
 // Run verilog simulation:
-// iverilog -o scramble_tb scramble_tb.v scramble.v scramble_core.v
+// iverilog -o scramble_tb.vvp scramble_tb.v scramble.v scramble_core.v
 // vvp scramble_tb
 // Check verilog outputs to see whether test pass.
 

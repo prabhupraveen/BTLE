@@ -6,7 +6,7 @@
 // python3 test_vector_for_btle_verilog.py
 // (arguments can be added: example_idx snr ppm_value)
 // Run verilog simulation:
-// iverilog -o search_unique_bit_sequence_tb search_unique_bit_sequence_tb.v search_unique_bit_sequence.v
+// iverilog -o search_unique_bit_sequence_tb.vvp search_unique_bit_sequence_tb.v search_unique_bit_sequence.v
 // vvp search_unique_bit_sequence_tb
 // Check verilog outputs to see whether test pass.
 
@@ -26,7 +26,8 @@ reg [64*8:0] TEST_OUTPUT_REF_FILENAME = "btle_rx_search_unique_bit_sequence_test
 
 reg [31:0] btle_config_mem [0:31];
 reg signed [0:0] search_unique_bit_sequence_test_input_mem [0:4095];
-reg signed [15:0] search_unique_bit_sequence_test_output_ref_mem [0:3];
+reg signed [15:0] search_unique_bit_sequence_test_output_ref_mem [0:63];
+reg signed [15:0] hit_idx_mem [0:63];
 
 reg [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0] ACCESS_ADDRESS;
 
@@ -34,6 +35,7 @@ integer search_unique_bit_sequence_test_input_fd;
 integer search_unique_bit_sequence_test_output_ref_fd;
 integer NUM_BIT_INPUT;
 integer NUM_SAMPLE_OUTPUT;
+integer NUM_HIT_OUTPUT;
 integer tmp;
 integer i, j;
 
@@ -102,6 +104,7 @@ always @ (posedge clk) begin
 
     clk_count <= 1;
     bit_in_count <= 0;
+    NUM_HIT_OUTPUT <= 0;
   end else begin
     clk_count <= clk_count + 1;
 
@@ -119,6 +122,30 @@ always @ (posedge clk) begin
 
     if (bit_in_count == (NUM_BIT_INPUT+30)) begin
       $display("%d input", NUM_BIT_INPUT);
+
+      if (NUM_BIT_INPUT == 0 || NUM_SAMPLE_OUTPUT == 0) begin
+        $display("FAIL: empty input/reference vectors. Please generate test vectors first.");
+        $finish;
+      end
+
+      $display("Compare all hit indices with reference ...");
+      if (NUM_HIT_OUTPUT != NUM_SAMPLE_OUTPUT) begin
+        $display("FAIL: hit count mismatch, dut=%d ref=%d", NUM_HIT_OUTPUT, NUM_SAMPLE_OUTPUT);
+      end else begin
+        tmp = 0;
+        for (i=0; i<NUM_SAMPLE_OUTPUT; i=i+1) begin
+          if (hit_idx_mem[i] != search_unique_bit_sequence_test_output_ref_mem[i]) begin
+            tmp = tmp + 1;
+            $display("Mismatch idx=%d dut=%d ref=%d", i, hit_idx_mem[i], search_unique_bit_sequence_test_output_ref_mem[i]);
+          end
+        end
+
+        if (tmp == 0) begin
+          $display("PASS: search_unique_bit_sequence_tb");
+        end else begin
+          $display("FAIL: search_unique_bit_sequence_tb differences=%d", tmp);
+        end
+      end
       $finish;
     end
 
@@ -126,11 +153,11 @@ always @ (posedge clk) begin
     if (hit_flag) begin
       $display("unique_bit_sequence full match at the %dth bit", bit_in_count);
       $display("unique_bit_sequence starting idx %d", bit_in_count - LEN_UNIQUE_BIT_SEQUENCE);
-      $display("Compare the unique_bit_sequence starting idx and the search_unique_bit_sequence_test_output_ref_mem[0] ...");
-      if ((bit_in_count - LEN_UNIQUE_BIT_SEQUENCE) == search_unique_bit_sequence_test_output_ref_mem[0]) begin
-        $display("Same as python result %d. Test PASS.", search_unique_bit_sequence_test_output_ref_mem[0]);
+      if (NUM_HIT_OUTPUT < 64) begin
+        hit_idx_mem[NUM_HIT_OUTPUT] <= bit_in_count - LEN_UNIQUE_BIT_SEQUENCE;
+        NUM_HIT_OUTPUT <= NUM_HIT_OUTPUT + 1;
       end else begin
-        $display("Different from python result %d", search_unique_bit_sequence_test_output_ref_mem[0]);
+        $display("FAIL: hit_idx_mem overflow");
       end
     end
 

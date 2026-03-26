@@ -13,3 +13,5 @@ btle_controller.hw
 *.xpr
 BOOT.BIN
 verilog/*.vcd
+verilog/*.vvp
+verilog/test_data/

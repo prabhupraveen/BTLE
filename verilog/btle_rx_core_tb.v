@@ -6,7 +6,7 @@
 // python3 test_vector_for_btle_verilog.py
 // (arguments can be added: example_idx snr ppm_value)
 // Run verilog simulation:
-// iverilog -o btle_rx_core_tb btle_rx_core_tb.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v
+// iverilog -o btle_rx_core_tb.vvp btle_rx_core_tb.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v
 // vvp btle_rx_core_tb
 // Check verilog outputs to see whether test pass.
 
@@ -150,7 +150,7 @@ reg signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] q_signal;
 reg iq_valid;
 
 wire hit_flag;
-wire [6:0] payload_length;
+wire [6:0] payload_length_out;
 wire payload_length_valid;
 wire info_bit;
 wire bit_valid;
@@ -266,7 +266,7 @@ always @ (posedge clk) begin
     end
 
     if (payload_length_valid) begin
-      $display("payload_length %d octet", payload_length);
+      $display("payload_length_out %d octet", payload_length_out);
     end
 
     if (decode_end) begin
@@ -294,7 +294,7 @@ btle_rx_core # (
   .iq_valid(iq_valid),
 
   .hit_flag(hit_flag),
-  .payload_length(payload_length),
+  .payload_length_out(payload_length_out),
   .payload_length_valid(payload_length_valid),
 
   .info_bit(info_bit),

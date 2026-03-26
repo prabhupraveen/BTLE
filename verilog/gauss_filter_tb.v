@@ -6,7 +6,7 @@
 // python3 test_vector_for_btle_verilog.py
 // (arguments can be added: example_idx snr ppm_value)
 // Run verilog simulation:
-// iverilog -o gauss_filter_tb gauss_filter_tb.v gauss_filter.v
+// iverilog -o gauss_filter_tb.vvp gauss_filter_tb.v gauss_filter.v
 // vvp gauss_filter_tb
 // Check verilog outputs to see whether test pass.
 
