@@ -22,13 +22,13 @@ module vco_tb #
 reg clk;
 reg rst;
 
-reg [64*8:0] COS_TABLE_FILENAME = "cos_table.txt";
-reg [64*8:0] SIN_TABLE_FILENAME = "sin_table.txt";
-reg [64*8:0] TEST_INPUT_FILENAME = "btle_tx_vco_test_input.txt";
-reg [64*8:0] TEST_OUTPUT_COS_REF_FILENAME = "btle_tx_vco_test_output_cos_ref.txt";
-reg [64*8:0] TEST_OUTPUT_SIN_REF_FILENAME = "btle_tx_vco_test_output_sin_ref.txt";
-reg [64*8:0] TEST_OUTPUT_COS_FILENAME = "btle_tx_vco_test_output_cos.txt";
-reg [64*8:0] TEST_OUTPUT_SIN_FILENAME = "btle_tx_vco_test_output_sin.txt";
+reg [64*8:0] COS_TABLE_FILENAME = "test_data/cos_table.txt";
+reg [64*8:0] SIN_TABLE_FILENAME = "test_data/sin_table.txt";
+reg [64*8:0] TEST_INPUT_FILENAME = "test_data/btle_tx_vco_test_input.txt";
+reg [64*8:0] TEST_OUTPUT_COS_REF_FILENAME = "test_data/btle_tx_vco_test_output_cos_ref.txt";
+reg [64*8:0] TEST_OUTPUT_SIN_REF_FILENAME = "test_data/btle_tx_vco_test_output_sin_ref.txt";
+reg [64*8:0] TEST_OUTPUT_COS_FILENAME = "test_data/btle_tx_vco_test_output_cos.txt";
+reg [64*8:0] TEST_OUTPUT_SIN_FILENAME = "test_data/btle_tx_vco_test_output_sin.txt";
 
 reg signed [(IQ_BIT_WIDTH-1):0] cos_table_mem [0:4095];
 reg signed [(IQ_BIT_WIDTH-1):0] sin_table_mem [0:4095];

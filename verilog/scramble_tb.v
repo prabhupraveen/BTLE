@@ -20,10 +20,10 @@ module scramble_tb #
 reg clk;
 reg rst;
 
-reg [64*8:0] BTLE_CONFIG_FILENAME = "btle_config.txt";
-reg [64*8:0] TEST_INPUT_FILENAME = "btle_tx_scramble_test_input.txt";
-reg [64*8:0] TEST_OUTPUT_REF_FILENAME = "btle_tx_scramble_test_output_ref.txt";
-reg [64*8:0] TEST_OUTPUT_FILENAME = "btle_tx_scramble_test_output.txt";
+reg [64*8:0] BTLE_CONFIG_FILENAME = "test_data/btle_config.txt";
+reg [64*8:0] TEST_INPUT_FILENAME = "test_data/btle_tx_scramble_test_input.txt";
+reg [64*8:0] TEST_OUTPUT_REF_FILENAME = "test_data/btle_tx_scramble_test_output_ref.txt";
+reg [64*8:0] TEST_OUTPUT_FILENAME = "test_data/btle_tx_scramble_test_output.txt";
 
 reg [31:0] btle_config_mem [0:31];
 reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] CHANNEL_NUMBER;

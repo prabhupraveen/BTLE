@@ -23,14 +23,14 @@ module btle_rx_core_tb #
 reg clk;
 reg rst;
 
-reg [64*8:0] BTLE_CONFIG_FILENAME  = "btle_config.txt";
-reg [72*8:0] TEST_INPUT_I_FILENAME = "btle_rx_btle_rx_core_test_input_i.txt";
-reg [72*8:0] TEST_INPUT_Q_FILENAME = "btle_rx_btle_rx_core_test_input_q.txt";
-reg [72*8:0] TEST_OUTPUT_FILENAME  = "btle_rx_btle_rx_core_test_output.txt";
-reg [72*8:0] TEST_OUTPUT_REF_FILENAME = "btle_rx_btle_rx_core_test_output_ref.txt";
-reg [72*8:0] TEST_OUTPUT_CRC_OK_REF_FILENAME = "btle_rx_btle_rx_core_test_output_crc_ok_ref.txt";
+reg [64*8:0] BTLE_CONFIG_FILENAME  = "test_data/btle_config.txt";
+reg [72*8:0] TEST_INPUT_I_FILENAME = "test_data/btle_rx_btle_rx_core_test_input_i.txt";
+reg [72*8:0] TEST_INPUT_Q_FILENAME = "test_data/btle_rx_btle_rx_core_test_input_q.txt";
+reg [72*8:0] TEST_OUTPUT_FILENAME  = "test_data/btle_rx_btle_rx_core_test_output.txt";
+reg [72*8:0] TEST_OUTPUT_REF_FILENAME = "test_data/btle_rx_btle_rx_core_test_output_ref.txt";
+reg [72*8:0] TEST_OUTPUT_CRC_OK_REF_FILENAME = "test_data/btle_rx_btle_rx_core_test_output_crc_ok_ref.txt";
 
-reg [72*8:0] TEST_OUTPUT_BIT_FILENAME  = "btle_rx_btle_rx_core_test_output_bit.txt";
+reg [72*8:0] TEST_OUTPUT_BIT_FILENAME  = "test_data/btle_rx_btle_rx_core_test_output_bit.txt";
 
 reg [(CRC_STATE_BIT_WIDTH-1) : 0]      CRC_STATE_INIT_BIT;
 reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] CHANNEL_NUMBER;

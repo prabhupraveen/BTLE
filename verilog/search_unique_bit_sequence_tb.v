@@ -20,9 +20,9 @@ module search_unique_bit_sequence_tb #
 reg clk;
 reg rst;
 
-reg [64*8:0] BTLE_CONFIG_FILENAME = "btle_config.txt";
-reg [64*8:0] TEST_INPUT_FILENAME = "btle_rx_search_unique_bit_sequence_test_input.txt";
-reg [64*8:0] TEST_OUTPUT_REF_FILENAME = "btle_rx_search_unique_bit_sequence_test_output_ref.txt";
+reg [64*8:0] BTLE_CONFIG_FILENAME = "test_data/btle_config.txt";
+reg [64*8:0] TEST_INPUT_FILENAME = "test_data/btle_rx_search_unique_bit_sequence_test_input.txt";
+reg [64*8:0] TEST_OUTPUT_REF_FILENAME = "test_data/btle_rx_search_unique_bit_sequence_test_output_ref.txt";
 
 reg [31:0] btle_config_mem [0:31];
 reg signed [0:0] search_unique_bit_sequence_test_input_mem [0:4095];

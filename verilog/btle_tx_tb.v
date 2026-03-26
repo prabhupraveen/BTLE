@@ -30,15 +30,15 @@ module btle_tx_tb #
 reg clk;
 reg rst;
 
-reg [64*8:0] BTLE_CONFIG_FILENAME = "btle_config.txt";
-reg [64*8:0] GAUSS_FILTER_TAP_FILENAME = "gauss_filter_tap.txt";
-reg [64*8:0] COS_TABLE_FILENAME = "cos_table.txt";
-reg [64*8:0] SIN_TABLE_FILENAME = "sin_table.txt";
-reg [64*8:0] TEST_INPUT_FILENAME = "btle_tx_test_input.txt";
-reg [64*8:0] TEST_OUTPUT_I_REF_FILENAME = "btle_tx_test_output_i_ref.txt";
-reg [64*8:0] TEST_OUTPUT_Q_REF_FILENAME = "btle_tx_test_output_q_ref.txt";
-reg [64*8:0] TEST_OUTPUT_I_FILENAME = "btle_tx_test_output_i.txt";
-reg [64*8:0] TEST_OUTPUT_Q_FILENAME = "btle_tx_test_output_q.txt";
+reg [64*8:0] BTLE_CONFIG_FILENAME = "test_data/btle_config.txt";
+reg [64*8:0] GAUSS_FILTER_TAP_FILENAME = "test_data/gauss_filter_tap.txt";
+reg [64*8:0] COS_TABLE_FILENAME = "test_data/cos_table.txt";
+reg [64*8:0] SIN_TABLE_FILENAME = "test_data/sin_table.txt";
+reg [64*8:0] TEST_INPUT_FILENAME = "test_data/btle_tx_test_input.txt";
+reg [64*8:0] TEST_OUTPUT_I_REF_FILENAME = "test_data/btle_tx_test_output_i_ref.txt";
+reg [64*8:0] TEST_OUTPUT_Q_REF_FILENAME = "test_data/btle_tx_test_output_q_ref.txt";
+reg [64*8:0] TEST_OUTPUT_I_FILENAME = "test_data/btle_tx_test_output_i.txt";
+reg [64*8:0] TEST_OUTPUT_Q_FILENAME = "test_data/btle_tx_test_output_q.txt";
 
 reg [(CRC_STATE_BIT_WIDTH-1) : 0] CRC_STATE_INIT_BIT;
 reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] CHANNEL_NUMBER;

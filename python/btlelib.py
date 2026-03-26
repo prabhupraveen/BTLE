@@ -87,8 +87,8 @@ def vco_fixed_point(voltage_signal, vco_input_gain):
     # Compare to the table address advancing by 1, the vco_input_gain actually is the table_size_scale_up_factor
     vco_fixed_point.cos_table, vco_fixed_point.sin_table = sin_cos_gen(vco_input_gain)
     vco_fixed_point.table_size = len(vco_fixed_point.cos_table)
-    np.savetxt('../verilog/cos_table.txt', vco_fixed_point.cos_table, fmt='%d')
-    np.savetxt('../verilog/sin_table.txt', vco_fixed_point.sin_table, fmt='%d')
+    np.savetxt('../verilog/test_data/cos_table.txt', vco_fixed_point.cos_table, fmt='%d')
+    np.savetxt('../verilog/test_data/sin_table.txt', vco_fixed_point.sin_table, fmt='%d')
 
   integral_voltage_signal = np.bitwise_and(np.cumsum(voltage_signal), np.int16(vco_fixed_point.table_size-1))
 
@@ -152,7 +152,7 @@ def gfsk_modulation_fixed_point(bit):
      gfsk_modulation_fixed_point.gauss_fir = np.int8(np.round(gfsk_modulation_fixed_point.gauss_fir_tap_amp_scale_up_factor*gfsk_modulation_fixed_point.gauss_fir))
      gfsk_modulation_fixed_point.gauss_fir_out_amp_scale_down_num_bit_shift = 1 # This compbined with tap_amp_scale_up to form the vco input gain (over +1/-1), which decide the cos&sin table size
      gfsk_modulation_fixed_point.vco_input_gain = np.right_shift(np.int16(gfsk_modulation_fixed_point.gauss_fir_tap_amp_scale_up_factor), gfsk_modulation_fixed_point.gauss_fir_out_amp_scale_down_num_bit_shift)
-     np.savetxt('../verilog/gauss_filter_tap.txt', gfsk_modulation_fixed_point.gauss_fir, fmt='%d')
+     np.savetxt('../verilog/test_data/gauss_filter_tap.txt', gfsk_modulation_fixed_point.gauss_fir, fmt='%d')
 
   num_bit = len(bit)
   bit = np.int8(bit)

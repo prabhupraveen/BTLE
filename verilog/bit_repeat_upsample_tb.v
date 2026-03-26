@@ -28,7 +28,7 @@ reg [0:0] bit_repeat_upsample_test_output_mem [0:4095];
 initial begin
   $dumpfile("bit_repeat_upsample_tb.vcd");
   $dumpvars;
-  $readmemh("bit_repeat_upsample_test_input.txt", bit_repeat_upsample_test_input_mem);
+  $readmemh("test_data/bit_repeat_upsample_test_input.txt", bit_repeat_upsample_test_input_mem);
 
   clk = 0;
   rst = 0;

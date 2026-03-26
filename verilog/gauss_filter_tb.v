@@ -22,10 +22,10 @@ module gauss_filter_tb #
 reg clk;
 reg rst;
 
-reg [64*8:0] GAUSS_FILTER_TAP_FILENAME = "gauss_filter_tap.txt";
-reg [64*8:0] TEST_INPUT_FILENAME = "btle_tx_gauss_filter_test_input.txt";
-reg [64*8:0] TEST_OUTPUT_REF_FILENAME = "btle_tx_gauss_filter_test_output_ref.txt";
-reg [64*8:0] TEST_OUTPUT_FILENAME = "btle_tx_gauss_filter_test_output.txt";
+reg [64*8:0] GAUSS_FILTER_TAP_FILENAME = "test_data/gauss_filter_tap.txt";
+reg [64*8:0] TEST_INPUT_FILENAME = "test_data/btle_tx_gauss_filter_test_input.txt";
+reg [64*8:0] TEST_OUTPUT_REF_FILENAME = "test_data/btle_tx_gauss_filter_test_output_ref.txt";
+reg [64*8:0] TEST_OUTPUT_FILENAME = "test_data/btle_tx_gauss_filter_test_output.txt";
 
 reg signed [(GAUSS_FILTER_BIT_WIDTH-1):0] gauss_filter_tap_mem [0:63];
 reg [0:0] gauss_filter_test_input_mem [0:4095];

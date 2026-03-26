@@ -39,17 +39,17 @@ num_bit_err = 0
 for idx in range(1):
   pdu_bit = bl.hex_string_to_bit(pdu_bit_in_hex)
   pdu_bit[16:] = np.int8(np.random.randint(2, size=len(pdu_bit)-16)) # generate random payload
-  btle_rx_core_test_output_octet_ref_at_tx_fd = open('../verilog/btle_rx_core_test_output_octet_ref_at_tx.txt', 'w')
+  btle_rx_core_test_output_octet_ref_at_tx_fd = open('../verilog/test_data/btle_rx_core_test_output_octet_ref_at_tx.txt', 'w')
   btle_rx_core_test_output_octet_ref_at_tx_fd.write(bl.bit_to_hex_string(pdu_bit[16:]))
   btle_rx_core_test_output_octet_ref_at_tx_fd.close
   # print(pdu_bit[16:])
-  # btle_tx_test_input_octet_ref_fd = open('../verilog/btle_tx_test_input_octet_string_ref.txt', 'w')
+  # btle_tx_test_input_octet_ref_fd = open('../verilog/test_data/btle_tx_test_input_octet_string_ref.txt', 'w')
   # btle_tx_test_input_octet_ref_fd.write(bl.bit_to_hex_string(pdu_bit))
   # btle_tx_test_input_octet_ref_fd.close
-  bl.bit_to_txt_octet_per_line(pdu_bit, '../verilog/btle_tx_test_input.txt')
+  bl.bit_to_txt_octet_per_line(pdu_bit, '../verilog/test_data/btle_tx_test_input.txt')
   tx_i, tx_q, phy_bit, phy_bit_upsample = bl.btle_tx(pdu_bit, channel_number, crc_state_init_bit)
-  np.savetxt('../verilog/btle_tx_test_output_i_ref.txt', tx_i, fmt='%d')
-  np.savetxt('../verilog/btle_tx_test_output_q_ref.txt', tx_q, fmt='%d')
+  np.savetxt('../verilog/test_data/btle_tx_test_output_i_ref.txt', tx_i, fmt='%d')
+  np.savetxt('../verilog/test_data/btle_tx_test_output_q_ref.txt', tx_q, fmt='%d')
   print('len pdu_bit ', len(pdu_bit), ' len phy_bit ', len(phy_bit), ' len sample ', len(tx_i))
 
   tx_i_error, tx_q_error, _ = bl.add_freq_sampling_error(tx_i, tx_q, ppm_value)
@@ -61,11 +61,11 @@ for idx in range(1):
   rx_i, rx_q = bl.add_noise(tx_i_error, tx_q_error, snr)
 
   rx_pdu_bit, crc_ok, num_byte_payload, _, bit_all_sample_phase, signal_for_decision = bl.btle_rx(rx_i, rx_q, channel_number, crc_state_init_bit)
-  btle_rx_core_test_output_octet_ref_fd = open('../verilog/btle_rx_core_test_output_octet_ref.txt', 'w')
+  btle_rx_core_test_output_octet_ref_fd = open('../verilog/test_data/btle_rx_core_test_output_octet_ref.txt', 'w')
   btle_rx_core_test_output_octet_ref_fd.write(bl.bit_to_hex_string(rx_pdu_bit[16:]))
   btle_rx_core_test_output_octet_ref_fd.close
 
-  btle_rx_test_output_octet_ref_fd = open('../verilog/btle_rx_test_output_octet_ref.txt', 'w')
+  btle_rx_test_output_octet_ref_fd = open('../verilog/test_data/btle_rx_test_output_octet_ref.txt', 'w')
   btle_rx_test_output_octet_ref_fd.write(bl.bit_to_hex_string(rx_pdu_bit))
   btle_rx_test_output_octet_ref_fd.close
 

@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
   # start generate test vector for verilog
   bl.SAVE_FOR_VERILOG = 1
-  bl.SAVE_DIR = '../verilog/'
+  bl.SAVE_DIR = '../verilog/test_data/'
 
   pdu_bit = bl.hex_string_to_bit(pdu_bit_in_hex)
   # pdu_bit[16:] = np.int8(np.random.randint(2, size=len(pdu_bit)-16)) # generate random payload

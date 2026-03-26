@@ -20,12 +20,12 @@ module gfsk_demodulation_tb #
 reg clk;
 reg rst;
 
-reg [72*8:0] TEST_INPUT_I_FILENAME = "btle_rx_gfsk_demodulation_test_input_i.txt";
-reg [72*8:0] TEST_INPUT_Q_FILENAME = "btle_rx_gfsk_demodulation_test_input_q.txt";
-reg [72*8:0] TEST_OUTPUT_SIGNAL_FOR_DECISION_REF_FILENAME = "btle_rx_gfsk_demodulation_test_output_signal_for_decision_ref.txt";
-reg [72*8:0] TEST_OUTPUT_BIT_REF_FILENAME = "btle_rx_gfsk_demodulation_test_output_bit_ref.txt";
-reg [72*8:0] TEST_OUTPUT_SIGNAL_FOR_DECISION_FILENAME = "btle_rx_gfsk_demodulation_test_output_signal_for_decision.txt";
-reg [72*8:0] TEST_OUTPUT_BIT_FILENAME = "btle_rx_gfsk_demodulation_test_output_bit.txt";
+reg [72*8:0] TEST_INPUT_I_FILENAME = "test_data/btle_rx_gfsk_demodulation_test_input_i.txt";
+reg [72*8:0] TEST_INPUT_Q_FILENAME = "test_data/btle_rx_gfsk_demodulation_test_input_q.txt";
+reg [72*8:0] TEST_OUTPUT_SIGNAL_FOR_DECISION_REF_FILENAME = "test_data/btle_rx_gfsk_demodulation_test_output_signal_for_decision_ref.txt";
+reg [72*8:0] TEST_OUTPUT_BIT_REF_FILENAME = "test_data/btle_rx_gfsk_demodulation_test_output_bit_ref.txt";
+reg [72*8:0] TEST_OUTPUT_SIGNAL_FOR_DECISION_FILENAME = "test_data/btle_rx_gfsk_demodulation_test_output_signal_for_decision.txt";
+reg [72*8:0] TEST_OUTPUT_BIT_FILENAME = "test_data/btle_rx_gfsk_demodulation_test_output_bit.txt";
 
 reg signed [(GFSK_DEMODULATION_BIT_WIDTH-1):0] gfsk_demodulation_test_input_i_mem [0:4095];
 reg signed [(GFSK_DEMODULATION_BIT_WIDTH-1):0] gfsk_demodulation_test_input_q_mem [0:4095];

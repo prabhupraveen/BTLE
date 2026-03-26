@@ -54,21 +54,21 @@ reg rst;
 reg s00_axi_aclk;
 reg s00_axi_aresetn;
 
-reg [64*8:0] BTLE_CONFIG_FILENAME  = "btle_config.txt";
-reg [72*8:0] RX_TEST_INPUT_I_FILENAME = "btle_rx_test_input_i.txt";
-reg [72*8:0] RX_TEST_INPUT_Q_FILENAME = "btle_rx_test_input_q.txt";
-reg [72*8:0] RX_TEST_OUTPUT_FILENAME  = "btle_rx_test_output.txt";
-reg [72*8:0] RX_TEST_OUTPUT_REF_FILENAME = "btle_rx_test_output_ref.txt";
-reg [72*8:0] RX_TEST_OUTPUT_CRC_OK_REF_FILENAME = "btle_rx_test_output_crc_ok_ref.txt";
+reg [64*8:0] BTLE_CONFIG_FILENAME  = "test_data/btle_config.txt";
+reg [72*8:0] RX_TEST_INPUT_I_FILENAME = "test_data/btle_rx_test_input_i.txt";
+reg [72*8:0] RX_TEST_INPUT_Q_FILENAME = "test_data/btle_rx_test_input_q.txt";
+reg [72*8:0] RX_TEST_OUTPUT_FILENAME  = "test_data/btle_rx_test_output.txt";
+reg [72*8:0] RX_TEST_OUTPUT_REF_FILENAME = "test_data/btle_rx_test_output_ref.txt";
+reg [72*8:0] RX_TEST_OUTPUT_CRC_OK_REF_FILENAME = "test_data/btle_rx_test_output_crc_ok_ref.txt";
 
-reg [64*8:0] GAUSS_FILTER_TAP_FILENAME = "gauss_filter_tap.txt";
-reg [64*8:0] COS_TABLE_FILENAME = "cos_table.txt";
-reg [64*8:0] SIN_TABLE_FILENAME = "sin_table.txt";
-reg [64*8:0] TX_TEST_INPUT_FILENAME = "btle_tx_test_input.txt";
-reg [64*8:0] TX_TEST_OUTPUT_I_REF_FILENAME = "btle_tx_test_output_i_ref.txt";
-reg [64*8:0] TX_TEST_OUTPUT_Q_REF_FILENAME = "btle_tx_test_output_q_ref.txt";
-reg [64*8:0] TX_TEST_OUTPUT_I_FILENAME = "btle_tx_test_output_i.txt";
-reg [64*8:0] TX_TEST_OUTPUT_Q_FILENAME = "btle_tx_test_output_q.txt";
+reg [64*8:0] GAUSS_FILTER_TAP_FILENAME = "test_data/gauss_filter_tap.txt";
+reg [64*8:0] COS_TABLE_FILENAME = "test_data/cos_table.txt";
+reg [64*8:0] SIN_TABLE_FILENAME = "test_data/sin_table.txt";
+reg [64*8:0] TX_TEST_INPUT_FILENAME = "test_data/btle_tx_test_input.txt";
+reg [64*8:0] TX_TEST_OUTPUT_I_REF_FILENAME = "test_data/btle_tx_test_output_i_ref.txt";
+reg [64*8:0] TX_TEST_OUTPUT_Q_REF_FILENAME = "test_data/btle_tx_test_output_q_ref.txt";
+reg [64*8:0] TX_TEST_OUTPUT_I_FILENAME = "test_data/btle_tx_test_output_i.txt";
+reg [64*8:0] TX_TEST_OUTPUT_Q_FILENAME = "test_data/btle_tx_test_output_q.txt";
 
 reg [(CRC_STATE_BIT_WIDTH-1) : 0]      CRC_STATE_INIT_BIT;
 reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] CHANNEL_NUMBER;

@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
   # start generate test vector for verilog
   bl.SAVE_FOR_VERILOG = 1
-  bl.SAVE_DIR = '../verilog/'
+  bl.SAVE_DIR = '../verilog/test_data/'
 
   filename_txt = bl.SAVE_DIR+'captured_iq.txt'
   print([filename_csv, filename_txt])
