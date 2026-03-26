@@ -77,10 +77,6 @@ class AppConfig:
         try:
             with open(path) as f:
                 data = json.load(f)
-            # Backward compatibility: old configs used `remote_work_dir`
-            if "btle_ll_dir" not in data and "remote_work_dir" in data:
-                data["btle_ll_dir"] = data.get("remote_work_dir", "/root/vis")
-
             valid = {k: v for k, v in data.items() if k in cls.__dataclass_fields__}
             cfg = cls(**valid)
             # Always blank sensitive fields
@@ -367,6 +363,84 @@ class SendCmdWorker(QThread):
             self.finished.emit(False, "Timeout waiting for ble_send_cmd")
         except Exception as e:
             self.finished.emit(False, str(e))
+
+
+class SequentialSendCmdWorker(QThread):
+    """
+    Sends multiple ble_send_cmd commands sequentially.
+    Takes a list of argument lists and runs each one after the other.
+    
+    Example: cmd_list = [["-n", "37"], ["-a", "0x8E89BED6"], ["-c", "0x555555"]]
+    """
+    log_line = pyqtSignal(str, str)
+    finished = pyqtSignal(bool, str)
+
+    def __init__(self, config: AppConfig, cmd_list: list):
+        """cmd_list: list of argument lists, e.g., [["-n", "37"], ["-a", "0xABCD"]]"""
+        super().__init__()
+        self.config = config
+        self.cmd_list = cmd_list
+
+    def run(self):
+        send_cmd_bin = os.path.join(APP_DIR, "ble_send_cmd")
+        if not os.path.isfile(send_cmd_bin):
+            self.finished.emit(False, f"ble_send_cmd not found at {send_cmd_bin}")
+            return
+
+        use_sudo = self.config.use_sudo_send_cmd and self.config.sudo_password
+        failed_count = 0
+        success_count = 0
+
+        self.log_line.emit(f"Sending {len(self.cmd_list)} command(s) sequentially…", "send")
+
+        for i, extra_args in enumerate(self.cmd_list, 1):
+            cmd = [send_cmd_bin,
+                   "-t", self.config.antsdr_ip,
+                   "-p", str(self.config.cmd_port)] + extra_args
+
+            if use_sudo:
+                cmd = ["sudo", "-S"] + cmd
+
+            self.log_line.emit(f"[{i}/{len(self.cmd_list)}] $ {' '.join(cmd)}", "send")
+
+            try:
+                proc = subprocess.Popen(
+                    cmd,
+                    stdin=subprocess.PIPE if use_sudo else None,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+                if use_sudo:
+                    proc.stdin.write(f"{self.config.sudo_password}\n".encode())
+                    proc.stdin.close()
+                out, err = proc.communicate(timeout=10)
+
+                for line in out.decode(errors="replace").splitlines():
+                    if line.strip():
+                        self.log_line.emit(f"  {line}", "send")
+                for line in err.decode(errors="replace").splitlines():
+                    if line.strip():
+                        cat = "error" if proc.returncode != 0 else "send"
+                        self.log_line.emit(f"  {line}", cat)
+
+                if proc.returncode == 0:
+                    self.log_line.emit(f"  ✓ OK", "send")
+                    success_count += 1
+                else:
+                    self.log_line.emit(f"  ✗ Exit code {proc.returncode}", "error")
+                    failed_count += 1
+
+            except subprocess.TimeoutExpired:
+                self.log_line.emit(f"  ✗ Timeout", "error")
+                failed_count += 1
+            except Exception as e:
+                self.log_line.emit(f"  ✗ Error: {e}", "error")
+                failed_count += 1
+
+        summary = f"Sent {len(self.cmd_list)} command(s): {success_count} OK, {failed_count} failed"
+        ok = failed_count == 0
+        self.log_line.emit(summary, "send" if ok else "error")
+        self.finished.emit(ok, summary)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -734,15 +808,28 @@ class SendCmdPanel(QGroupBox):
         self._update_preview()
 
     def _update_preview(self):
-        args = self.get_extra_args()
-        if args:
+        """Show preview of commands that will be sent."""
+        cmd_list = self.get_sequential_cmd_list()
+        
+        if not cmd_list:
+            self._preview.setText("(no flags checked — nothing will be sent)")
+        elif len(cmd_list) == 1:
+            # Single command
+            args = cmd_list[0]
             cmd = (f"./ble_send_cmd -t {self.cfg.antsdr_ip}"
                    f" -p {self.cfg.cmd_port} {' '.join(args)}")
+            self._preview.setText(f"→ {cmd}")
         else:
-            cmd = "(no flags checked — nothing will be sent)"
-        self._preview.setText(f"→ {cmd}")
+            # Multiple commands - show all on separate lines
+            base = f"./ble_send_cmd -t {self.cfg.antsdr_ip} -p {self.cfg.cmd_port}"
+            lines = [f"→ Sequential send: {len(cmd_list)} command(s)"]
+            for i, args in enumerate(cmd_list, 1):
+                cmd = f"{base} {' '.join(args)}"
+                lines.append(f"  [{i}] {cmd}")
+            self._preview.setText("\n".join(lines))
 
     def get_extra_args(self) -> list:
+        """Build a single combined command (legacy, kept for compatibility)."""
         args = []
         if self.n_cb.isChecked() and self.n_edit.text().strip():
             args += ["-n", self.n_edit.text().strip()]
@@ -753,6 +840,31 @@ class SendCmdPanel(QGroupBox):
         if self.m_cb.isChecked() and self.m_edit.text():
             args += ["-m", self.m_edit.text()]
         return args
+
+    def get_sequential_cmd_list(self) -> list:
+        """Build a list of separate commands (one per register parameter).
+        
+        Returns: [["-n", "37"], ["-a", "0x8E89BED6"], ...] or similar.
+        Messages are treated as a combined command with register updates.
+        """
+        cmd_list = []
+        
+        # Add register update commands (-n, -a, -c)
+        if self.n_cb.isChecked() and self.n_edit.text().strip():
+            cmd_list.append(["-n", self.n_edit.text().strip()])
+        if self.a_cb.isChecked() and self.a_edit.text().strip():
+            cmd_list.append(["-a", self.a_edit.text().strip()])
+        if self.c_cb.isChecked() and self.c_edit.text().strip():
+            cmd_list.append(["-c", self.c_edit.text().strip()])
+        
+        # Messages (-m) are sent as a combined command with all other params
+        if self.m_cb.isChecked() and self.m_edit.text():
+            msg_cmd = ["-m", self.m_edit.text()]
+            # Optionally include register params with message for context
+            # (but per spec, message is separate)
+            cmd_list.append(msg_cmd)
+        
+        return cmd_list
 
     def update_config(self, cfg: AppConfig):
         self.cfg = cfg
@@ -813,7 +925,7 @@ class MainWindow(QMainWindow):
         self.cfg = cfg
         self.ssh_worker:     Optional[SSHWorker]     = None
         self.capture_worker: Optional[CaptureWorker] = None
-        self.send_worker:    Optional[SendCmdWorker] = None
+        self.send_worker:    Optional[SequentialSendCmdWorker] = None
         self.ping_worker:    Optional[PingWorker]    = None
         self._last_mismatch_text: str = ""
 
@@ -1159,14 +1271,14 @@ class MainWindow(QMainWindow):
     def _send_cmd(self):
         if self.send_worker and self.send_worker.isRunning():
             return
-        extra = self.send_panel.get_extra_args()
-        if not extra:
+        cmd_list = self.send_panel.get_sequential_cmd_list()
+        if not cmd_list:
             QMessageBox.information(self, "Nothing to send",
                 "Check at least one flag checkbox before sending.")
             return
         self.send_panel.set_busy(True)
 
-        self.send_worker = SendCmdWorker(self.cfg, extra)
+        self.send_worker = SequentialSendCmdWorker(self.cfg, cmd_list)
         self.send_worker.log_line.connect(lambda t, c: self.log.append_line(t, c))
         self.send_worker.finished.connect(self._on_send_done)
         self.send_worker.start()

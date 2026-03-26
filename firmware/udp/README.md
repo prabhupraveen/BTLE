@@ -34,6 +34,7 @@ Open **Config → Open Configuration…** and set values carefully, especially:
 - Host IP
 - Command/Data ports
 - SSH username/password for remote AntSDR login
+- **btle_ll Dir** (remote directory containing `btle_ll`; default: `/root/vis`)
 
 You typically do **not** need to fill root password if you already launched GUI with `sudo`.
 
@@ -130,7 +131,7 @@ Check:
 ## Runtime Notes
 
 - Keep binaries (`ble_fpga_ctl`, `ble_send_cmd`) in the same directory as `control_gui.py`.
-- Ensure remote `btle_ll` binary exists in configured remote working directory.
+- Ensure remote `btle_ll` binary exists in the configured **btle_ll Dir**.
 
 ---
 

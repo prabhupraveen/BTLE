@@ -12,3 +12,4 @@ btle_controller.cache
 btle_controller.hw
 *.xpr
 BOOT.BIN
+verilog/*.vcd

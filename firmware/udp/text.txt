@@ -1,9 +1,0 @@
-sudo tcpdump -i tun0 -X udp port 50001   // tcpdump
-
-./ble_send_cmd -t 192.168.10.61 -p 50000 -n 38  // send command
-
-./ble_fpga_ctl -p 50001 | wireshark -k -i - // read
-
-
-gcc -O3 -o ble_fpga_ctl ble_fpga_ctl.c
-gcc -O3 -o ble_send_cmd ble_send_cmd.c
