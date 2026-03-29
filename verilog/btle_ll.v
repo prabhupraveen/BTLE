@@ -221,6 +221,8 @@ wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg63;
 `KEEP_FOR_DBG wire [31:0] tx_access_address_cfg;
 `KEEP_FOR_DBG wire [(CRC_STATE_BIT_WIDTH-1) : 0]      tx_crc_state_init_bit_cfg;
 `KEEP_FOR_DBG wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] tx_channel_number_cfg;
+`KEEP_FOR_DBG wire [7:0] tx_pdu_octet_mem_data_cfg;
+`KEEP_FOR_DBG wire [NUM_BIT_PAYLOAD_LENGTH:0] tx_pdu_octet_mem_addr_cfg;
 `KEEP_FOR_DBG wire tx_start_cfg;
 
 `KEEP_FOR_DBG wire [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0]  rx_unique_bit_sequence_cfg;
@@ -277,6 +279,16 @@ localparam [2:0] STANDBY                  = 0,
 `KEEP_FOR_DBG wire [(NUM_BIT_PAYLOAD_LENGTH-1):0] rx_payload_length_axi;
 `KEEP_FOR_DBG reg  [(NUM_BIT_PAYLOAD_LENGTH-1):0] rx_payload_length_axi_lock;
 
+`KEEP_FOR_DBG reg rx_pkt_parse_active_axi;
+`KEEP_FOR_DBG reg [7:0] rx_pkt_header0_axi;
+`KEEP_FOR_DBG reg [7:0] rx_pkt_header1_axi;
+`KEEP_FOR_DBG reg [7:0] rx_pkt_ctrl_opcode_axi;
+`KEEP_FOR_DBG reg [31:0] rx_pkt_conn_aa_axi;
+`KEEP_FOR_DBG reg [23:0] rx_pkt_conn_crc_init_axi;
+`KEEP_FOR_DBG reg [36:0] rx_pkt_conn_ch_map_axi;
+`KEEP_FOR_DBG reg [4:0]  rx_pkt_conn_hop_inc_axi;
+`KEEP_FOR_DBG reg rx_pkt_snapshot_toggle_axi;
+
 `KEEP_FOR_DBG wire rx_crc_ok_axi;
 `KEEP_FOR_DBG reg  rx_crc_ok_axi_lock;
 
@@ -326,6 +338,19 @@ localparam [2:0] STANDBY                  = 0,
 `KEEP_FOR_DBG wire slv_reg_rden_bb;
 `KEEP_FOR_DBG wire [5:0] axi_araddr_core_bb;
 
+`KEEP_FOR_DBG wire [7:0] rx_pkt_header0_bb;
+`KEEP_FOR_DBG wire [7:0] rx_pkt_header1_bb;
+`KEEP_FOR_DBG wire [7:0] rx_pkt_ctrl_opcode_bb;
+`KEEP_FOR_DBG wire [31:0] rx_pkt_conn_aa_bb;
+`KEEP_FOR_DBG wire [23:0] rx_pkt_conn_crc_init_bb;
+`KEEP_FOR_DBG wire [36:0] rx_pkt_conn_ch_map_bb;
+`KEEP_FOR_DBG wire [4:0]  rx_pkt_conn_hop_inc_bb;
+`KEEP_FOR_DBG wire rx_pkt_snapshot_toggle_bb;
+`KEEP_FOR_DBG wire rx_crc_ok_axi_lock_bb;
+
+`KEEP_FOR_DBG reg rx_pkt_snapshot_toggle_bb_d;
+`KEEP_FOR_DBG reg rx_pkt_snapshot_pulse_bb;
+
 // ====================enhanced LL scheduler signals========================
 localparam [5:0] ADV_CH_37 = 6'd37,
                  ADV_CH_38 = 6'd38,
@@ -371,12 +396,15 @@ localparam [31:0] SUPERVISION_TIMEOUT_TICK_DEFAULT = 32'd100000000; // ~1s @100M
 
 `KEEP_FOR_DBG reg [7:0] last_rx_pdu_byte;
 `KEEP_FOR_DBG reg [7:0] last_ctrl_opcode;
+`KEEP_FOR_DBG reg [7:0] last_rx_header_byte;
 
 `KEEP_FOR_DBG reg tx_start_ll;
 `KEEP_FOR_DBG reg [7:0]  tx_preamble_ll;
 `KEEP_FOR_DBG reg [31:0] tx_access_address_ll;
 `KEEP_FOR_DBG reg [(CRC_STATE_BIT_WIDTH-1) : 0]      tx_crc_state_init_bit_ll;
 `KEEP_FOR_DBG reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] tx_channel_number_ll;
+`KEEP_FOR_DBG reg [7:0] tx_pdu_octet_mem_data_ll;
+`KEEP_FOR_DBG reg [NUM_BIT_PAYLOAD_LENGTH:0] tx_pdu_octet_mem_addr_ll;
 `KEEP_FOR_DBG reg [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0]  rx_unique_bit_sequence_ll;
 `KEEP_FOR_DBG reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] rx_channel_number_ll;
 `KEEP_FOR_DBG reg [(CRC_STATE_BIT_WIDTH-1) : 0]      rx_crc_state_init_bit_ll;
@@ -385,6 +413,189 @@ localparam [31:0] SUPERVISION_TIMEOUT_TICK_DEFAULT = 32'd100000000; // ~1s @100M
 `KEEP_FOR_DBG reg ll_ctrl_pdu_seen_pulse;
 `KEEP_FOR_DBG reg ll_connect_ind_pulse;
 `KEEP_FOR_DBG reg ll_phy_update_pulse;
+
+localparam [3:0] LL_PKT_ADV          = 4'd0,
+                 LL_PKT_SCAN_REQ     = 4'd1,
+                 LL_PKT_SCAN_RSP     = 4'd2,
+                 LL_PKT_DATA_EMPTY   = 4'd3,
+                 LL_PKT_CTRL_VERSION = 4'd4,
+                 LL_PKT_CTRL_FEATURE = 4'd5,
+                 LL_PKT_CTRL_CH_MAP  = 4'd6,
+                 LL_PKT_CTRL_TERM    = 4'd7;
+
+localparam [7:0] LL_CTRL_VERSION_IND      = 8'h0C,
+                 LL_CTRL_FEATURE_REQ      = 8'h08,
+                 LL_CTRL_FEATURE_RSP      = 8'h09,
+                 LL_CTRL_CHANNEL_MAP_IND  = 8'h01,
+                 LL_CTRL_TERMINATE_IND    = 8'h02;
+
+`KEEP_FOR_DBG reg [3:0] ll_tx_pkt_kind;
+`KEEP_FOR_DBG reg [15:0] ll_tifs_counter;
+`KEEP_FOR_DBG reg ll_tx_after_ifs_pending;
+`KEEP_FOR_DBG reg ll_pending_scan_req;
+`KEEP_FOR_DBG reg ll_pending_scan_rsp;
+`KEEP_FOR_DBG reg ll_pending_ctrl_version;
+`KEEP_FOR_DBG reg ll_pending_ctrl_feature;
+`KEEP_FOR_DBG reg ll_pending_ctrl_ch_map;
+`KEEP_FOR_DBG reg ll_pending_ctrl_terminate;
+
+`KEEP_FOR_DBG reg tx_mem_addr_advancing;
+`KEEP_FOR_DBG reg tx_data_sn;
+`KEEP_FOR_DBG reg tx_data_nesn;
+
+`KEEP_FOR_DBG reg [36:0] conn_channel_map_active;
+`KEEP_FOR_DBG reg [4:0]  conn_hop_increment_active;
+
+`KEEP_FOR_DBG reg connection_established_axi_d1;
+`KEEP_FOR_DBG reg connection_established_axi_d2;
+
+wire [3:0] adv_pdu_type_cfg;
+wire [5:0] adv_data_len_cfg;
+wire [5:0] scan_rsp_data_len_cfg;
+wire [47:0] local_addr_cfg;
+wire [47:0] peer_addr_cfg;
+wire [31:0] conn_access_address_cfg;
+wire [23:0] conn_crc_init_cfg;
+wire [15:0] tifs_ticks_cfg;
+
+assign adv_pdu_type_cfg      = slv_reg22[3:0];
+assign adv_data_len_cfg      = slv_reg22[13:8];
+assign scan_rsp_data_len_cfg = slv_reg22[21:16];
+assign local_addr_cfg        = {slv_reg24[15:0], slv_reg23};
+assign peer_addr_cfg         = {slv_reg25, slv_reg24[31:16]};
+assign conn_access_address_cfg = (slv_reg30 == 0 ? tx_access_address_cfg : slv_reg30);
+assign conn_crc_init_cfg       = (slv_reg31[23:0] == 0 ? tx_crc_state_init_bit_cfg : slv_reg31[23:0]);
+assign tifs_ticks_cfg          = (slv_reg32[15:0] == 0 ? 16'd15000 : slv_reg32[15:0]);
+
+function [7:0] ll_adv_data_byte;
+  input [4:0] idx;
+  begin
+    case (idx)
+      5'd0:  ll_adv_data_byte = slv_reg26[7:0];
+      5'd1:  ll_adv_data_byte = slv_reg26[15:8];
+      5'd2:  ll_adv_data_byte = slv_reg26[23:16];
+      5'd3:  ll_adv_data_byte = slv_reg26[31:24];
+      5'd4:  ll_adv_data_byte = slv_reg27[7:0];
+      5'd5:  ll_adv_data_byte = slv_reg27[15:8];
+      5'd6:  ll_adv_data_byte = slv_reg27[23:16];
+      5'd7:  ll_adv_data_byte = slv_reg27[31:24];
+      5'd8:  ll_adv_data_byte = slv_reg28[7:0];
+      5'd9:  ll_adv_data_byte = slv_reg28[15:8];
+      5'd10: ll_adv_data_byte = slv_reg28[23:16];
+      5'd11: ll_adv_data_byte = slv_reg28[31:24];
+      5'd12: ll_adv_data_byte = slv_reg29[7:0];
+      5'd13: ll_adv_data_byte = slv_reg29[15:8];
+      5'd14: ll_adv_data_byte = slv_reg29[23:16];
+      default: ll_adv_data_byte = slv_reg29[31:24];
+    endcase
+  end
+endfunction
+
+always @(*) begin
+  tx_pdu_octet_mem_data_ll = 8'h00;
+  case (ll_tx_pkt_kind)
+    LL_PKT_ADV: begin
+      case (tx_pdu_octet_mem_addr_ll)
+        0: tx_pdu_octet_mem_data_ll = {4'b0000, adv_pdu_type_cfg};
+        1: tx_pdu_octet_mem_data_ll = {2'b00, (6'd6 + adv_data_len_cfg)};
+        2: tx_pdu_octet_mem_data_ll = local_addr_cfg[7:0];
+        3: tx_pdu_octet_mem_data_ll = local_addr_cfg[15:8];
+        4: tx_pdu_octet_mem_data_ll = local_addr_cfg[23:16];
+        5: tx_pdu_octet_mem_data_ll = local_addr_cfg[31:24];
+        6: tx_pdu_octet_mem_data_ll = local_addr_cfg[39:32];
+        7: tx_pdu_octet_mem_data_ll = local_addr_cfg[47:40];
+        default: tx_pdu_octet_mem_data_ll = ll_adv_data_byte(tx_pdu_octet_mem_addr_ll - 8);
+      endcase
+    end
+    LL_PKT_SCAN_REQ: begin
+      case (tx_pdu_octet_mem_addr_ll)
+        0: tx_pdu_octet_mem_data_ll = 8'h03;
+        1: tx_pdu_octet_mem_data_ll = 8'd12;
+        2: tx_pdu_octet_mem_data_ll = local_addr_cfg[7:0];
+        3: tx_pdu_octet_mem_data_ll = local_addr_cfg[15:8];
+        4: tx_pdu_octet_mem_data_ll = local_addr_cfg[23:16];
+        5: tx_pdu_octet_mem_data_ll = local_addr_cfg[31:24];
+        6: tx_pdu_octet_mem_data_ll = local_addr_cfg[39:32];
+        7: tx_pdu_octet_mem_data_ll = local_addr_cfg[47:40];
+        8: tx_pdu_octet_mem_data_ll = peer_addr_cfg[7:0];
+        9: tx_pdu_octet_mem_data_ll = peer_addr_cfg[15:8];
+        10: tx_pdu_octet_mem_data_ll = peer_addr_cfg[23:16];
+        11: tx_pdu_octet_mem_data_ll = peer_addr_cfg[31:24];
+        12: tx_pdu_octet_mem_data_ll = peer_addr_cfg[39:32];
+        default: tx_pdu_octet_mem_data_ll = peer_addr_cfg[47:40];
+      endcase
+    end
+    LL_PKT_SCAN_RSP: begin
+      case (tx_pdu_octet_mem_addr_ll)
+        0: tx_pdu_octet_mem_data_ll = 8'h04;
+        1: tx_pdu_octet_mem_data_ll = {2'b00, (6'd6 + scan_rsp_data_len_cfg)};
+        2: tx_pdu_octet_mem_data_ll = local_addr_cfg[7:0];
+        3: tx_pdu_octet_mem_data_ll = local_addr_cfg[15:8];
+        4: tx_pdu_octet_mem_data_ll = local_addr_cfg[23:16];
+        5: tx_pdu_octet_mem_data_ll = local_addr_cfg[31:24];
+        6: tx_pdu_octet_mem_data_ll = local_addr_cfg[39:32];
+        7: tx_pdu_octet_mem_data_ll = local_addr_cfg[47:40];
+        default: tx_pdu_octet_mem_data_ll = ll_adv_data_byte(tx_pdu_octet_mem_addr_ll - 8);
+      endcase
+    end
+    LL_PKT_CTRL_VERSION: begin
+      case (tx_pdu_octet_mem_addr_ll)
+        0: tx_pdu_octet_mem_data_ll = {4'b0000, tx_data_sn, tx_data_nesn, 2'b11};
+        1: tx_pdu_octet_mem_data_ll = 8'd6;
+        2: tx_pdu_octet_mem_data_ll = LL_CTRL_VERSION_IND;
+        3: tx_pdu_octet_mem_data_ll = 8'h09;
+        4: tx_pdu_octet_mem_data_ll = 8'h00;
+        5: tx_pdu_octet_mem_data_ll = 8'h01;
+        6: tx_pdu_octet_mem_data_ll = 8'h00;
+        default: tx_pdu_octet_mem_data_ll = 8'h00;
+      endcase
+    end
+    LL_PKT_CTRL_FEATURE: begin
+      case (tx_pdu_octet_mem_addr_ll)
+        0: tx_pdu_octet_mem_data_ll = {4'b0000, tx_data_sn, tx_data_nesn, 2'b11};
+        1: tx_pdu_octet_mem_data_ll = 8'd9;
+        2: tx_pdu_octet_mem_data_ll = LL_CTRL_FEATURE_RSP;
+        3: tx_pdu_octet_mem_data_ll = slv_reg33[7:0];
+        4: tx_pdu_octet_mem_data_ll = slv_reg33[15:8];
+        5: tx_pdu_octet_mem_data_ll = slv_reg33[23:16];
+        6: tx_pdu_octet_mem_data_ll = slv_reg33[31:24];
+        7: tx_pdu_octet_mem_data_ll = slv_reg34[7:0];
+        8: tx_pdu_octet_mem_data_ll = slv_reg34[15:8];
+        9: tx_pdu_octet_mem_data_ll = slv_reg34[23:16];
+        default: tx_pdu_octet_mem_data_ll = slv_reg34[31:24];
+      endcase
+    end
+    LL_PKT_CTRL_CH_MAP: begin
+      case (tx_pdu_octet_mem_addr_ll)
+        0: tx_pdu_octet_mem_data_ll = {4'b0000, tx_data_sn, tx_data_nesn, 2'b11};
+        1: tx_pdu_octet_mem_data_ll = 8'd8;
+        2: tx_pdu_octet_mem_data_ll = LL_CTRL_CHANNEL_MAP_IND;
+        3: tx_pdu_octet_mem_data_ll = channel_map_cfg[7:0];
+        4: tx_pdu_octet_mem_data_ll = channel_map_cfg[15:8];
+        5: tx_pdu_octet_mem_data_ll = channel_map_cfg[23:16];
+        6: tx_pdu_octet_mem_data_ll = channel_map_cfg[31:24];
+        7: tx_pdu_octet_mem_data_ll = {3'b000, channel_map_cfg[36:32]};
+        8: tx_pdu_octet_mem_data_ll = conn_event_counter[7:0];
+        default: tx_pdu_octet_mem_data_ll = conn_event_counter[15:8];
+      endcase
+    end
+    LL_PKT_CTRL_TERM: begin
+      case (tx_pdu_octet_mem_addr_ll)
+        0: tx_pdu_octet_mem_data_ll = {4'b0000, tx_data_sn, tx_data_nesn, 2'b11};
+        1: tx_pdu_octet_mem_data_ll = 8'd2;
+        2: tx_pdu_octet_mem_data_ll = LL_CTRL_TERMINATE_IND;
+        default: tx_pdu_octet_mem_data_ll = slv_reg35[7:0];
+      endcase
+    end
+    default: begin
+      case (tx_pdu_octet_mem_addr_ll)
+        0: tx_pdu_octet_mem_data_ll = {4'b0000, tx_data_sn, tx_data_nesn, 2'b01};
+        1: tx_pdu_octet_mem_data_ll = 8'h00;
+        default: tx_pdu_octet_mem_data_ll = 8'h00;
+      endcase
+    end
+  endcase
+end
 
 function [5:0] csa1_next_channel;
   input [5:0] current_channel;
@@ -452,6 +663,8 @@ assign tx_access_address              = (ll_sched_enable ? tx_access_address_ll 
 assign tx_crc_state_init_bit          = (ll_sched_enable ? tx_crc_state_init_bit_ll : tx_crc_state_init_bit_cfg);
 assign tx_channel_number              = (ll_sched_enable ? tx_channel_number_ll : tx_channel_number_cfg);
 assign tx_start                       = (ll_sched_enable ? (tx_start_ll | tx_start_cfg) : tx_start_cfg);
+assign tx_pdu_octet_mem_data          = (ll_sched_enable ? tx_pdu_octet_mem_data_ll : tx_pdu_octet_mem_data_cfg);
+assign tx_pdu_octet_mem_addr          = (ll_sched_enable ? tx_pdu_octet_mem_addr_ll : tx_pdu_octet_mem_addr_cfg);
 
 assign rx_unique_bit_sequence         = (ll_sched_enable ? rx_unique_bit_sequence_ll : rx_unique_bit_sequence_cfg);
 assign rx_channel_number              = (ll_sched_enable ? rx_channel_number_ll : rx_channel_number_cfg);
@@ -474,8 +687,8 @@ assign tx_access_address_axi          = slv_reg5[(32-1) : 0];
 assign tx_crc_state_init_bit_axi      = slv_reg6[(CRC_STATE_BIT_WIDTH-1) : 0];
 assign tx_channel_number_axi          = slv_reg7[(CHANNEL_NUMBER_BIT_WIDTH-1) : 0];
 
-assign tx_pdu_octet_mem_data          = slv_reg8[(8-1) : 0];
-assign tx_pdu_octet_mem_addr          = slv_reg8[(16+NUM_BIT_PAYLOAD_LENGTH)  : 16+0];  // 1 more addr bit is needed: the octet_valid actually will output 2 bytes header, payload length, 3 bytes CRC
+assign tx_pdu_octet_mem_data_cfg      = slv_reg8[(8-1) : 0];
+assign tx_pdu_octet_mem_addr_cfg      = slv_reg8[(16+NUM_BIT_PAYLOAD_LENGTH)  : 16+0];  // 1 more addr bit is needed: the octet_valid actually will output 2 bytes header, payload length, 3 bytes CRC
 
 assign tx_start_axi                   = slv_reg9[0];
 
@@ -508,6 +721,18 @@ assign slv_reg56 = timestamp_rx_hit_flag_lock_by_decode_end_axi[(C_S00_AXI_DATA_
 assign slv_reg57 = timestamp_rx_hit_flag_lock_by_decode_end_axi[(2*C_S00_AXI_DATA_WIDTH-1) : C_S00_AXI_DATA_WIDTH];
 
 assign slv_reg58 = ref_1pps_flip_and_count;
+assign slv_reg59 = {ll_pending_ctrl_terminate,
+                    ll_pending_ctrl_ch_map,
+                    ll_pending_ctrl_feature,
+                    ll_pending_ctrl_version,
+                    ll_pending_scan_rsp,
+                    ll_pending_scan_req,
+                    ll_tx_after_ifs_pending,
+                    ll_tx_pkt_kind,
+                    connection_established,
+                    scan_window_open,
+                    ll_tifs_counter[10:0],
+                    conn_event_counter[7:0]};
 
 assign slv_reg60 = timestamp_axi[(C_S00_AXI_DATA_WIDTH-1) : 0];
 assign slv_reg61 = timestamp_axi[(2*C_S00_AXI_DATA_WIDTH-1) : C_S00_AXI_DATA_WIDTH];
@@ -519,15 +744,20 @@ assign slv_reg63 = {15'd0, tx_done, 6'd0, frame_error, rx_done, rx_frame};
 // =============ll state machine==========
 always @ (posedge axi_aclk) begin
   if (~axi_aresetn) begin
+    connection_established_axi_d1 <= 0;
+    connection_established_axi_d2 <= 0;
     ll_state <= STANDBY;
   end else begin
-    if (ll_sched_enable == 0) begin
+    connection_established_axi_d1 <= connection_established;
+    connection_established_axi_d2 <= connection_established_axi_d1;
+
+    if (reg_gpio_axi[0] == 0) begin
       ll_state <= STANDBY;
-    end else if (connection_established) begin
+    end else if (connection_established_axi_d2) begin
       ll_state <= CONNECTION;
-    end else if (ll_scan_enable) begin
+    end else if (reg_gpio_axi[1]) begin
       ll_state <= SCANNING;
-    end else if (ll_adv_enable) begin
+    end else if (reg_gpio_axi[3]) begin
       ll_state <= ADVERTISING;
     end else begin
       ll_state <= STANDBY;
@@ -556,15 +786,37 @@ always @ (posedge bb_clk) begin
 
     last_rx_pdu_byte <= 0;
     last_ctrl_opcode <= 0;
+    last_rx_header_byte <= 0;
 
     tx_start_ll <= 0;
     tx_preamble_ll <= 8'hAA;
     tx_access_address_ll <= 32'h8E89BED6;
     tx_crc_state_init_bit_ll <= 0;
     tx_channel_number_ll <= ADV_CH_37[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
+    tx_pdu_octet_mem_addr_ll <= 0;
     rx_unique_bit_sequence_ll <= 32'h8E89BED6;
     rx_channel_number_ll <= ADV_CH_37[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
     rx_crc_state_init_bit_ll <= 0;
+
+    ll_tx_pkt_kind <= LL_PKT_ADV;
+    ll_tifs_counter <= 0;
+    ll_tx_after_ifs_pending <= 0;
+    ll_pending_scan_req <= 0;
+    ll_pending_scan_rsp <= 0;
+    ll_pending_ctrl_version <= 0;
+    ll_pending_ctrl_feature <= 0;
+    ll_pending_ctrl_ch_map <= 0;
+    ll_pending_ctrl_terminate <= 0;
+
+    tx_mem_addr_advancing <= 0;
+    tx_data_sn <= 0;
+    tx_data_nesn <= 0;
+
+    conn_channel_map_active <= 37'h1FFFFFFFFF;
+    conn_hop_increment_active <= 5'd5;
+
+    rx_pkt_snapshot_toggle_bb_d <= 0;
+    rx_pkt_snapshot_pulse_bb <= 0;
 
     ll_supervision_timeout_pulse <= 0;
     ll_ctrl_pdu_seen_pulse <= 0;
@@ -576,6 +828,12 @@ always @ (posedge bb_clk) begin
     ll_ctrl_pdu_seen_pulse <= 0;
     ll_connect_ind_pulse <= 0;
     ll_phy_update_pulse <= 0;
+    rx_pkt_snapshot_pulse_bb <= 0;
+
+    if (rx_pkt_snapshot_toggle_bb_d != rx_pkt_snapshot_toggle_bb) begin
+      rx_pkt_snapshot_toggle_bb_d <= rx_pkt_snapshot_toggle_bb;
+      rx_pkt_snapshot_pulse_bb <= 1;
+    end
 
     tx_preamble_ll <= tx_preamble_cfg;
     tx_crc_state_init_bit_ll <= tx_crc_state_init_bit_cfg;
@@ -597,13 +855,46 @@ always @ (posedge bb_clk) begin
       conn_data_channel <= 0;
       last_rx_pdu_byte <= 0;
       last_ctrl_opcode <= 0;
+      last_rx_header_byte <= 0;
       tx_access_address_ll <= tx_access_address_cfg;
       tx_channel_number_ll <= tx_channel_number_cfg;
+      tx_pdu_octet_mem_addr_ll <= 0;
       rx_unique_bit_sequence_ll <= rx_unique_bit_sequence_cfg;
       rx_channel_number_ll <= rx_channel_number_cfg;
+      ll_tx_pkt_kind <= LL_PKT_ADV;
+      ll_tifs_counter <= 0;
+      ll_tx_after_ifs_pending <= 0;
+      ll_pending_scan_req <= 0;
+      ll_pending_scan_rsp <= 0;
+      ll_pending_ctrl_version <= 0;
+      ll_pending_ctrl_feature <= 0;
+      ll_pending_ctrl_ch_map <= 0;
+      ll_pending_ctrl_terminate <= 0;
+
+      tx_mem_addr_advancing <= 0;
+      tx_data_sn <= 0;
+      tx_data_nesn <= 0;
+
+      conn_channel_map_active <= channel_map_cfg;
+      conn_hop_increment_active <= hop_increment_cfg;
     end else begin
-      tx_access_address_ll <= (connection_established ? tx_access_address_cfg : 32'h8E89BED6);
-      rx_unique_bit_sequence_ll <= (connection_established ? rx_unique_bit_sequence_cfg : 32'h8E89BED6);
+      if (tx_mem_addr_advancing) begin
+        tx_pdu_octet_mem_addr_ll <= tx_pdu_octet_mem_addr_ll + 1;
+      end
+
+      if (ll_tx_after_ifs_pending) begin
+        if (ll_tifs_counter == 0) begin
+          tx_start_ll <= 1;
+          tx_pdu_octet_mem_addr_ll <= 0;
+          tx_mem_addr_advancing <= 1;
+          ll_tx_after_ifs_pending <= 0;
+        end else begin
+          ll_tifs_counter <= ll_tifs_counter - 1;
+        end
+      end
+
+      tx_access_address_ll <= (connection_established ? conn_access_address_cfg : 32'h8E89BED6);
+      rx_unique_bit_sequence_ll <= (connection_established ? conn_access_address_cfg : 32'h8E89BED6);
 
       if (ll_scan_enable) begin
         if (scan_interval_cnt == 0) begin
@@ -628,7 +919,10 @@ always @ (posedge bb_clk) begin
 
       if (ll_adv_enable && !connection_established) begin
         if (adv_interval_cnt == 0) begin
+          ll_tx_pkt_kind <= LL_PKT_ADV;
           tx_start_ll <= 1;
+          tx_pdu_octet_mem_addr_ll <= 0;
+          tx_mem_addr_advancing <= 1;
           case (adv_channel_seq)
             2'd0: begin
               tx_channel_number_ll <= ADV_CH_37[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
@@ -657,24 +951,39 @@ always @ (posedge bb_clk) begin
         adv_interval_cnt <= 0;
       end
 
-      if (rx_decode_end) begin
-        last_rx_pdu_byte <= rx_pdu_octet_mem_data;
+      if (rx_pkt_snapshot_pulse_bb) begin
+        last_rx_header_byte <= rx_pkt_header0_bb;
+        last_rx_pdu_byte <= rx_pkt_header1_bb;
 
         if (connection_established) begin
           supervision_timeout_cnt <= supervision_timeout_ticks_cfg;
-          if (rx_crc_ok) begin
+          if (rx_crc_ok_axi_lock_bb) begin
             tx_pending_retransmit <= 0;
+
+            if (rx_pkt_header0_bb[3] == tx_data_nesn)
+              tx_data_nesn <= ~tx_data_nesn;
+            if (rx_pkt_header0_bb[2] == tx_data_sn)
+              tx_data_sn <= ~tx_data_sn;
           end else begin
             tx_pending_retransmit <= 1;
           end
 
-          if (rx_pdu_octet_mem_data[1:0] == 2'b11) begin
+          if (rx_pkt_header0_bb[1:0] == 2'b11) begin
             ll_ctrl_pdu_seen_pulse <= 1;
-            last_ctrl_opcode <= rx_pdu_octet_mem_data;
+            last_ctrl_opcode <= rx_pkt_ctrl_opcode_bb;
+
+            if (rx_pkt_ctrl_opcode_bb == LL_CTRL_VERSION_IND)
+              ll_pending_ctrl_version <= 1;
+            if ((rx_pkt_ctrl_opcode_bb == LL_CTRL_FEATURE_REQ) || (rx_pkt_ctrl_opcode_bb == LL_CTRL_FEATURE_RSP))
+              ll_pending_ctrl_feature <= 1;
+            if (rx_pkt_ctrl_opcode_bb == LL_CTRL_CHANNEL_MAP_IND)
+              ll_pending_ctrl_ch_map <= 1;
+            if (rx_pkt_ctrl_opcode_bb == LL_CTRL_TERMINATE_IND)
+              ll_pending_ctrl_terminate <= 1;
           end
-        end else if (ll_scan_enable && scan_window_open && rx_crc_ok) begin
+        end else if (ll_scan_enable && scan_window_open && rx_crc_ok_axi_lock_bb) begin
           // CONNECT_IND hook from ADV channel PDU type field.
-          if (rx_pdu_octet_mem_data[3:0] == 4'h5) begin
+          if ((rx_pkt_header0_bb[3:0] == 4'h5) && (rx_pkt_header1_bb[5:0] >= 6'd34)) begin
             ll_connect_ind_pulse <= 1;
             connection_established <= ll_conn_enable;
             conn_event_counter <= 0;
@@ -682,29 +991,66 @@ always @ (posedge bb_clk) begin
             conn_interval_cnt <= conn_interval_ticks_cfg;
             supervision_timeout_cnt <= supervision_timeout_ticks_cfg;
 
+            tx_access_address_ll <= (rx_pkt_conn_aa_bb == 0 ? conn_access_address_cfg : rx_pkt_conn_aa_bb);
+            rx_unique_bit_sequence_ll <= (rx_pkt_conn_aa_bb == 0 ? conn_access_address_cfg : rx_pkt_conn_aa_bb);
+            tx_crc_state_init_bit_ll <= (rx_pkt_conn_crc_init_bb == 0 ? conn_crc_init_cfg : rx_pkt_conn_crc_init_bb);
+            rx_crc_state_init_bit_ll <= (rx_pkt_conn_crc_init_bb == 0 ? conn_crc_init_cfg : rx_pkt_conn_crc_init_bb);
+            conn_channel_map_active <= (|rx_pkt_conn_ch_map_bb ? rx_pkt_conn_ch_map_bb : channel_map_cfg);
+            conn_hop_increment_active <= (rx_pkt_conn_hop_inc_bb == 0 ? hop_increment_cfg : rx_pkt_conn_hop_inc_bb);
+
+            tx_data_sn <= 0;
+            tx_data_nesn <= 0;
             tx_channel_number_ll <= 0;
             rx_channel_number_ll <= 0;
-          end else if (ll_scan_active && ((rx_pdu_octet_mem_data[3:0] == 4'h0) || (rx_pdu_octet_mem_data[3:0] == 4'h6))) begin
+          end else if (ll_scan_active && ((rx_pkt_header0_bb[3:0] == 4'h0) || (rx_pkt_header0_bb[3:0] == 4'h6))) begin
             // Active scanning hook for SCAN_REQ scheduling.
-            tx_start_ll <= 1;
+            ll_pending_scan_req <= 1;
+            ll_tx_pkt_kind <= LL_PKT_SCAN_REQ;
+            ll_tifs_counter <= tifs_ticks_cfg;
+            ll_tx_after_ifs_pending <= 1;
+          end else if (ll_adv_enable && (rx_pkt_header0_bb[3:0] == 4'h3)) begin
+            ll_pending_scan_rsp <= 1;
+            ll_tx_pkt_kind <= LL_PKT_SCAN_RSP;
+            ll_tifs_counter <= tifs_ticks_cfg;
+            ll_tx_after_ifs_pending <= 1;
           end
         end
       end
 
       if (connection_established) begin
         if (ll_phy_2m_req && !phy_2m_active) begin
-          // Hook point for future LL_PHY_REQ/LL_PHY_UPDATE_IND handling.
-          phy_2m_active <= 1;
-          ll_phy_update_pulse <= 1;
+          // Reserved for future 2M PHY negotiation once PHY-side support is available.
+          // ll_phy_update_pulse <= 1;
+          // phy_2m_active <= 1;
+          ll_phy_update_pulse <= 0;
+          phy_2m_active <= 0;
         end
 
         if (conn_interval_cnt == 0) begin
           tx_start_ll <= 1;
+          tx_pdu_octet_mem_addr_ll <= 0;
+          tx_mem_addr_advancing <= 1;
           conn_event_counter <= conn_event_counter + 1;
-          conn_data_channel <= csa1_next_channel(conn_data_channel, hop_increment_cfg, channel_map_cfg);
-          tx_channel_number_ll <= csa1_next_channel(conn_data_channel, hop_increment_cfg, channel_map_cfg);
-          rx_channel_number_ll <= csa1_next_channel(conn_data_channel, hop_increment_cfg, channel_map_cfg);
+          conn_data_channel <= csa1_next_channel(conn_data_channel, conn_hop_increment_active, conn_channel_map_active);
+          tx_channel_number_ll <= csa1_next_channel(conn_data_channel, conn_hop_increment_active, conn_channel_map_active);
+          rx_channel_number_ll <= csa1_next_channel(conn_data_channel, conn_hop_increment_active, conn_channel_map_active);
           conn_interval_cnt <= conn_interval_ticks_cfg;
+
+          if (ll_pending_ctrl_terminate) begin
+            ll_tx_pkt_kind <= LL_PKT_CTRL_TERM;
+            ll_pending_ctrl_terminate <= 0;
+          end else if (ll_pending_ctrl_ch_map) begin
+            ll_tx_pkt_kind <= LL_PKT_CTRL_CH_MAP;
+            ll_pending_ctrl_ch_map <= 0;
+          end else if (ll_pending_ctrl_version) begin
+            ll_tx_pkt_kind <= LL_PKT_CTRL_VERSION;
+            ll_pending_ctrl_version <= 0;
+          end else if (ll_pending_ctrl_feature) begin
+            ll_tx_pkt_kind <= LL_PKT_CTRL_FEATURE;
+            ll_pending_ctrl_feature <= 0;
+          end else begin
+            ll_tx_pkt_kind <= LL_PKT_DATA_EMPTY;
+          end
 
           if (tx_pending_retransmit)
             tx_pending_empty_pdu <= 0;
@@ -731,7 +1077,15 @@ always @ (posedge bb_clk) begin
         tx_pending_empty_pdu <= 0;
         tx_pending_retransmit <= 0;
         supervision_timeout_cnt <= 0;
+        tx_mem_addr_advancing <= 0;
+        if (!ll_scan_enable)
+          ll_pending_scan_req <= 0;
+        if (!ll_adv_enable)
+          ll_pending_scan_rsp <= 0;
       end
+
+      if (tx_iq_valid_last)
+        tx_mem_addr_advancing <= 0;
     end
   end
 end
@@ -798,10 +1152,55 @@ always @ (posedge axi_aclk) begin
   if (~axi_aresetn) begin
     rx_crc_ok_axi_lock <= 0;
     rx_payload_length_axi_lock <= 0;
+
+    rx_pkt_parse_active_axi <= 0;
+    rx_pkt_header0_axi <= 0;
+    rx_pkt_header1_axi <= 0;
+    rx_pkt_ctrl_opcode_axi <= 0;
+    rx_pkt_conn_aa_axi <= 0;
+    rx_pkt_conn_crc_init_axi <= 0;
+    rx_pkt_conn_ch_map_axi <= 0;
+    rx_pkt_conn_hop_inc_axi <= 0;
+    rx_pkt_snapshot_toggle_axi <= 0;
   end else begin
     if (rx_decode_end_axi) begin
       rx_crc_ok_axi_lock <= rx_crc_ok_axi;
       rx_payload_length_axi_lock <= rx_payload_length_axi;
+
+      rx_pkt_parse_active_axi <= 1;
+      rx_pkt_header0_axi <= 0;
+      rx_pkt_header1_axi <= 0;
+      rx_pkt_ctrl_opcode_axi <= 0;
+      rx_pkt_conn_aa_axi <= 0;
+      rx_pkt_conn_crc_init_axi <= 0;
+      rx_pkt_conn_ch_map_axi <= 0;
+      rx_pkt_conn_hop_inc_axi <= 0;
+    end else if (rx_pkt_parse_active_axi) begin
+      case (rx_pdu_octet_mem_addr)
+        0: rx_pkt_header0_axi <= rx_pdu_octet_mem_data;
+        1: rx_pkt_header1_axi <= rx_pdu_octet_mem_data;
+        2: rx_pkt_ctrl_opcode_axi <= rx_pdu_octet_mem_data;
+        14: rx_pkt_conn_aa_axi[7:0] <= rx_pdu_octet_mem_data;
+        15: rx_pkt_conn_aa_axi[15:8] <= rx_pdu_octet_mem_data;
+        16: rx_pkt_conn_aa_axi[23:16] <= rx_pdu_octet_mem_data;
+        17: rx_pkt_conn_aa_axi[31:24] <= rx_pdu_octet_mem_data;
+        18: rx_pkt_conn_crc_init_axi[7:0] <= rx_pdu_octet_mem_data;
+        19: rx_pkt_conn_crc_init_axi[15:8] <= rx_pdu_octet_mem_data;
+        20: rx_pkt_conn_crc_init_axi[23:16] <= rx_pdu_octet_mem_data;
+        30: rx_pkt_conn_ch_map_axi[7:0] <= rx_pdu_octet_mem_data;
+        31: rx_pkt_conn_ch_map_axi[15:8] <= rx_pdu_octet_mem_data;
+        32: rx_pkt_conn_ch_map_axi[23:16] <= rx_pdu_octet_mem_data;
+        33: rx_pkt_conn_ch_map_axi[31:24] <= rx_pdu_octet_mem_data;
+        34: rx_pkt_conn_ch_map_axi[36:32] <= rx_pdu_octet_mem_data[4:0];
+        35: rx_pkt_conn_hop_inc_axi <= rx_pdu_octet_mem_data[4:0];
+        default: begin
+        end
+      endcase
+
+      if (rx_pdu_octet_mem_addr > (rx_payload_length_axi_lock + 6)) begin
+        rx_pkt_parse_active_axi <= 0;
+        rx_pkt_snapshot_toggle_axi <= ~rx_pkt_snapshot_toggle_axi;
+      end
     end
   end
 end
@@ -927,7 +1326,16 @@ clk_cross_bus #
               CRC_STATE_BIT_WIDTH+
               32+
               1+
-              6)
+              6+
+              8+
+              8+
+              8+
+              32+
+              24+
+              37+
+              5+
+              1+
+              1)
 ) clk_cross_bus_s_axi_to_bb_i (
   .write_clk(axi_aclk),
   .rst(~axi_aresetn),
@@ -949,7 +1357,16 @@ clk_cross_bus #
                rx_crc_state_init_bit_axi,
                slv_reg39,
                slv_reg_rden,
-               axi_araddr_core}),
+               axi_araddr_core,
+               rx_pkt_header0_axi,
+               rx_pkt_header1_axi,
+               rx_pkt_ctrl_opcode_axi,
+               rx_pkt_conn_aa_axi,
+               rx_pkt_conn_crc_init_axi,
+               rx_pkt_conn_ch_map_axi,
+               rx_pkt_conn_hop_inc_axi,
+               rx_pkt_snapshot_toggle_axi,
+               rx_crc_ok_axi_lock}),
 
   .read_clk(bb_clk),
   .read_data({reg_gpio,
@@ -969,7 +1386,16 @@ clk_cross_bus #
               rx_crc_state_init_bit_cfg,
               slv_reg39_bb,
               slv_reg_rden_bb,
-              axi_araddr_core_bb})
+              axi_araddr_core_bb,
+              rx_pkt_header0_bb,
+              rx_pkt_header1_bb,
+              rx_pkt_ctrl_opcode_bb,
+              rx_pkt_conn_aa_bb,
+              rx_pkt_conn_crc_init_bb,
+              rx_pkt_conn_ch_map_bb,
+              rx_pkt_conn_hop_inc_bb,
+              rx_pkt_snapshot_toggle_bb,
+              rx_crc_ok_axi_lock_bb})
 );
 
 clk_cross_bus #
@@ -1379,8 +1805,8 @@ localparam ADDR_WIDTH_DPRAM = NUM_BIT_PAYLOAD_LENGTH+1;
 
 `KEEP_FOR_DBG wire [(ADDR_WIDTH_DPRAM-1) : 0] header_payload_crc_len;
 
-`KEEP_FOR_DBG assign write_data = word_out;
-`KEEP_FOR_DBG assign write_enable = word_out_strobe;
+assign write_data = word_out;
+assign write_enable = word_out_strobe;
 assign header_payload_crc_len = 2 + rx_payload_length_axi_lock + 3; // 2 bytes header, payload length, 3 bytes CRC
 
 // 5'd40 means slv_reg40 read signal
@@ -2538,20 +2964,6 @@ end
 
 endmodule
 
-// ===============================================================================
-// --------------------------------------------------------------------
-// >>>>>>>>>>>>>>>>>>>>>>>>> COPYRIGHT NOTICE <<<<<<<<<<<<<<<<<<<<<<<<<
-// --------------------------------------------------------------------
-// Author: halftop
-// Github: https://github.com/halftop
-// Email: yu.zh@live.com
-// Description: 
-// Dependencies: 
-// Since: 2019-06-09 16:31:56
-// LastEditors: halftop
-// LastEditTime: 2019-06-09 16:31:56
-// ********************************************************************
-// Module Function:
 `timescale 1ns / 1ps
 
 // NOTE: uart_frame_rx / uart_frame_tx / tx_clk_gen / rx_clk_gen /
@@ -2707,7 +3119,7 @@ xpm_fifo_async_clk_cross_inst (
                                  // reset, but reset must be released only after the clock(s) is/are stable.
 
   .sleep(sleep),                 // 1-bit input: Dynamic power saving: If sleep is High, the memory/fifo block is in power saving mode.
-  .wr_clk(write_clk),               // 1-bit input: Write clock: Used for write operation. wr_clk must be a free running clock.
+  .wr_clk(write_clk),            // 1-bit input: Write clock: Used for write operation. wr_clk must be a free running clock.
   .wr_en(wr_en)                  // 1-bit input: Write Enable: If the FIFO is not full, asserting this signal causes data (on din) to be written
                                  // to the FIFO. Must be held active-low when rst or wr_rst_busy is active high.
 );
