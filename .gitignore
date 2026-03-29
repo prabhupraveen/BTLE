@@ -15,3 +15,4 @@ BOOT.BIN
 verilog/*.vcd
 verilog/*.vvp
 verilog/test_data/
+.vscode

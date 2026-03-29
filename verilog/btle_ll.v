@@ -208,6 +208,25 @@ wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg63;
 
 `KEEP_FOR_DBG wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg39_bb;
 
+// ====================bb clk domain config-path signals====================
+`KEEP_FOR_DBG wire [3:0] tx_gauss_filter_tap_index_cfg;
+`KEEP_FOR_DBG wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] tx_gauss_filter_tap_value_cfg;
+
+`KEEP_FOR_DBG wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] tx_cos_table_write_address_cfg;
+`KEEP_FOR_DBG wire signed [(IQ_BIT_WIDTH-1) : 0]    tx_cos_table_write_data_cfg;
+`KEEP_FOR_DBG wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] tx_sin_table_write_address_cfg;
+`KEEP_FOR_DBG wire signed [(IQ_BIT_WIDTH-1) : 0]    tx_sin_table_write_data_cfg;
+
+`KEEP_FOR_DBG wire [7:0]  tx_preamble_cfg;
+`KEEP_FOR_DBG wire [31:0] tx_access_address_cfg;
+`KEEP_FOR_DBG wire [(CRC_STATE_BIT_WIDTH-1) : 0]      tx_crc_state_init_bit_cfg;
+`KEEP_FOR_DBG wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] tx_channel_number_cfg;
+`KEEP_FOR_DBG wire tx_start_cfg;
+
+`KEEP_FOR_DBG wire [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0]  rx_unique_bit_sequence_cfg;
+`KEEP_FOR_DBG wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] rx_channel_number_cfg;
+`KEEP_FOR_DBG wire [(CRC_STATE_BIT_WIDTH-1) : 0]      rx_crc_state_init_bit_cfg;
+
 // ===========================UART========================
 // rx
 wire [FRAME_WD-1:0] rx_frame;
@@ -307,16 +326,136 @@ localparam [2:0] STANDBY                  = 0,
 `KEEP_FOR_DBG wire slv_reg_rden_bb;
 `KEEP_FOR_DBG wire [5:0] axi_araddr_core_bb;
 
+// ====================enhanced LL scheduler signals========================
+localparam [5:0] ADV_CH_37 = 6'd37,
+                 ADV_CH_38 = 6'd38,
+                 ADV_CH_39 = 6'd39;
+
+localparam [31:0] ADV_INTERVAL_TICK_DEFAULT        = 32'd1600000;  // ~16ms @100MHz
+localparam [31:0] SCAN_INTERVAL_TICK_DEFAULT       = 32'd10000000; // ~100ms @100MHz
+localparam [31:0] SCAN_WINDOW_TICK_DEFAULT         = 32'd5000000;  // ~50ms @100MHz
+localparam [31:0] CONN_INTERVAL_TICK_DEFAULT       = 32'd2400000;  // ~24ms @100MHz
+localparam [31:0] SUPERVISION_TIMEOUT_TICK_DEFAULT = 32'd100000000; // ~1s @100MHz
+
+`KEEP_FOR_DBG wire ll_sched_enable;
+`KEEP_FOR_DBG wire ll_scan_enable;
+`KEEP_FOR_DBG wire ll_scan_active;
+`KEEP_FOR_DBG wire ll_adv_enable;
+`KEEP_FOR_DBG wire ll_conn_enable;
+`KEEP_FOR_DBG wire ll_phy_2m_req;
+
+`KEEP_FOR_DBG wire [31:0] adv_interval_ticks_cfg;
+`KEEP_FOR_DBG wire [31:0] scan_interval_ticks_cfg;
+`KEEP_FOR_DBG wire [31:0] scan_window_ticks_cfg;
+`KEEP_FOR_DBG wire [31:0] conn_interval_ticks_cfg;
+`KEEP_FOR_DBG wire [31:0] supervision_timeout_ticks_cfg;
+
+`KEEP_FOR_DBG wire [4:0] hop_increment_cfg;
+`KEEP_FOR_DBG wire [36:0] channel_map_cfg;
+
+`KEEP_FOR_DBG reg [31:0] adv_interval_cnt;
+`KEEP_FOR_DBG reg [31:0] scan_interval_cnt;
+`KEEP_FOR_DBG reg [31:0] scan_window_cnt;
+`KEEP_FOR_DBG reg [31:0] conn_interval_cnt;
+`KEEP_FOR_DBG reg [31:0] supervision_timeout_cnt;
+
+`KEEP_FOR_DBG reg [1:0] adv_channel_seq;
+`KEEP_FOR_DBG reg scan_window_open;
+`KEEP_FOR_DBG reg connection_established;
+`KEEP_FOR_DBG reg tx_pending_empty_pdu;
+`KEEP_FOR_DBG reg tx_pending_retransmit;
+`KEEP_FOR_DBG reg phy_2m_active;
+
+`KEEP_FOR_DBG reg [15:0] conn_event_counter;
+`KEEP_FOR_DBG reg [5:0] conn_data_channel;
+
+`KEEP_FOR_DBG reg [7:0] last_rx_pdu_byte;
+`KEEP_FOR_DBG reg [7:0] last_ctrl_opcode;
+
+`KEEP_FOR_DBG reg tx_start_ll;
+`KEEP_FOR_DBG reg [7:0]  tx_preamble_ll;
+`KEEP_FOR_DBG reg [31:0] tx_access_address_ll;
+`KEEP_FOR_DBG reg [(CRC_STATE_BIT_WIDTH-1) : 0]      tx_crc_state_init_bit_ll;
+`KEEP_FOR_DBG reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] tx_channel_number_ll;
+`KEEP_FOR_DBG reg [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0]  rx_unique_bit_sequence_ll;
+`KEEP_FOR_DBG reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] rx_channel_number_ll;
+`KEEP_FOR_DBG reg [(CRC_STATE_BIT_WIDTH-1) : 0]      rx_crc_state_init_bit_ll;
+
+`KEEP_FOR_DBG reg ll_supervision_timeout_pulse;
+`KEEP_FOR_DBG reg ll_ctrl_pdu_seen_pulse;
+`KEEP_FOR_DBG reg ll_connect_ind_pulse;
+`KEEP_FOR_DBG reg ll_phy_update_pulse;
+
+function [5:0] csa1_next_channel;
+  input [5:0] current_channel;
+  input [4:0] hop_increment;
+  input [36:0] channel_map;
+  integer i;
+  reg [5:0] candidate;
+  begin
+    candidate = current_channel + hop_increment;
+    if (candidate >= 6'd37)
+      candidate = candidate - 6'd37;
+
+    if (channel_map[candidate]) begin
+      csa1_next_channel = candidate;
+    end else begin
+      csa1_next_channel = candidate;
+      for (i = 0; i < 37; i = i + 1) begin
+        if (!channel_map[csa1_next_channel]) begin
+          if (csa1_next_channel == 6'd36)
+            csa1_next_channel = 0;
+          else
+            csa1_next_channel = csa1_next_channel + 1;
+        end
+      end
+    end
+  end
+endfunction
+
 // ===============================================================================
 assign ll_gpio                        = reg_gpio;
 assign ll_itrpt0                      = rx_decode_end;
 assign ll_itrpt1                      = rx_hit_flag;
-assign ll_itrpt2                      = 0;
-assign ll_itrpt3                      = 0;
-assign ll_itrpt4                      = 0;
-assign ll_itrpt5                      = 0;
-assign ll_itrpt6                      = 0;
-assign ll_itrpt7                      = 0;
+assign ll_itrpt2                      = ll_supervision_timeout_pulse;
+assign ll_itrpt3                      = ll_ctrl_pdu_seen_pulse;
+assign ll_itrpt4                      = ll_connect_ind_pulse;
+assign ll_itrpt5                      = ll_phy_update_pulse;
+assign ll_itrpt6                      = scan_window_open;
+assign ll_itrpt7                      = connection_established;
+
+assign ll_sched_enable                = reg_gpio[0];
+assign ll_scan_enable                 = reg_gpio[1];
+assign ll_scan_active                 = reg_gpio[2];
+assign ll_adv_enable                  = reg_gpio[3];
+assign ll_conn_enable                 = reg_gpio[4];
+assign ll_phy_2m_req                  = reg_gpio[5];
+
+assign adv_interval_ticks_cfg         = (slv_reg14 == 0 ? ADV_INTERVAL_TICK_DEFAULT : slv_reg14);
+assign scan_interval_ticks_cfg        = (slv_reg15 == 0 ? SCAN_INTERVAL_TICK_DEFAULT : slv_reg15);
+assign scan_window_ticks_cfg          = (slv_reg16 == 0 ? SCAN_WINDOW_TICK_DEFAULT : slv_reg16);
+assign conn_interval_ticks_cfg        = (slv_reg17 == 0 ? CONN_INTERVAL_TICK_DEFAULT : slv_reg17);
+assign supervision_timeout_ticks_cfg  = (slv_reg18 == 0 ? SUPERVISION_TIMEOUT_TICK_DEFAULT : slv_reg18);
+
+assign hop_increment_cfg              = (slv_reg19[4:0] == 0 ? 5'd5 : slv_reg19[4:0]);
+assign channel_map_cfg                = {slv_reg21[4:0], slv_reg20};
+
+assign tx_gauss_filter_tap_index      = tx_gauss_filter_tap_index_cfg;
+assign tx_gauss_filter_tap_value      = tx_gauss_filter_tap_value_cfg;
+assign tx_cos_table_write_address     = tx_cos_table_write_address_cfg;
+assign tx_cos_table_write_data        = tx_cos_table_write_data_cfg;
+assign tx_sin_table_write_address     = tx_sin_table_write_address_cfg;
+assign tx_sin_table_write_data        = tx_sin_table_write_data_cfg;
+
+assign tx_preamble                    = (ll_sched_enable ? tx_preamble_ll : tx_preamble_cfg);
+assign tx_access_address              = (ll_sched_enable ? tx_access_address_ll : tx_access_address_cfg);
+assign tx_crc_state_init_bit          = (ll_sched_enable ? tx_crc_state_init_bit_ll : tx_crc_state_init_bit_cfg);
+assign tx_channel_number              = (ll_sched_enable ? tx_channel_number_ll : tx_channel_number_cfg);
+assign tx_start                       = (ll_sched_enable ? (tx_start_ll | tx_start_cfg) : tx_start_cfg);
+
+assign rx_unique_bit_sequence         = (ll_sched_enable ? rx_unique_bit_sequence_ll : rx_unique_bit_sequence_cfg);
+assign rx_channel_number              = (ll_sched_enable ? rx_channel_number_ll : rx_channel_number_cfg);
+assign rx_crc_state_init_bit          = (ll_sched_enable ? rx_crc_state_init_bit_ll : rx_crc_state_init_bit_cfg);
 
 assign reg_gpio_axi                   = slv_reg0[15 : 0];
 
@@ -382,36 +521,218 @@ always @ (posedge axi_aclk) begin
   if (~axi_aresetn) begin
     ll_state <= STANDBY;
   end else begin
-    case(ll_state)
-      STANDBY: begin
-        if (tx_iq_valid_last)
-          ll_state <= ADVERTISING;
+    if (ll_sched_enable == 0) begin
+      ll_state <= STANDBY;
+    end else if (connection_established) begin
+      ll_state <= CONNECTION;
+    end else if (ll_scan_enable) begin
+      ll_state <= SCANNING;
+    end else if (ll_adv_enable) begin
+      ll_state <= ADVERTISING;
+    end else begin
+      ll_state <= STANDBY;
+    end
+  end
+end
+
+// =============enhanced LL scheduler==========
+always @ (posedge bb_clk) begin
+  if (bb_rst) begin
+    adv_interval_cnt <= 0;
+    scan_interval_cnt <= 0;
+    scan_window_cnt <= 0;
+    conn_interval_cnt <= 0;
+    supervision_timeout_cnt <= 0;
+
+    adv_channel_seq <= 0;
+    scan_window_open <= 0;
+    connection_established <= 0;
+    tx_pending_empty_pdu <= 0;
+    tx_pending_retransmit <= 0;
+    phy_2m_active <= 0;
+
+    conn_event_counter <= 0;
+    conn_data_channel <= 0;
+
+    last_rx_pdu_byte <= 0;
+    last_ctrl_opcode <= 0;
+
+    tx_start_ll <= 0;
+    tx_preamble_ll <= 8'hAA;
+    tx_access_address_ll <= 32'h8E89BED6;
+    tx_crc_state_init_bit_ll <= 0;
+    tx_channel_number_ll <= ADV_CH_37[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
+    rx_unique_bit_sequence_ll <= 32'h8E89BED6;
+    rx_channel_number_ll <= ADV_CH_37[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
+    rx_crc_state_init_bit_ll <= 0;
+
+    ll_supervision_timeout_pulse <= 0;
+    ll_ctrl_pdu_seen_pulse <= 0;
+    ll_connect_ind_pulse <= 0;
+    ll_phy_update_pulse <= 0;
+  end else begin
+    tx_start_ll <= 0;
+    ll_supervision_timeout_pulse <= 0;
+    ll_ctrl_pdu_seen_pulse <= 0;
+    ll_connect_ind_pulse <= 0;
+    ll_phy_update_pulse <= 0;
+
+    tx_preamble_ll <= tx_preamble_cfg;
+    tx_crc_state_init_bit_ll <= tx_crc_state_init_bit_cfg;
+    rx_crc_state_init_bit_ll <= rx_crc_state_init_bit_cfg;
+
+    if (ll_sched_enable == 0) begin
+      adv_interval_cnt <= 0;
+      scan_interval_cnt <= 0;
+      scan_window_cnt <= 0;
+      conn_interval_cnt <= 0;
+      supervision_timeout_cnt <= 0;
+      adv_channel_seq <= 0;
+      scan_window_open <= 0;
+      connection_established <= 0;
+      tx_pending_empty_pdu <= 0;
+      tx_pending_retransmit <= 0;
+      phy_2m_active <= 0;
+      conn_event_counter <= 0;
+      conn_data_channel <= 0;
+      last_rx_pdu_byte <= 0;
+      last_ctrl_opcode <= 0;
+      tx_access_address_ll <= tx_access_address_cfg;
+      tx_channel_number_ll <= tx_channel_number_cfg;
+      rx_unique_bit_sequence_ll <= rx_unique_bit_sequence_cfg;
+      rx_channel_number_ll <= rx_channel_number_cfg;
+    end else begin
+      tx_access_address_ll <= (connection_established ? tx_access_address_cfg : 32'h8E89BED6);
+      rx_unique_bit_sequence_ll <= (connection_established ? rx_unique_bit_sequence_cfg : 32'h8E89BED6);
+
+      if (ll_scan_enable) begin
+        if (scan_interval_cnt == 0) begin
+          scan_window_open <= 1;
+          scan_window_cnt <= scan_window_ticks_cfg;
+          scan_interval_cnt <= scan_interval_ticks_cfg;
+        end else begin
+          scan_interval_cnt <= scan_interval_cnt - 1;
+        end
+
+        if (scan_window_open) begin
+          if (scan_window_cnt == 0)
+            scan_window_open <= 0;
+          else
+            scan_window_cnt <= scan_window_cnt - 1;
+        end
+      end else begin
+        scan_window_open <= 0;
+        scan_interval_cnt <= 0;
+        scan_window_cnt <= 0;
       end
-      ADVERTISING: begin
-        if (tx_iq_valid_last)
-          ll_state <= INITIATING;
+
+      if (ll_adv_enable && !connection_established) begin
+        if (adv_interval_cnt == 0) begin
+          tx_start_ll <= 1;
+          case (adv_channel_seq)
+            2'd0: begin
+              tx_channel_number_ll <= ADV_CH_37[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
+              rx_channel_number_ll <= ADV_CH_37[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
+            end
+            2'd1: begin
+              tx_channel_number_ll <= ADV_CH_38[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
+              rx_channel_number_ll <= ADV_CH_38[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
+            end
+            default: begin
+              tx_channel_number_ll <= ADV_CH_39[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
+              rx_channel_number_ll <= ADV_CH_39[(CHANNEL_NUMBER_BIT_WIDTH-1):0];
+            end
+          endcase
+
+          if (adv_channel_seq == 2'd2)
+            adv_channel_seq <= 0;
+          else
+            adv_channel_seq <= adv_channel_seq + 1;
+
+          adv_interval_cnt <= adv_interval_ticks_cfg;
+        end else begin
+          adv_interval_cnt <= adv_interval_cnt - 1;
+        end
+      end else begin
+        adv_interval_cnt <= 0;
       end
-      INITIATING: begin
-        if (tx_iq_valid_last)
-          ll_state <= CONNECTION;
+
+      if (rx_decode_end) begin
+        last_rx_pdu_byte <= rx_pdu_octet_mem_data;
+
+        if (connection_established) begin
+          supervision_timeout_cnt <= supervision_timeout_ticks_cfg;
+          if (rx_crc_ok) begin
+            tx_pending_retransmit <= 0;
+          end else begin
+            tx_pending_retransmit <= 1;
+          end
+
+          if (rx_pdu_octet_mem_data[1:0] == 2'b11) begin
+            ll_ctrl_pdu_seen_pulse <= 1;
+            last_ctrl_opcode <= rx_pdu_octet_mem_data;
+          end
+        end else if (ll_scan_enable && scan_window_open && rx_crc_ok) begin
+          // CONNECT_IND hook from ADV channel PDU type field.
+          if (rx_pdu_octet_mem_data[3:0] == 4'h5) begin
+            ll_connect_ind_pulse <= 1;
+            connection_established <= ll_conn_enable;
+            conn_event_counter <= 0;
+            conn_data_channel <= 0;
+            conn_interval_cnt <= conn_interval_ticks_cfg;
+            supervision_timeout_cnt <= supervision_timeout_ticks_cfg;
+
+            tx_channel_number_ll <= 0;
+            rx_channel_number_ll <= 0;
+          end else if (ll_scan_active && ((rx_pdu_octet_mem_data[3:0] == 4'h0) || (rx_pdu_octet_mem_data[3:0] == 4'h6))) begin
+            // Active scanning hook for SCAN_REQ scheduling.
+            tx_start_ll <= 1;
+          end
+        end
       end
-      CONNECTION: begin
+
+      if (connection_established) begin
+        if (ll_phy_2m_req && !phy_2m_active) begin
+          // Hook point for future LL_PHY_REQ/LL_PHY_UPDATE_IND handling.
+          phy_2m_active <= 1;
+          ll_phy_update_pulse <= 1;
+        end
+
+        if (conn_interval_cnt == 0) begin
+          tx_start_ll <= 1;
+          conn_event_counter <= conn_event_counter + 1;
+          conn_data_channel <= csa1_next_channel(conn_data_channel, hop_increment_cfg, channel_map_cfg);
+          tx_channel_number_ll <= csa1_next_channel(conn_data_channel, hop_increment_cfg, channel_map_cfg);
+          rx_channel_number_ll <= csa1_next_channel(conn_data_channel, hop_increment_cfg, channel_map_cfg);
+          conn_interval_cnt <= conn_interval_ticks_cfg;
+
+          if (tx_pending_retransmit)
+            tx_pending_empty_pdu <= 0;
+          else
+            tx_pending_empty_pdu <= 1;
+        end else begin
+          conn_interval_cnt <= conn_interval_cnt - 1;
+        end
+
         if (tx_iq_valid_last)
-          ll_state <= ISOCHRONOUS_BROADCASTING;
+          supervision_timeout_cnt <= supervision_timeout_ticks_cfg;
+        else if (supervision_timeout_cnt == 0) begin
+          connection_established <= 0;
+          ll_supervision_timeout_pulse <= 1;
+          tx_pending_retransmit <= 0;
+          tx_pending_empty_pdu <= 0;
+          phy_2m_active <= 0;
+        end else begin
+          supervision_timeout_cnt <= supervision_timeout_cnt - 1;
+        end
+      end else begin
+        conn_interval_cnt <= 0;
+        conn_event_counter <= conn_event_counter;
+        tx_pending_empty_pdu <= 0;
+        tx_pending_retransmit <= 0;
+        supervision_timeout_cnt <= 0;
       end
-      ISOCHRONOUS_BROADCASTING: begin
-        if (tx_iq_valid_last)
-          ll_state <= SCANNING;
-      end
-      SCANNING: begin
-        if (tx_iq_valid_last)
-          ll_state <= SYNCHRONIZATION;
-      end
-      SYNCHRONIZATION: begin
-        if (tx_iq_valid_last)
-          ll_state <= STANDBY;
-      end
-    endcase
+    end
   end
 end
 
@@ -530,6 +851,17 @@ event_counter_pulse # (
   .count(event3_counter)
 );
 
+event_counter_pulse # (
+  .COUNTER_WIDTH(C_S00_AXI_DATA_WIDTH)
+) event_counter_pulse_supervision_timeout_i (
+  .clk(bb_clk),
+  .rst(bb_rst|reg_gpio[15]),
+
+  .pulse_signal(ll_supervision_timeout_pulse),
+
+  .count(event4_counter)
+);
+
 event_counter_level # (
   .COUNTER_WIDTH(C_S00_AXI_DATA_WIDTH)
 ) event_counter_level_decode_run_i (
@@ -621,20 +953,20 @@ clk_cross_bus #
 
   .read_clk(bb_clk),
   .read_data({reg_gpio,
-              tx_gauss_filter_tap_index, 
-              tx_gauss_filter_tap_value, 
-              tx_cos_table_write_address, 
-              tx_cos_table_write_data, 
-              tx_sin_table_write_address, 
-              tx_sin_table_write_data,
-              tx_preamble,
-              tx_access_address, 
-              tx_crc_state_init_bit, 
-              tx_channel_number,
-              tx_start,
-              rx_unique_bit_sequence, 
-              rx_channel_number, 
-              rx_crc_state_init_bit,
+              tx_gauss_filter_tap_index_cfg,
+              tx_gauss_filter_tap_value_cfg,
+              tx_cos_table_write_address_cfg,
+              tx_cos_table_write_data_cfg,
+              tx_sin_table_write_address_cfg,
+              tx_sin_table_write_data_cfg,
+              tx_preamble_cfg,
+              tx_access_address_cfg,
+              tx_crc_state_init_bit_cfg,
+              tx_channel_number_cfg,
+              tx_start_cfg,
+              rx_unique_bit_sequence_cfg,
+              rx_channel_number_cfg,
+              rx_crc_state_init_bit_cfg,
               slv_reg39_bb,
               slv_reg_rden_bb,
               axi_araddr_core_bb})
@@ -2222,634 +2554,9 @@ endmodule
 // Module Function:
 `timescale 1ns / 1ps
 
-module uart_frame_rx
-#(
-  parameter  CLK_FREQUENCE  = 50_000_000,    //hz
-  BAUD_RATE    = 9600    ,    //9600、19200 、38400 、57600 、115200、230400、460800、921600
-  PARITY      = "NONE"  ,    //"NONE","EVEN","ODD"
-  FRAME_WD    = 8            //if PARITY="NONE",it can be 5~9;else 5~8
-)
-(
-  input clk,    //sys_clk
-  input rst_n,
-  input uart_rx,
-  output reg [FRAME_WD-1:0] rx_frame,    //frame_received,when rx_done = 1 it's valid
-  output reg rx_done,    //once_rx_done
-  output reg frame_error    //when the PARITY is enable if frame_error = 1,the frame received is wrong
-);
-
-wire sample_clk;
-wire frame_en;    //once_rx_start
-reg  cnt_en;    //sample_clk_cnt enable
-reg  [3:0] sample_clk_cnt;
-reg  [log2(FRAME_WD+1)-1:0] sample_bit_cnt;
-wire baud_rate_clk;
-
-localparam  IDLE       =  5'b0_0000,
-            START_BIT  =  5'b0_0001,
-            DATA_FRAME =  5'b0_0010,
-            PARITY_BIT =  5'b0_0100,
-            STOP_BIT   =  5'b0_1000,
-            DONE       =  5'b1_0000;
-
-reg  [4:0]  cstate;
-reg [4:0]  nstate;
-//
-wire  [1:0]  verify_mode;
-generate
-  if (PARITY == "ODD")
-    assign verify_mode = 2'b01;
-  else if (PARITY == "EVEN")
-    assign verify_mode = 2'b10;
-  else
-    assign verify_mode = 2'b00;
-endgenerate
-//detect the start condition--the negedge of uart_rx
-reg uart_rx0,uart_rx1,uart_rx2,uart_rx3;
-
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) begin
-    uart_rx0 <= 1'b0;
-    uart_rx1 <= 1'b0;
-    uart_rx2 <= 1'b0;
-    uart_rx3 <= 1'b0;
-  end else begin
-    uart_rx0 <= uart_rx ;
-    uart_rx1 <= uart_rx0;
-    uart_rx2 <= uart_rx1;
-    uart_rx3 <= uart_rx2;
-  end
-end
-//negedge of uart_rx-----start_bit
-assign frame_en = uart_rx3 & uart_rx2 & ~uart_rx1 & ~uart_rx0;
-
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    cnt_en <= 1'b0;
-  else if (frame_en) 
-    cnt_en <= 1'b1;
-  else if (rx_done) 
-    cnt_en <= 1'b0;
-  else
-    cnt_en <= cnt_en;
-end
-
-assign baud_rate_clk = sample_clk & sample_clk_cnt == 4'd8;
-
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    sample_clk_cnt <= 4'd0;
-  else if (cnt_en) begin
-    if (baud_rate_clk) 
-      sample_clk_cnt <= 4'd0;
-    else if (sample_clk)
-      sample_clk_cnt <= sample_clk_cnt + 1'b1;
-    else
-      sample_clk_cnt <= sample_clk_cnt;
-  end else 
-    sample_clk_cnt <= 4'd0;
-end
-//the start_bit is the first one (0),then the LSB of the data_frame is the second(1) ......
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    sample_bit_cnt <= 'd0;
-  else if (cstate == IDLE)
-    sample_bit_cnt <= 'd0;
-  else if (baud_rate_clk)
-    sample_bit_cnt <= sample_bit_cnt + 1'b1;
-  else
-    sample_bit_cnt <= sample_bit_cnt;
-end
-//read the readme
-reg    [1:0]  sample_result  ;
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    sample_result <= 1'b0;
-  else if (sample_clk) begin
-    case (sample_clk_cnt)
-      4'd0:sample_result <= 2'd0;
-      4'd3,4'd4,4'd5: sample_result <= sample_result + uart_rx;
-      default: sample_result <= sample_result;
-    endcase
-  end
-end
-//FSM-1
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    cstate <= IDLE;
-  else 
-    cstate <= nstate;
-end
-//FSM-2
-always @(*) begin
-  case (cstate)
-    IDLE       : nstate = frame_en ? START_BIT : IDLE ;
-    START_BIT  : nstate = (baud_rate_clk & sample_result[1] == 1'b0) ? DATA_FRAME : START_BIT ;
-    DATA_FRAME : begin
-                   case (verify_mode[1]^verify_mode[0])
-                     1'b1: nstate = (sample_bit_cnt == FRAME_WD & baud_rate_clk) ? PARITY_BIT : DATA_FRAME ;    //parity is enable
-                     1'b0: nstate = (sample_bit_cnt == FRAME_WD & baud_rate_clk) ? STOP_BIT : DATA_FRAME ;    //parity is disable
-                     default: nstate = (sample_bit_cnt == FRAME_WD & baud_rate_clk) ? STOP_BIT : DATA_FRAME ;  //defasult is disable
-                   endcase
-                 end
-    PARITY_BIT : nstate = baud_rate_clk ? STOP_BIT : PARITY_BIT ;
-    STOP_BIT   : nstate = (baud_rate_clk & sample_result[1] == 1'b1) ? DONE : STOP_BIT ;
-    DONE       : nstate = IDLE;
-    default    : nstate = IDLE;
-  endcase
-end
-//FSM-3
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) begin
-    rx_frame  <= 'd0;
-    rx_done    <= 1'b0;
-    frame_error  <= 1'b0;
-  end else begin
-    case (nstate)
-      IDLE    : begin
-              rx_frame  <= 'd0;
-              rx_done    <= 1'b0;
-              frame_error  <= 1'b0;
-            end 
-      START_BIT  : begin
-              rx_frame  <= 'd0;
-              rx_done    <= 1'b0;
-              frame_error  <= 1'b0;
-            end 
-      DATA_FRAME  : begin
-              if (sample_clk & sample_clk_cnt == 4'd6) 
-                rx_frame <= {sample_result[1],rx_frame[FRAME_WD-1:1]};
-              else
-                rx_frame  <= rx_frame;
-              rx_done    <= 1'b0;
-              frame_error  <= 1'b0;
-            end 
-      PARITY_BIT  : begin
-              rx_frame  <= rx_frame;
-              rx_done    <= 1'b0;
-              if (sample_clk_cnt == 4'd8)
-              frame_error  <= ^rx_frame ^ sample_result[1];
-              else
-              frame_error  <= frame_error;
-            end 
-      STOP_BIT  : begin
-              rx_frame  <= rx_frame;
-              rx_done    <= 1'b0;
-              frame_error  <= frame_error;
-            end 
-      DONE    : begin
-              frame_error  <= frame_error;
-              rx_done    <= 1'b1;
-              rx_frame  <= rx_frame;
-            end 
-      default: begin
-              rx_frame  <= rx_frame;
-              rx_done    <= 1'b0;
-              frame_error  <= frame_error;
-            end 
-    endcase
-  end
-end
-
-rx_clk_gen
-#(
-  .CLK_FREQUENCE  (CLK_FREQUENCE  ),  //hz
-  .BAUD_RATE    (BAUD_RATE    )  //9600、19200 、38400 、57600 、115200、230400、460800、921600
-)
-rx_clk_gen_inst
-(
-  .clk        ( clk     )  ,
-  .rst_n      ( rst_n     )  ,
-  .rx_start   ( frame_en   )  ,
-  .rx_done    ( rx_done   )  ,
-  .sample_clk ( sample_clk )  
-);  
-
-function integer log2(input integer v);
-  begin
-  log2=0;
-  while(v>>log2) 
-    log2=log2+1;
-  end
-endfunction
-
-endmodule
-
-// ===============================================================================
-// --------------------------------------------------------------------
-// >>>>>>>>>>>>>>>>>>>>>>>>> COPYRIGHT NOTICE <<<<<<<<<<<<<<<<<<<<<<<<<
-// --------------------------------------------------------------------
-// Author: halftop
-// Github: https://github.com/halftop
-// Email: yu.zh@live.com
-// Description: 
-// Dependencies: 
-// Since: 2019-06-08 16:51:59
-// LastEditors: halftop
-// LastEditTime: 2019-06-08 16:51:59
-// ********************************************************************
-// Module Function:
-`timescale 1ns / 1ps
-module uart_frame_tx
-#(
-  parameter CLK_FREQUENCE  = 50_000_000,    //hz
-            BAUD_RATE    = 9600    ,    //9600、19200 、38400 、57600 、115200、230400、460800、921600
-            PARITY      = "NONE"  ,    //"NONE","EVEN","ODD"
-            FRAME_WD    = 8          //if PARITY="NONE",it can be 5~9;else 5~8
-)
-(
-  input clk      ,  //system_clk
-  input rst_n    ,  //system_reset
-  input frame_en  ,  //once_tx_start
-  input [FRAME_WD-1:0]  data_frame  ,  //data_to_tx
-  output reg  tx_done    ,  //once_tx_done
-  output reg  uart_tx       //uart_tx_data
-);
-
-wire  bps_clk;
-
-tx_clk_gen
-#(
-  .CLK_FREQUENCE  (CLK_FREQUENCE),    //hz
-  .BAUD_RATE      (BAUD_RATE  )       //9600、19200 、38400 、57600 、115200、230400、460800、921600
-)
-tx_clk_gen_inst
-(
-  .clk        ( clk      ),    //system_clk
-  .rst_n      ( rst_n    ),    //system_reset
-  .tx_done    ( tx_done  ),    //once_tx_done
-  .tx_start   ( frame_en ),    //once_tx_start
-  .bps_clk    ( bps_clk  )     //baud_rate_clk
-);
-
-localparam  IDLE        =  6'b00_0000  ,
-            READY       =  6'b00_0001  ,
-            START_BIT   =  6'b00_0010  ,
-            SHIFT_PRO   =  6'b00_0100  ,
-            PARITY_BIT  =  6'b00_1000  ,
-            STOP_BIT    =  6'b01_0000  ,
-            DONE        =  6'b10_0000  ;
-
-wire  [1:0]  verify_mode;
-generate
-  if (PARITY == "ODD")
-    assign verify_mode = 2'b01;
-  else if (PARITY == "EVEN")
-    assign verify_mode = 2'b10;
-  else
-    assign verify_mode = 2'b00;
-endgenerate
-
-reg    [FRAME_WD-1:0]  data_reg;
-reg    [log2(FRAME_WD-1)-1:0] cnt;
-reg          parity_even;
-reg    [5:0] cstate;
-reg    [5:0] nstate;
-
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n)
-    cnt <= 'd0;
-  else if (cstate == SHIFT_PRO & bps_clk == 1'b1) 
-    if (cnt == FRAME_WD-1)
-      cnt <= 'd0;
-    else
-      cnt <= cnt + 1'b1;
-  else
-    cnt <= cnt;
-end
-//FSM-1
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n)
-    cstate <= IDLE;
-  else
-    cstate <= nstate;
-end
-//FSM-2
-always @(*) begin
-  case (cstate)
-    IDLE       : nstate = frame_en ? READY : IDLE  ;
-    READY      : nstate = (bps_clk == 1'b1) ? START_BIT : READY;
-    START_BIT  : nstate = (bps_clk == 1'b1) ? SHIFT_PRO : START_BIT;
-    SHIFT_PRO  : nstate = (cnt == FRAME_WD-1 & bps_clk == 1'b1) ? PARITY_BIT : SHIFT_PRO;
-    PARITY_BIT : nstate = (bps_clk == 1'b1) ? STOP_BIT : PARITY_BIT;
-    STOP_BIT   : nstate = (bps_clk == 1'b1) ? DONE : STOP_BIT;
-    DONE       : nstate = IDLE;
-    default    : nstate = IDLE;
-  endcase
-end
-//FSM-3
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) begin
-    data_reg <= 'd0;
-    uart_tx <= 1'b1;
-    tx_done <= 1'b0;
-    parity_even <= 1'b0;
-  end else begin
-    case (nstate)
-      IDLE    : begin
-              data_reg <= 'd0;
-              tx_done <= 1'b0;
-              uart_tx <= 1'b1;
-            end
-      READY    : begin
-              data_reg <= 'd0;
-              tx_done <= 1'b0;
-              uart_tx <= 1'b1;
-            end
-      START_BIT  : begin
-              data_reg <= data_frame;
-              parity_even <= ^data_frame;
-              uart_tx <= 1'b0;
-              tx_done <= 1'b0;
-            end
-      SHIFT_PRO  : begin
-              if(bps_clk == 1'b1) begin
-                data_reg <= {1'b0,data_reg[FRAME_WD-1:1]};
-                uart_tx <= data_reg[0];
-              end else begin
-                data_reg <= data_reg;
-                uart_tx <= uart_tx;
-              end
-              tx_done <= 1'b0;
-            end
-      PARITY_BIT  : begin
-              data_reg <= data_reg;
-              tx_done <= 1'b0;
-              case (verify_mode)
-                2'b00: uart_tx <= 1'b1;    //若无校验多发一位STOP_BIT
-                2'b01: uart_tx <= ~parity_even;
-                2'b10: uart_tx <= parity_even;
-                default: uart_tx <= 1'b1;
-              endcase
-            end
-      STOP_BIT  : uart_tx <= 1'b1;
-      DONE    : tx_done <= 1'b1;
-      default    :  begin
-              data_reg <= 'd0;
-              uart_tx <= 1'b1;
-              tx_done <= 1'b0;
-              parity_even <= 1'b0;
-            end
-    endcase
-  end
-end
-
-function integer log2(input integer v);
-  begin
-  log2=0;
-  while(v>>log2) 
-    log2=log2+1;
-  end
-endfunction
-
-endmodule
-
-// --------------------------------------------------------------------
-// >>>>>>>>>>>>>>>>>>>>>>>>> COPYRIGHT NOTICE <<<<<<<<<<<<<<<<<<<<<<<<<
-// --------------------------------------------------------------------
-// Author: halftop
-// Github: https://github.com/halftop
-// Email: yu.zh@live.com
-// Description: uart_tx_baud_rate_clk_generate
-// Dependencies: 
-// Since: 2019-06-07 15:36:59
-// LastEditors: halftop
-// LastEditTime: 2019-06-07 15:36:59
-// ********************************************************************
-// Module Function: generate_uart_tx_baud_rate_clk
-`timescale 1ns / 1ps
-module tx_clk_gen
-#(
-  parameter CLK_FREQUENCE  = 50_000_000,    //hz
-            BAUD_RATE    = 9600         //9600、19200 、38400 、57600 、115200、230400、460800、921600
-)
-(
-  input       clk,      //system_clk
-  input       rst_n,    //system_reset
-  input       tx_done,  //once_tx_done
-  input       tx_start, //once_tx_start
-  output  reg bps_clk   //baud_rate_clk
-);
-
-localparam  BPS_CNT =  CLK_FREQUENCE/BAUD_RATE-1,
-            BPS_WD  =  log2(BPS_CNT);
-
-reg [BPS_WD-1:0] count;
-reg c_state;
-reg n_state;
-//FSM-1      1'b0:IDLE  1'b1:send_data
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n)
-    c_state <= 1'b0;
-  else
-    c_state <= n_state;
-end
-//FSM-2
-always @(*) begin
-  case (c_state)
-    1'b0: n_state = tx_start ? 1'b1 : 1'b0;
-    1'b1: n_state = tx_done ? 1'b0 : 1'b1;
-    default: n_state = 1'b0;
-  endcase
-end
-//FSM-3 FSM's output(count_en) is equal to c_state
-
-//baud_rate_clk_counter
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n)
-    count <= {BPS_WD{1'b0}};
-  else if (!c_state)
-    count <= {BPS_WD{1'b0}};
-  else begin
-    if (count == BPS_CNT) 
-      count <= {BPS_WD{1'b0}};
-    else
-      count <= count + 1'b1;
-  end
-end
-//baud_rate_clk_output
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n)
-    bps_clk <= 1'b0;
-  else if (count == 'd1)
-    bps_clk <= 1'b1;
-  else
-    bps_clk <= 1'b0;
-end
-//get_the_width_of_
-function integer log2(input integer v);
-  begin
-  log2=0;
-  while(v>>log2) 
-    log2=log2+1;
-  end
-endfunction
-
-endmodule
-
-// --------------------------------------------------------------------
-// >>>>>>>>>>>>>>>>>>>>>>>>> COPYRIGHT NOTICE <<<<<<<<<<<<<<<<<<<<<<<<<
-// --------------------------------------------------------------------
-// Author: halftop
-// Github: https://github.com/halftop
-// Email: yu.zh@live.com
-// Description: generate uart rx sample clk = 9 x BAUD_RATE
-// Dependencies: 
-// Since: 2019-06-09 16:30:57
-// LastEditors: halftop
-// LastEditTime: 2019-06-09 16:30:57
-// ********************************************************************
-// Module Function: generate uart rx sample clk = 9 x BAUD_RATE
-`timescale 1ns / 1ps
-
-module rx_clk_gen
-#(
-  parameter CLK_FREQUENCE  = 50_000_000,  //hz
-            BAUD_RATE    = 9600       //9600、19200 、38400 、57600 、115200、230400、460800、921600
-)
-(
-  input       clk,
-  input       rst_n,
-  input       rx_start,
-  input       rx_done,
-  output  reg sample_clk
-);
-
-localparam  SMP_CLK_CNT  =  CLK_FREQUENCE/BAUD_RATE/9 - 1,
-            CNT_WIDTH    =  log2(SMP_CLK_CNT)       ;
-
-reg [CNT_WIDTH-1:0]  clk_count  ;
-reg cstate;
-reg nstate;
-//FSM-1  1'b0:IDLE 1'b1:RECEIVE
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) begin
-    cstate <= 1'b0;
-  end else begin
-    cstate <= nstate;
-  end
-end
-//FSM-2
-always @(*) begin
-  case (cstate)
-    1'b0: nstate = rx_start ? 1'b1 : 1'b0;
-    1'b1: nstate = rx_done ? 1'b0 : 1'b1 ;
-    default: nstate = 1'b0;
-  endcase
-end
-//FSM-3 FSM's output(clk_count_en) is equal to cstate
-
-//sample_clk_counter
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    clk_count <= 'd0;
-  else if (!cstate) 
-    clk_count <= 'd0;
-  else if (clk_count == SMP_CLK_CNT)
-    clk_count <= 'd0;
-  else
-    clk_count <= clk_count + 1'b1;
-end
-//generate sample_clk = 9xBAUD_RATE
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    sample_clk <= 1'b0;
-  else if (clk_count == 1'b1) 
-    sample_clk <= 1'b1;
-  else 
-    sample_clk <= 1'b0;
-end
-//get the width of sample_clk_counter
-function integer log2(input integer v);
-  begin
-  log2=0;
-  while(v>>log2) 
-    log2=log2+1;
-  end
-endfunction
-
-endmodule
-
-// Author: Xianjun Jiao <putaoshu@msn.com>
-// SPDX-FileCopyrightText: 2025 Xianjun Jiao
-// SPDX-License-Identifier: Apache-2.0 license
-
-// Based on Xilinx UG901 2025-06-11
-// https://docs.amd.com/r/en-US/ug901-vivado-synthesis/Simple-Dual-Port-Block-RAM-with-Single-Clock-Verilog
-// Simple Dual-Port Block RAM with Single Clock (Verilog)
-
-`timescale 1ns / 1ps
-module sdpram_one_clk #
-(
-  parameter DATA_WIDTH = 8,
-  parameter ADDRESS_WIDTH = 11
-) (
-  input wire clk,
-  input wire rst,
-
-  input wire [ADDRESS_WIDTH-1:0] write_address,
-  input wire [DATA_WIDTH-1:0] write_data,
-  input wire write_enable,
-
-  input wire [ADDRESS_WIDTH-1:0] read_address,
-  output reg [DATA_WIDTH-1:0] read_data
-);
-
-reg [DATA_WIDTH-1:0] memory [((1<<ADDRESS_WIDTH)-1):0];
-
-always @ (posedge clk) begin
-  if (write_enable) begin
-    memory[write_address] <= write_data;
-  end
-end
-
-always @ (posedge clk) begin
-  read_data <= memory[read_address];
-end
-
-endmodule
-
-// Author: Xianjun Jiao <putaoshu@msn.com>
-// SPDX-FileCopyrightText: 2025 Xianjun Jiao
-// SPDX-License-Identifier: Apache-2.0 license
-
-// Based on Xilinx UG901 2025-06-11
-// https://docs.amd.com/r/en-US/ug901-vivado-synthesis/Simple-Dual-Port-Block-RAM-with-Single-Clock-Verilog
-// Simple Dual-Port Block RAM with Dual Clocks (Verilog)
-
-`timescale 1ns / 1ps
-module sdpram_two_clk #
-(
-  parameter DATA_WIDTH = 8,
-  parameter ADDRESS_WIDTH = 11
-) (
-  input wire clk,
-  input wire rst,
-
-  input wire [ADDRESS_WIDTH-1:0] write_address,
-  input wire [DATA_WIDTH-1:0] write_data,
-  input wire write_enable,
-
-  input wire clkb,
-  input wire [ADDRESS_WIDTH-1:0] read_address,
-  output reg [DATA_WIDTH-1:0] read_data
-);
-
-reg [DATA_WIDTH-1:0] memory [((1<<ADDRESS_WIDTH)-1):0];
-
-// Write logic (Port A)
-always @ (posedge clk) begin
-  if (write_enable) begin
-    memory[write_address] <= write_data;
-  end
-end
-
-// Read logic (Port B)
-always @ (posedge clkb) begin
-  read_data <= memory[read_address];
-end
-
-endmodule
+// NOTE: uart_frame_rx / uart_frame_tx / tx_clk_gen / rx_clk_gen /
+// sdpram_one_clk / sdpram_two_clk are maintained in standalone files
+// under verilog/ and are intentionally not duplicated here.
 
 module clk_cross_bus #
 (
