@@ -6,7 +6,7 @@
 // python3 test_vector_for_btle_verilog.py
 // (arguments can be added: example_idx snr ppm_value)
 // Run verilog simulation:
-// iverilog -o btle_controller_tb.vvp auxiliary_daemon.v btle_controller_tb.v btle_controller.v clock_domain_conversion_iq.v btle_ll/btle_ll_stub.v btle_phy.v btle_rx.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
+// iverilog -o btle_controller_tb.vvp auxiliary_daemon.v btle_controller_tb.v btle_controller.v clock_domain_conversion_iq.v btle_ll.v btle_phy.v btle_rx.v btle_rx_core.v gfsk_demodulation.v symbol_timing_recovery_simple.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v rx_energy_detect_cca.v packet_timing_enforce.v packet_abort_on_crc_fail.v packet_abort_early_term.v
 // vvp btle_controller_tb
 // Check verilog outputs to see whether test pass.
 

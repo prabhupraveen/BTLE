@@ -2,6 +2,12 @@
 // SPDX-FileCopyrightText: 2025 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
 
+// 1. Computes |I| and |Q| from the incoming RF I/Q samples
+// 2. Outputs a magnitude estimate: |I| + |Q|
+// 3. Detects changes in AGC lock status using bb_gpio[7]
+// 4. Outputs current AGC lock state
+// 5. Extracts RF gain from bb_gpio[6:0]
+
 `define KEEP_FOR_DBG (*mark_debug="true",DONT_TOUCH="TRUE"*)
 
 `timescale 1ns / 1ps

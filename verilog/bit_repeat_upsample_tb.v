@@ -94,7 +94,7 @@ always @ (posedge clk) begin
     if (info_bit_count == (NUM_BIT_INPUT+30)) begin
       $display("%d input", NUM_BIT_INPUT);
       $display("%d output", bit_out_count);
-      $writememh("bit_repeat_upsample_test_output.txt", bit_repeat_upsample_test_output_mem, 0, bit_out_count-1);
+      $writememh("test_data/bit_repeat_upsample_test_output.txt", bit_repeat_upsample_test_output_mem, 0, bit_out_count-1);
       tmp_num_error = num_error;
       if (bit_out_count != expected_bit_out_count) begin
         $display("ERROR: output count mismatch exp=%d got=%d", expected_bit_out_count, bit_out_count);

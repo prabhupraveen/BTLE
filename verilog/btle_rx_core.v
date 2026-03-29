@@ -50,6 +50,18 @@ reg [NUM_BIT_PAYLOAD_LENGTH : 0] payload_length;
 wire [(CRC_STATE_BIT_WIDTH-1) : 0] lfsr;
 wire [(CRC_STATE_BIT_WIDTH-1) : 0] crc24_bit;
 
+// Symbol timing recovery signals
+`KEEP_FOR_DBG wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] signal_for_decision;
+`KEEP_FOR_DBG wire signal_for_decision_valid;
+
+`KEEP_FOR_DBG wire [2:0] phase_sel;
+`KEEP_FOR_DBG wire sym_strobe;
+`KEEP_FOR_DBG wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] decision_sym;
+
+// Bit slicing with timing recovery
+`KEEP_FOR_DBG wire phy_bit_from_timing_recovery;
+`KEEP_FOR_DBG wire bit_valid_from_timing_recovery;
+
 `KEEP_FOR_DBG reg        bit_valid_delay;
 `KEEP_FOR_DBG reg  [1:0] phy_rx_state;
 `KEEP_FOR_DBG reg  [(NUM_BIT_PAYLOAD_LENGTH+3):0] bit_count;
@@ -151,12 +163,34 @@ gfsk_demodulation # (
   .q(q),
   .iq_valid(iq_valid),
 
-  .signal_for_decision(),
-  .signal_for_decision_valid(),
+  .signal_for_decision(signal_for_decision),
+  .signal_for_decision_valid(signal_for_decision_valid),
   
   .phy_bit(phy_bit),
   .bit_valid(phy_bit_valid)
 );
+
+// Symbol timing recovery: selects best phase and decimates to 1 Msps
+symbol_timing_recovery_simple # (
+  .SPS(8),
+  .DEC_W(2*GFSK_DEMODULATION_BIT_WIDTH),
+  .PH_W(3),
+  .UPDATE_PERIOD_SYM(32)
+) symbol_timing_recovery_i (
+  .clk(clk),
+  .rst(rst),
+
+  .decision_in(signal_for_decision),
+  .decision_valid(signal_for_decision_valid),
+
+  .phase_sel(phase_sel),
+  .sym_strobe(sym_strobe),
+  .decision_sym(decision_sym)
+);
+
+// Bit slicing at optimal phase selected by timing recovery
+assign phy_bit_from_timing_recovery = (decision_sym > 0);
+assign bit_valid_from_timing_recovery = sym_strobe;
 
 search_unique_bit_sequence # (
   .LEN_UNIQUE_BIT_SEQUENCE(LEN_UNIQUE_BIT_SEQUENCE)
@@ -164,8 +198,8 @@ search_unique_bit_sequence # (
   .clk(clk),
   .rst(rst),
 
-  .phy_bit(phy_bit),
-  .bit_valid(phy_bit_valid),
+  .phy_bit(phy_bit_from_timing_recovery),
+  .bit_valid(bit_valid_from_timing_recovery),
   .unique_bit_sequence(unique_bit_sequence),
 
   .hit_flag(hit_flag)
@@ -179,8 +213,8 @@ scramble_core # (
 
   .channel_number(channel_number),
   .channel_number_load(1'b0),
-  .data_in(phy_bit),
-  .data_in_valid(phy_bit_valid),
+  .data_in(phy_bit_from_timing_recovery),
+  .data_in_valid(bit_valid_from_timing_recovery),
 
   .data_out(info_bit),
   .data_out_valid(bit_valid)

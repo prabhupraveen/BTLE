@@ -7,8 +7,8 @@ import os
 import csv
 # import matplotlib.pyplot as plt
 
-SAVE_FOR_VERILOG = 0 # Change to 1 to save files for verilog test bench
-SAVE_DIR = '' #The directory to store the test vector files
+SAVE_FOR_VERILOG = 1 # Change to 1 to save files for verilog test bench
+SAVE_DIR = '../verilog/test_data/' #The directory to store the test vector files
 
 SAMPLE_PER_SYMBOL = 8
 NUM_SYMBOL_GAUSS_FILTER_SPAN = 2

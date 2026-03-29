@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
 
-// iverilog -o btle_rx btle_rx.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v
+// iverilog -o btle_rx btle_rx.v btle_rx_core.v gfsk_demodulation.v symbol_timing_recovery_simple.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v rx_energy_detect_cca.v packet_timing_enforce.v packet_abort_on_crc_fail.v packet_abort_early_term.v
 
 `define KEEP_FOR_DBG (*mark_debug="true",DONT_TOUCH="TRUE"*)
 
@@ -14,7 +14,20 @@ module btle_rx #
   parameter LEN_UNIQUE_BIT_SEQUENCE = 32,
   parameter CHANNEL_NUMBER_BIT_WIDTH = 6,
   parameter CRC_STATE_BIT_WIDTH = 24,
-  parameter NUM_BIT_PAYLOAD_LENGTH = 8 // 8 bit in the core spec 6.2
+  parameter NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
+
+  // Optional RX control/guard features (default disabled to preserve legacy behavior)
+  parameter ENABLE_RX_ED_CCA = 0,
+  parameter ENABLE_PKT_TIMING_ENFORCE = 0,
+  parameter ENABLE_ABORT_ON_CRC_FAIL = 0,
+
+  parameter PKT_ABORT_HOLD_CYCLES = 1,
+  parameter PKT_FAIL_LIMIT = 1,
+  parameter PKT_PRE_AA_TIMEOUT_US = 80,
+  parameter PKT_MAX_US = 4000,
+  parameter RX_CLK_HZ = 16000000,
+  parameter RX_ED_THRESHOLD = 32'd0,
+  parameter RX_ED_WINDOW_SAMPLES = 128
 ) (
   input wire clk, // for baseband processing, 16MHz
   input wire rst,
@@ -83,6 +96,33 @@ wire [(NUM_BIT_PAYLOAD_LENGTH-1):0] payload_length_store_wire [0 : (SAMPLE_PER_S
 `KEEP_FOR_DBG reg [0:0] decode_end_state;
 `KEEP_FOR_DBG reg decode_restart;
 
+// Optional RX control modules
+wire cca_busy_raw;
+wire [31:0] ed_level_raw;
+wire ed_valid_raw;
+wire timing_abort_raw;
+wire timeout_wait_hit_raw;
+wire timeout_in_pkt_raw;
+wire abort_on_crc_fail_pulse_raw;
+wire [15:0] abort_on_crc_fail_count_raw;
+wire abort_pulse;
+wire abort_latched;
+wire abort_crc_fail_seen;
+
+wire cca_busy;
+wire [31:0] ed_level;
+wire ed_valid;
+wire timing_abort;
+
+wire rst_rx;
+
+assign cca_busy = (ENABLE_RX_ED_CCA ? cca_busy_raw : 1'b0);
+assign ed_level = (ENABLE_RX_ED_CCA ? ed_level_raw : 32'd0);
+assign ed_valid = (ENABLE_RX_ED_CCA ? ed_valid_raw : 1'b0);
+
+assign timing_abort = (ENABLE_PKT_TIMING_ENFORCE ? timing_abort_raw : 1'b0);
+assign rst_rx = (rst | abort_pulse);
+
 assign payload_length_store_wire[0] = payload_length_store[0];
 assign payload_length_store_wire[1] = payload_length_store[1];
 assign payload_length_store_wire[2] = payload_length_store[2];
@@ -102,7 +142,7 @@ assign hit_flag = (hit_flag_any==1 && hit_flag_any_delay==0);
 
 // output interface
 always @ (posedge clk) begin
-  if (rst) begin
+  if (rst_rx) begin
     decode_run <= 0;
     hit_flag_any_delay <= 0;
     decode_end <= 0;
@@ -231,7 +271,7 @@ end
 // distribute sample into all 8 phases
 integer idx;
 always @ (posedge clk) begin
-  if (rst) begin
+  if (rst_rx) begin
     iq_valid_store <= 0;
     iq_phase <= 0;
     // generate
@@ -263,7 +303,7 @@ generate
       .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH)
     ) btle_rx_core_i (
       .clk(clk),
-      .rst(rst|decode_end_early|decode_end_all),
+      .rst(rst_rx|decode_end_early|decode_end_all),
 
       .unique_bit_sequence(unique_bit_sequence),
       .channel_number(channel_number),
@@ -292,7 +332,7 @@ generate
       .ADDRESS_WIDTH(NUM_BIT_PAYLOAD_LENGTH+1)
     ) serial_in_ram_out_i (
       .clk(clk),
-      .rst(rst|hit_flag_internal[gen_idx]),
+      .rst(rst_rx|hit_flag_internal[gen_idx]),
 
       .data_in(octet_internal[gen_idx]),
       .data_in_valid(octet_valid[gen_idx]),
@@ -303,7 +343,7 @@ generate
     );
 
     always @ (posedge clk) begin
-      if (rst|hit_flag_internal[gen_idx]) begin
+      if (rst_rx|hit_flag_internal[gen_idx]) begin
         payload_length_store[gen_idx] <= 0;
       end else if (payload_length_valid[gen_idx]) begin
         payload_length_store[gen_idx] <= payload_length_internal[gen_idx];
@@ -312,7 +352,7 @@ generate
 
     always @ (posedge clk) begin
       // if (rst|hit_flag_internal[gen_idx]|decode_end_early|decode_end_all) begin
-      if (rst|hit_flag_internal[gen_idx]|decode_restart) begin
+      if (rst_rx|hit_flag_internal[gen_idx]|decode_restart) begin
         crc_ok_store[gen_idx] <= 0;
         decode_end_store[gen_idx] <= 0;
       end else if (decode_end_internal[gen_idx]) begin
@@ -322,7 +362,7 @@ generate
     end
 
     always @ (posedge clk) begin
-      if (rst|decode_end_internal[gen_idx]|decode_end_early|decode_end_all) begin
+      if (rst_rx|decode_end_internal[gen_idx]|decode_end_early|decode_end_all) begin
         hit_flag_all_phase[gen_idx] <= 0;
       end else if (hit_flag_internal[gen_idx]) begin
         hit_flag_all_phase[gen_idx] <= 1;
@@ -330,5 +370,72 @@ generate
     end
   end
 endgenerate
+
+rx_energy_detect_cca # (
+  .IQ_W(GFSK_DEMODULATION_BIT_WIDTH),
+  .ACC_W(32),
+  .WINDOW_SAMPLES(RX_ED_WINDOW_SAMPLES)
+) rx_energy_detect_cca_i (
+  .clk(clk),
+  .rst(rst_rx),
+
+  .i(i),
+  .q(q),
+  .iq_valid(iq_valid),
+
+  .ed_threshold(RX_ED_THRESHOLD),
+
+  .cca_busy(cca_busy_raw),
+  .ed_level(ed_level_raw),
+  .ed_valid(ed_valid_raw)
+);
+
+packet_timing_enforce # (
+  .CLK_HZ(RX_CLK_HZ),
+  .PREAMBLE_AA_TIMEOUT_US(PKT_PRE_AA_TIMEOUT_US),
+  .PKT_MAX_US(PKT_MAX_US)
+) packet_timing_enforce_i (
+  .clk(clk),
+  .rst(rst_rx),
+
+  .arm(decode_run),
+  .hit_flag(hit_flag),
+  .decode_end(decode_end),
+
+  .abort(timing_abort_raw),
+  .timeout_wait_hit(timeout_wait_hit_raw),
+  .timeout_in_pkt(timeout_in_pkt_raw)
+);
+
+packet_abort_on_crc_fail # (
+  .FAIL_LIMIT(PKT_FAIL_LIMIT)
+) packet_abort_on_crc_fail_i (
+  .clk(clk),
+  .rst(rst_rx),
+
+  .enable((ENABLE_ABORT_ON_CRC_FAIL != 0)),
+  .decode_end(decode_end),
+  .crc_ok(crc_ok),
+
+  .abort_pulse(abort_on_crc_fail_pulse_raw),
+  .fail_count(abort_on_crc_fail_count_raw)
+);
+
+packet_abort_early_term # (
+  .HOLD_CYCLES(PKT_ABORT_HOLD_CYCLES)
+) packet_abort_early_term_i (
+  .clk(clk),
+  .rst(rst),
+
+  .abort_req(abort_on_crc_fail_pulse_raw),
+  .timing_abort(timing_abort),
+  .decode_end(decode_end),
+  .crc_ok(crc_ok),
+  .abort_on_crc_fail(1'b0),
+
+  .abort_pulse(abort_pulse),
+  .aborted(abort_latched),
+  .crc_fail_seen(abort_crc_fail_seen)
+);
 
 endmodule

@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
 
-// iverilog -o btle_controller_wrapper btle_controller_wrapper.v btle_controller.v btle_ll.v uart_frame_rx.v uart_frame_tx.v rx_clk_gen.v tx_clk_gen.v btle_phy.v btle_rx.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
+// iverilog -o btle_controller_wrapper btle_controller_wrapper.v btle_controller.v btle_ll.v uart_frame_rx.v uart_frame_tx.v rx_clk_gen.v tx_clk_gen.v btle_phy.v btle_rx.v btle_rx_core.v gfsk_demodulation.v symbol_timing_recovery_simple.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v rx_energy_detect_cca.v packet_timing_enforce.v packet_abort_on_crc_fail.v packet_abort_early_term.v
 
 `timescale 1ns / 1ps
 module btle_controller_wrapper #
