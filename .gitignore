@@ -23,5 +23,10 @@ BOOT.BIN
 verilog/tb/test_data/
 verilog/tb/test_vectors_batch/
 
+verilog/cocotb/sim_build
+verilog/cocotb/*.xml
+
 .vscode
+.venv
 __pycache__/
+.python-version

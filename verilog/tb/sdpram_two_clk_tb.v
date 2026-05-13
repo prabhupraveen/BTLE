@@ -1,7 +1,7 @@
 // Testbench: sdpram_two_clk
 //
 // Run:
-//   iverilog -g2012 -o sdpram_two_clk_tb.vvp sdpram_two_clk_tb.v sdpram_two_clk.v
+//   iverilog -g2012 -o sdpram_two_clk_tb.vvp sdpram_two_clk_tb.v ../sdpram_two_clk.v
 //   vvp sdpram_two_clk_tb
 //
 // What it tests:

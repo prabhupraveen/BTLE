@@ -1,7 +1,7 @@
 // Testbench: sdpram_one_clk
 //
 // Run:
-//   iverilog -g2012 -o sdpram_one_clk_tb.vvp sdpram_one_clk_tb.v sdpram_one_clk.v
+//   iverilog -g2012 -o sdpram_one_clk_tb.vvp sdpram_one_clk_tb.v ../sdpram_one_clk.v
 //   vvp sdpram_one_clk_tb
 //
 // What it tests (small but more comprehensive than smoke):

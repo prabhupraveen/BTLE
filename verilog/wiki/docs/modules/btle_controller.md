@@ -1,0 +1,81 @@
+# btle_controller
+
+## Description
+TODO: Add description
+
+## Inputs
+- rf_clk
+- rf_rst
+- bb_clk
+- bb_rst
+- uart_rx
+- s00_axi_aclk
+- s00_axi_aresetn
+- s00_axi_awaddr
+- s00_axi_awprot
+- s00_axi_awvalid
+- s00_axi_wdata
+- s00_axi_wstrb
+- s00_axi_wvalid
+- s00_axi_bready
+- s00_axi_araddr
+- s00_axi_arprot
+- s00_axi_arvalid
+- s00_axi_rready
+- baremetal_phy_intf_mode
+- ext_tx_gauss_filter_tap_index
+- ext_tx_gauss_filter_tap_value
+- ext_tx_cos_table_write_address
+- ext_tx_cos_table_write_data
+- ext_tx_sin_table_write_address
+- ext_tx_sin_table_write_data
+- ext_tx_preamble
+- ext_tx_access_address
+- ext_tx_crc_state_init_bit
+- ext_tx_crc_state_init_bit_load
+- ext_tx_channel_number
+- ext_tx_channel_number_load
+- ext_tx_pdu_octet_mem_data
+- ext_tx_pdu_octet_mem_addr
+- ext_tx_start
+- ext_rx_unique_bit_sequence
+- ext_rx_channel_number
+- ext_rx_crc_state_init_bit
+- ext_rx_pdu_octet_mem_addr
+
+## Outputs
+- ll_itrpt0
+- ll_itrpt1
+- ll_itrpt2
+- ll_itrpt3
+- ll_itrpt4
+- ll_itrpt5
+- ll_itrpt6
+- ll_itrpt7
+- uart_tx
+- s00_axi_awready
+- s00_axi_wready
+- s00_axi_bresp
+- s00_axi_bvalid
+- s00_axi_arready
+- s00_axi_rdata
+- s00_axi_rresp
+- s00_axi_rvalid
+- ext_tx_phy_bit
+- ext_tx_phy_bit_valid
+- ext_tx_phy_bit_valid_last
+- ext_tx_bit_upsample
+- ext_tx_bit_upsample_valid
+- ext_tx_bit_upsample_valid_last
+- ext_tx_bit_upsample_gauss_filter
+- ext_tx_bit_upsample_gauss_filter_valid
+- ext_tx_bit_upsample_gauss_filter_valid_last
+
+## Calls
+- [auxiliary_daemon](auxiliary_daemon.md)
+- [btle_ll](btle_ll.md)
+- [btle_phy](btle_phy.md)
+- [clock_domain_conversion_iq](clock_domain_conversion_iq.md)
+
+## Called By
+- [btle_controller_wrapper](btle_controller_wrapper.md)

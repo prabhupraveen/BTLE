@@ -1,0 +1,79 @@
+# btle_ll
+
+## Description
+TODO: Add description
+
+## Inputs
+- bb_clk
+- bb_rst
+- uart_rx
+- tx_iq_valid_last
+- rx_hit_flag
+- rx_decode_run
+- rx_decode_end
+- rx_crc_ok
+- rx_payload_length
+- rx_i_signal
+- rx_q_signal
+- rx_iq_valid
+- i_abs_add_q_abs
+- agc_lock_change
+- agc_lock_state
+- rf_gain
+- simulation_en
+- simulation_rx_ram_read_en
+- axi_aclk
+- axi_aresetn
+- axi_awaddr
+- axi_awprot
+- axi_awvalid
+- axi_wdata
+- axi_wstrb
+- axi_wvalid
+- axi_bready
+- axi_araddr
+- axi_arprot
+- axi_arvalid
+- axi_rready
+
+## Outputs
+- uart_tx
+- tx_gauss_filter_tap_index
+- tx_gauss_filter_tap_value
+- tx_cos_table_write_address
+- tx_cos_table_write_data
+- tx_sin_table_write_address
+- tx_sin_table_write_data
+- tx_preamble
+- tx_access_address
+- tx_crc_state_init_bit
+- tx_channel_number
+- tx_start
+- rx_unique_bit_sequence
+- rx_channel_number
+- rx_crc_state_init_bit
+- ll_itrpt0
+- ll_itrpt1
+- ll_itrpt2
+- ll_itrpt3
+- ll_itrpt4
+- ll_itrpt5
+- ll_itrpt6
+- ll_itrpt7
+- axi_awready
+- axi_wready
+- axi_bresp
+- axi_bvalid
+- axi_arready
+- axi_rdata
+- axi_rresp
+- axi_rvalid
+
+## Calls
+- [clk_cross_bus](clk_cross_bus.md)
+- [sdpram_one_clk](sdpram_one_clk.md)
+- [uart_frame_rx](uart_frame_rx.md)
+- [uart_frame_tx](uart_frame_tx.md)
+
+## Called By
+- [btle_controller](btle_controller.md)

@@ -6,7 +6,7 @@
 // python3 test_vector_for_btle_verilog.py
 // (arguments can be added: example_idx snr ppm_value)
 // Run verilog simulation:
-// iverilog -o gfsk_demodulation_tb.vvp gfsk_demodulation_tb.v gfsk_demodulation.v
+// iverilog -o gfsk_demodulation_tb.vvp gfsk_demodulation_tb.v ../gfsk_demodulation.v
 // vvp gfsk_demodulation_tb
 // Check verilog outputs to see whether test pass.
 

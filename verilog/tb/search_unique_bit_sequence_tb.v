@@ -6,7 +6,7 @@
 // python3 test_vector_for_btle_verilog.py
 // (arguments can be added: example_idx snr ppm_value)
 // Run verilog simulation:
-// iverilog -o search_unique_bit_sequence_tb.vvp search_unique_bit_sequence_tb.v search_unique_bit_sequence.v
+// iverilog -o search_unique_bit_sequence_tb.vvp search_unique_bit_sequence_tb.v ../search_unique_bit_sequence.v
 // vvp search_unique_bit_sequence_tb
 // Check verilog outputs to see whether test pass.
 
