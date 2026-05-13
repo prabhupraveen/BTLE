@@ -18,10 +18,10 @@ btle_controller.hw
 
 BOOT.BIN
 
-verilog/*.vcd
-verilog/*.vvp
-verilog/test_data/
-verilog/test_vectors_batch/
+*.vcd
+*.vvp
+verilog/tb/test_data/
+verilog/tb/test_vectors_batch/
 
 .vscode
 __pycache__/

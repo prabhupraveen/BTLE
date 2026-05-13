@@ -42,7 +42,7 @@ always begin
   #((1000.0/16.0)/2.0) clk = !clk; //16MHz
 end
 
-reg bit;
+reg bit_;
 reg bit_valid;
 reg bit_valid_last;
 
@@ -61,7 +61,7 @@ reg [31:0] bit_valid_last_idx;
 integer tmp_num_error;
 always @ (posedge clk) begin
   if (rst) begin
-    bit <= 0;
+    bit_ <= 0;
     bit_valid <= 0;
     bit_valid_last <= 0;
 
@@ -78,7 +78,7 @@ always @ (posedge clk) begin
 
     if (clk_count[3:0] == 0) begin // speed 1M
       if (info_bit_count < NUM_BIT_INPUT) begin
-        bit <= bit_repeat_upsample_test_input_mem[info_bit_count];
+        bit_ <= bit_repeat_upsample_test_input_mem[info_bit_count];
         bit_valid <= 1;
         // $display("%h", bit_repeat_upsample_test_input_mem[info_bit_count]);
         if (info_bit_count == (NUM_BIT_INPUT-1)) begin
@@ -144,7 +144,7 @@ bit_repeat_upsample # (
   .clk(clk),
   .rst(rst),
 
-  .phy_bit(bit),
+  .phy_bit(bit_),
   .bit_valid(bit_valid),
   .bit_valid_last(bit_valid_last),
 

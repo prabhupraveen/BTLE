@@ -21,7 +21,7 @@ module aa_correlator_threshold #(
   input  wire [THRESH_W-1:0] aa_threshold, // e.g. 32 means exact, 28 allows 4 errors
 
   output reg  hit_flag,               // 1-cycle pulse
-  output reg  [THRESH_W-1:0] score    // #matches in window when evaluated
+  output reg  [THRESH_W-1:0] score    // #matches_ in window when evaluated
 );
 
   reg [LEN-1:0] shift;
@@ -29,7 +29,7 @@ module aa_correlator_threshold #(
 
   integer k;
   reg [THRESH_W-1:0] mism;
-  reg [THRESH_W-1:0] matches;
+  reg [THRESH_W-1:0] matches_;
 
   // combinational popcount of XOR
   always @* begin
@@ -37,7 +37,7 @@ module aa_correlator_threshold #(
     for (k = 0; k < LEN; k = k + 1) begin
       mism = mism + (shift[k] ^ aa_target[k]);
     end
-    matches = LEN[THRESH_W-1:0] - mism;
+    matches_ = LEN[THRESH_W-1:0] - mism;
   end
 
   always @(posedge clk) begin
@@ -57,8 +57,8 @@ module aa_correlator_threshold #(
 
       // Evaluate on delayed valid so shift has updated with current bit.
       if (bit_valid_d) begin
-        score <= matches;
-        if (matches >= aa_threshold) begin
+        score <= matches_;
+        if (matches_ >= aa_threshold) begin
           hit_flag <= 1'b1;
         end
       end

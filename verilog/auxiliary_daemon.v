@@ -13,25 +13,43 @@
 `timescale 1ns / 1ps
 module auxiliary_daemon #
 (
-  parameter RF_IQ_BIT_WIDTH = 64,
-  parameter RF_I_OR_Q_BIT_WIDTH = (RF_IQ_BIT_WIDTH/4),
+  parameter integer RF_IQ_BIT_WIDTH = 64,
+  parameter integer RF_I_OR_Q_BIT_WIDTH = (RF_IQ_BIT_WIDTH/4),
 
-  parameter IQ_BIT_WIDTH = 8,
+  parameter integer IQ_BIT_WIDTH = 8,
 
-  parameter GFSK_DEMODULATION_BIT_WIDTH = 16
+  parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
+  
+  parameter integer BRAM_DEPTH = 32768,
+  parameter integer BRAM_ADDR_WIDTH = $clog2(BRAM_DEPTH),
+  parameter integer BRAM_DATA_WIDTH = (2*RF_I_OR_Q_BIT_WIDTH),
+  parameter integer BRAM_ADDR_WIDTH_IN_BYTE = $clog2(BRAM_DEPTH*BRAM_DATA_WIDTH/8)
 ) (
   input bb_clk, // bb 16MHz clock
   input bb_rst,
-
+  
+  // inputs come from btle_controller
   input wire signed [(RF_I_OR_Q_BIT_WIDTH-1) : 0] rx_i_signal, // bb 16MHz clock
   input wire signed [(RF_I_OR_Q_BIT_WIDTH-1) : 0] rx_q_signal,
   input wire rx_iq_valid,
   input wire [7:0] bb_gpio,
 
-  output wire [RF_I_OR_Q_BIT_WIDTH : 0] i_abs_add_q_abs,
+  // all outputs go as inputs to btle_ll
+  output wire [RF_I_OR_Q_BIT_WIDTH : 0] i_abs_add_q_abs,  
   output wire agc_lock_change,
   output wire agc_lock_state,
-  output wire [6:0] rf_gain
+  output wire [6:0] rf_gain,
+
+  // bram related
+  `KEEP_FOR_DBG output wire                         bram_addr_b_half_flag,
+  `KEEP_FOR_DBG output reg  [BRAM_ADDR_WIDTH-1 : 0] bram_addr_b,
+  `KEEP_FOR_DBG input  wire [BRAM_ADDR_WIDTH_IN_BYTE-1 : 0] bram_addr_a,
+  input  wire bram_clk_a,
+  input  wire [BRAM_DATA_WIDTH-1 : 0] bram_wrdata_a,
+  `KEEP_FOR_DBG output wire [BRAM_DATA_WIDTH-1 : 0] bram_rddata_a,
+  input  wire bram_en_a,
+  input  wire bram_rst_a,
+  input  wire bram_we_a
 );
 
 reg [(RF_I_OR_Q_BIT_WIDTH-1) : 0] i_abs;
@@ -58,6 +76,54 @@ always @ (posedge bb_clk) begin
     bb_gpio_msb_delay <= bb_gpio[7];
   end
 end
+
+// bram related
+always @ (posedge bb_clk) begin
+  if (bb_rst) begin
+    bram_addr_b <= 0;
+  end else begin
+    if (rx_iq_valid) begin
+      bram_addr_b <= bram_addr_b + 1;
+    end
+  end
+end
+
+`ifdef XILINX_XPM
+sdpram_two_clk_xilinx #
+(
+  .DATA_WIDTH(BRAM_DATA_WIDTH),
+  .ADDRESS_WIDTH(BRAM_ADDR_WIDTH)
+) sdpram_two_clk_auxiliary_daemon_i (
+  .clk(bb_clk),
+  .rst(bb_rst),
+
+  .write_address(bram_addr_b),
+  .write_data({rx_q_signal, rx_i_signal}),
+  .write_enable(1'd1),
+
+  .clkb(bram_clk_a),
+  .rstb(bram_rst_a),
+  .read_address(bram_addr_a[(BRAM_ADDR_WIDTH_IN_BYTE-1) : $clog2(BRAM_DATA_WIDTH/8)]),
+  .read_data(bram_rddata_a)
+);
+`else
+sdpram_two_clk #
+(
+  .DATA_WIDTH(BRAM_DATA_WIDTH),
+  .ADDRESS_WIDTH(BRAM_ADDR_WIDTH)
+) sdpram_two_clk_auxiliary_daemon_i (
+  .clk(bb_clk),
+  .rst(bb_rst),
+
+  .write_address(bram_addr_b),
+  .write_data({rx_q_signal, rx_i_signal}),
+  .write_enable(1'd1),
+
+  .clkb(bram_clk_a),
+  .read_address(bram_addr_a[(BRAM_ADDR_WIDTH_IN_BYTE-1) : $clog2(BRAM_DATA_WIDTH/8)]),
+  .read_data(bram_rddata_a)
+);
+`endif
 
 endmodule
 

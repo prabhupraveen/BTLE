@@ -6,7 +6,7 @@
 // python3 test_vector_for_btle_verilog.py
 // (arguments can be added: example_idx snr ppm_value)
 // Run verilog simulation:
-// iverilog -o crc24_tb.vvp crc24_tb.v crc24.v crc24_core.v
+// iverilog -o crc24_tb.vvp crc24_tb.v ../crc24.v ../crc24_core.v
 // vvp crc24_tb
 // Check verilog outputs to see whether test pass.
 

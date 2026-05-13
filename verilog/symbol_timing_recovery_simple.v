@@ -29,6 +29,7 @@ module symbol_timing_recovery_simple #(
 
   input  wire signed [DEC_W-1:0] decision_in,
   input  wire decision_valid,
+  input  wire [15:0] update_period_sym_runtime,
 
   output reg  [PH_W-1:0] phase_sel,
   output reg  sym_strobe,
@@ -68,7 +69,7 @@ module symbol_timing_recovery_simple #(
           decision_sym <= decision_in;
 
           sym_cnt <= sym_cnt + 1;
-          if (sym_cnt == (UPDATE_PERIOD_SYM-1)) begin
+          if (sym_cnt == ((update_period_sym_runtime == 0 ? UPDATE_PERIOD_SYM[15:0] : update_period_sym_runtime)-1)) begin
             // pick best phase
             sym_cnt <= 0;
 

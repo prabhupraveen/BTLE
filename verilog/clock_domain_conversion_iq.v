@@ -8,12 +8,12 @@
 `timescale 1ns / 1ps
 module clock_domain_conversion_iq #
 (
-  parameter RF_IQ_BIT_WIDTH = 64,
-  parameter RF_I_OR_Q_BIT_WIDTH = (RF_IQ_BIT_WIDTH/4),
+  parameter integer RF_IQ_BIT_WIDTH = 64,
+  parameter integer RF_I_OR_Q_BIT_WIDTH = (RF_IQ_BIT_WIDTH/4),
 
-  parameter IQ_BIT_WIDTH = 8,
+  parameter integer IQ_BIT_WIDTH = 8,
 
-  parameter GFSK_DEMODULATION_BIT_WIDTH = 16
+  parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16
 ) (
   input rf_clk, // ad9361 8MHz rf clock
   input rf_rst,
@@ -42,6 +42,9 @@ module clock_domain_conversion_iq #
   output reg                           tx_iq_valid_last_ext
 );
 
+reg tx_iq_valid_delay1;
+reg tx_iq_valid_last_delay1;
+
 // rx path
 always @ (posedge bb_clk) begin
   if (bb_rst) begin
@@ -58,19 +61,29 @@ always @ (posedge bb_clk) begin
 end
 
 // tx path
+// tx_iq_valid is under 16MHz clk, we need to stretch it to be valid under 8MHz clk. so we use the delay register to make it valid for 2 cycles of 16MHz clk, which is 1 cycle of 8MHz clk.
+always @ (posedge bb_clk) begin
+  if (bb_rst) begin
+    tx_iq_valid_delay1 <= 0;
+    tx_iq_valid_last_delay1 <= 0;
+  end else begin
+    tx_iq_valid_delay1 <= tx_iq_valid;
+    tx_iq_valid_last_delay1 <= tx_iq_valid_last;
+  end
+end
+
 always @ (posedge rf_clk) begin
   if (rf_rst) begin
     tx_iq_signal_ext <= 0;
     tx_iq_valid_ext <= 0;
     tx_iq_valid_last_ext <= 0;
   end else begin
-    tx_iq_signal_ext[(RF_I_OR_Q_BIT_WIDTH-1)   : 0                   ]    = {{(RF_I_OR_Q_BIT_WIDTH-IQ_BIT_WIDTH){tx_i_signal[IQ_BIT_WIDTH-1]}}, tx_i_signal};
-    tx_iq_signal_ext[(2*RF_I_OR_Q_BIT_WIDTH-1) : RF_I_OR_Q_BIT_WIDTH ]    = {{(RF_I_OR_Q_BIT_WIDTH-IQ_BIT_WIDTH){tx_q_signal[IQ_BIT_WIDTH-1]}}, tx_q_signal};
-    tx_iq_signal_ext[(RF_IQ_BIT_WIDTH-1)       : (2*RF_I_OR_Q_BIT_WIDTH)] = 0;
-    tx_iq_valid_ext <= tx_iq_valid;
-    tx_iq_valid_last_ext <= tx_iq_valid_last;
+    tx_iq_signal_ext[(RF_I_OR_Q_BIT_WIDTH-1)   : 0                   ]    <= {{(RF_I_OR_Q_BIT_WIDTH-IQ_BIT_WIDTH){tx_i_signal[IQ_BIT_WIDTH-1]}}, tx_i_signal};
+    tx_iq_signal_ext[(2*RF_I_OR_Q_BIT_WIDTH-1) : RF_I_OR_Q_BIT_WIDTH ]    <= {{(RF_I_OR_Q_BIT_WIDTH-IQ_BIT_WIDTH){tx_q_signal[IQ_BIT_WIDTH-1]}}, tx_q_signal};
+    tx_iq_signal_ext[(RF_IQ_BIT_WIDTH-1)       : (2*RF_I_OR_Q_BIT_WIDTH)] <= 0;
+    tx_iq_valid_ext <= (tx_iq_valid | tx_iq_valid_delay1); // tx_iq_valid is under 16MHz clk, we need to stretch it to be valid under 8MHz clk. so we use the delay register to make it valid for 2 cycles of 16MHz clk, which is 1 cycle of 8MHz clk.
+    tx_iq_valid_last_ext <= (tx_iq_valid_last | tx_iq_valid_last_delay1);
   end
 end
 
 endmodule
-

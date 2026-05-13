@@ -4,7 +4,7 @@
 
 // btle_controller = btle_ll (link layer) + btle_phy (phy: btle_tx and btle_rx)
 
-// iverilog -o btle_controller btle_controller.v clock_domain_conversion_iq.v btle_ll/btle_ll_stub.v btle_phy.v btle_rx.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
+// iverilog -o btle_controller btle_controller.v clock_domain_conversion_iq.v ./btle_ll/hw/fpga/btle_ll_stub.v btle_phy.v btle_rx.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
 
 `define KEEP_FOR_DBG (*mark_debug="true",DONT_TOUCH="TRUE"*)
 
@@ -17,27 +17,32 @@ module btle_controller #
   parameter integer C_S00_AXI_ADDR_WIDTH  = 8,
 
   // parameter	CLK_FREQUENCE	= 16_000_000,	//hz
-  parameter	CLK_FREQUENCE	= 100_000_000,	//hz
-  parameter BAUD_RATE		= 115200		,		  //9600、19200 、38400 、57600 、115200、230400、460800、921600
-  parameter PARITY			= "NONE"	,		  //"NONE","EVEN","ODD"
-  parameter FRAME_WD		= 8,					    //if PARITY="NONE",it can be 5~9;else 5~8
+  parameter	integer CLK_FREQUENCE	= 100_000_000,	//hz
+  parameter integer BAUD_RATE		= 115200		,		  //9600、19200 、38400 、57600 、115200、230400、460800、921600
+  parameter         PARITY			= "NONE"	,		  //"NONE","EVEN","ODD"
+  parameter integer FRAME_WD		= 8,					    //if PARITY="NONE",it can be 5~9;else 5~8
 
-  parameter RF_IQ_BIT_WIDTH = 64,
-  parameter RF_I_OR_Q_BIT_WIDTH = (RF_IQ_BIT_WIDTH/4),
+  parameter integer RF_IQ_BIT_WIDTH = 64,
+  parameter integer RF_I_OR_Q_BIT_WIDTH = (RF_IQ_BIT_WIDTH/4),
 
-  parameter CRC_STATE_BIT_WIDTH = 24,
-  parameter CHANNEL_NUMBER_BIT_WIDTH = 6,
-  parameter SAMPLE_PER_SYMBOL = 8,
-  parameter GAUSS_FILTER_BIT_WIDTH = 16,
-  parameter NUM_TAP_GAUSS_FILTER = 17,
-  parameter VCO_BIT_WIDTH = 16,
-  parameter SIN_COS_ADDR_BIT_WIDTH = 11,
-  parameter IQ_BIT_WIDTH = 8,
-  parameter GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
+  parameter integer CRC_STATE_BIT_WIDTH = 24,
+  parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
+  parameter integer SAMPLE_PER_SYMBOL = 8,
+  parameter integer GAUSS_FILTER_BIT_WIDTH = 16,
+  parameter integer NUM_TAP_GAUSS_FILTER = 17,
+  parameter integer VCO_BIT_WIDTH = 16,
+  parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
+  parameter integer IQ_BIT_WIDTH = 8,
+  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
 
-  parameter GFSK_DEMODULATION_BIT_WIDTH = 16,
-  parameter LEN_UNIQUE_BIT_SEQUENCE = 32,
-  parameter NUM_BIT_PAYLOAD_LENGTH = 8 // 8 bit in the core spec 6.2
+  parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
+  parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
+  parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
+
+  parameter integer BRAM_DEPTH = 32768,
+  parameter integer BRAM_ADDR_WIDTH = $clog2(BRAM_DEPTH),
+  parameter integer BRAM_DATA_WIDTH = (2*RF_I_OR_Q_BIT_WIDTH),
+  parameter integer BRAM_ADDR_WIDTH_IN_BYTE = $clog2(BRAM_DEPTH*BRAM_DATA_WIDTH/8)
 ) (
   input  wire rf_clk,
   input  wire rf_rst,
@@ -56,6 +61,15 @@ module btle_controller #
   output wire ll_itrpt5,
   output wire ll_itrpt6,
   output wire ll_itrpt7,
+
+  // bram related
+  input  wire [BRAM_ADDR_WIDTH_IN_BYTE-1 : 0] bram_addr_a,
+  input  wire bram_clk_a,
+  input  wire [BRAM_DATA_WIDTH-1 : 0] bram_wrdata_a,
+  output wire [BRAM_DATA_WIDTH-1 : 0] bram_rddata_a,
+  input  wire bram_en_a,
+  input  wire bram_rst_a,
+  input  wire bram_we_a,
 
   // ============================to host: UART HCI=========================
   input  wire uart_rx,
@@ -164,6 +178,8 @@ wire                                              tx_iq_valid_last;
 
 // =================link layer and auxiliary==================
 // `KEEP_FOR_DBG wire [15:0] ll_reg_gpio;
+wire [BRAM_ADDR_WIDTH-1 : 0] bram_addr_b;
+wire                         bram_addr_b_half_flag;
 
 // =================link layer to phy tx======================
 wire [3:0] ll_tx_gauss_filter_tap_index;
@@ -218,6 +234,15 @@ wire  [NUM_BIT_PAYLOAD_LENGTH:0] ll_rx_pdu_octet_mem_addr; // 1 more addr bit is
 `KEEP_FOR_DBG wire [(CRC_STATE_BIT_WIDTH-1) : 0]      rx_crc_state_init_bit;
 
 `KEEP_FOR_DBG wire  [NUM_BIT_PAYLOAD_LENGTH:0] rx_pdu_octet_mem_addr; // 1 more addr bit is needed: the octet_valid actually will output 2 bytes header, payload length, 3 bytes CRC
+
+// PHY 2M/test-mode controls:
+// - In baremetal mode these come from gpio for quick bring-up.
+// - In LL mode they are sourced from ll_gpio hooks.
+wire phy_2m_mode;
+wire [2:0] phy_test_mode;
+
+assign phy_2m_mode = (baremetal_phy_intf_mode ? gpio[1] : ll_gpio[5]);
+assign phy_test_mode = (baremetal_phy_intf_mode ? gpio[4:2] : ll_gpio[8:6]);
 
 // =======switch between external baremetal phy control and link layer phy control========
 // phy tx
@@ -291,7 +316,12 @@ auxiliary_daemon #
 
   .IQ_BIT_WIDTH(IQ_BIT_WIDTH),
 
-  .GFSK_DEMODULATION_BIT_WIDTH(GFSK_DEMODULATION_BIT_WIDTH)
+  .GFSK_DEMODULATION_BIT_WIDTH(GFSK_DEMODULATION_BIT_WIDTH),
+
+  .BRAM_DEPTH(BRAM_DEPTH),
+  .BRAM_ADDR_WIDTH(BRAM_ADDR_WIDTH),
+  .BRAM_DATA_WIDTH(BRAM_DATA_WIDTH),
+  .BRAM_ADDR_WIDTH_IN_BYTE(BRAM_ADDR_WIDTH_IN_BYTE)
 ) auxiliary_daemon_i (
   .bb_clk(bb_clk), // bb 16MHz clock
   .bb_rst(bb_rst),
@@ -304,7 +334,17 @@ auxiliary_daemon #
   .i_abs_add_q_abs(i_abs_add_q_abs),
   .agc_lock_change(agc_lock_change),
   .agc_lock_state(agc_lock_state),
-  .rf_gain(rf_gain)
+  .rf_gain(rf_gain),
+
+  .bram_addr_b_half_flag(bram_addr_b_half_flag),
+  .bram_addr_b(bram_addr_b),
+  .bram_addr_a(bram_addr_a),
+  .bram_clk_a(bram_clk_a),
+  .bram_wrdata_a(bram_wrdata_a),
+  .bram_rddata_a(bram_rddata_a),
+  .bram_en_a(bram_en_a),
+  .bram_rst_a(bram_rst_a),
+  .bram_we_a(bram_we_a)
 );
 
 btle_ll #
@@ -372,6 +412,8 @@ btle_ll #
   .rx_pdu_octet_mem_data(ext_rx_pdu_octet_mem_data),
 
   // ===============Auxiliary Signals================
+  .bram_addr_b_half_flag(bram_addr_b_half_flag),
+  .bram_addr_b({{(C_S00_AXI_DATA_WIDTH-BRAM_ADDR_WIDTH){1'b0}}, bram_addr_b}),
   .ll_gpio(ll_gpio),
   .ll_itrpt0(ll_itrpt0),
   .ll_itrpt1(ll_itrpt1),
@@ -438,6 +480,9 @@ btle_phy #
   .rst(bb_rst),
 
   .clkb(s00_axi_aclk),
+
+  .phy_2m_mode(phy_2m_mode),
+  .phy_test_mode(phy_test_mode),
 
   .tx_gauss_filter_tap_index(tx_gauss_filter_tap_index),
   .tx_gauss_filter_tap_value(tx_gauss_filter_tap_value),

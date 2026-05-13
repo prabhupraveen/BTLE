@@ -7,10 +7,13 @@
 `timescale 1ns / 1ps
 module gfsk_demodulation #
 (
-  parameter GFSK_DEMODULATION_BIT_WIDTH = 16
+  parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16
 ) (
   input wire clk,
   input wire rst,
+
+  input wire phy_2m_mode,
+  input wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] decision_threshold,
 
   `KEEP_FOR_DBG input wire signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] i,
   `KEEP_FOR_DBG input wire signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] q,
@@ -27,6 +30,7 @@ module gfsk_demodulation #
 `KEEP_FOR_DBG reg signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] i1;
 `KEEP_FOR_DBG reg signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] q0;
 `KEEP_FOR_DBG reg signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] q1;
+wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] signal_for_decision_shaped;
 
 reg iq_valid_delay1;
 reg iq_valid_delay2;
@@ -34,6 +38,7 @@ reg iq_valid_delay3;
 
 assign signal_for_decision_valid = iq_valid_delay2;
 assign bit_valid = iq_valid_delay3;
+assign signal_for_decision_shaped = (phy_2m_mode ? (signal_for_decision >>> 1) : signal_for_decision);
 
 always @ (posedge clk) begin
   if (rst) begin
@@ -61,7 +66,7 @@ always @ (posedge clk) begin
     end
 
     signal_for_decision <= i0*q1 - i1*q0;
-    phy_bit <= (signal_for_decision > 0);
+    phy_bit <= (signal_for_decision_shaped > decision_threshold);
 
   end
 end

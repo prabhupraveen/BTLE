@@ -7,24 +7,27 @@
 `timescale 1ns / 1ps
 module btle_phy #
 (
-  parameter CRC_STATE_BIT_WIDTH = 24,
-  parameter CHANNEL_NUMBER_BIT_WIDTH = 6,
-  parameter SAMPLE_PER_SYMBOL = 8,
-  parameter GAUSS_FILTER_BIT_WIDTH = 16,
-  parameter NUM_TAP_GAUSS_FILTER = 17,
-  parameter VCO_BIT_WIDTH = 16,
-  parameter SIN_COS_ADDR_BIT_WIDTH = 11,
-  parameter IQ_BIT_WIDTH = 8,
-  parameter GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
+  parameter integer CRC_STATE_BIT_WIDTH = 24,
+  parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
+  parameter integer SAMPLE_PER_SYMBOL = 8,
+  parameter integer GAUSS_FILTER_BIT_WIDTH = 16,
+  parameter integer NUM_TAP_GAUSS_FILTER = 17,
+  parameter integer VCO_BIT_WIDTH = 16,
+  parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
+  parameter integer IQ_BIT_WIDTH = 8,
+  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
 
-  parameter GFSK_DEMODULATION_BIT_WIDTH = 16,
-  parameter LEN_UNIQUE_BIT_SEQUENCE = 32,
-  parameter NUM_BIT_PAYLOAD_LENGTH = 8 // 8 bit in the core spec 6.2
+  parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
+  parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
+  parameter integer NUM_BIT_PAYLOAD_LENGTH = 8 // 8 bit in the core spec 6.2
 ) (
   input wire clk,
   input wire rst,
 
   input wire clkb,
+
+  input wire phy_2m_mode,
+  input wire [2:0] phy_test_mode,
 
   // for tx
   input wire [3:0] tx_gauss_filter_tap_index, // only need to set 0~8, 9~16 will be mirror of 0~7
@@ -86,6 +89,11 @@ module btle_phy #
   output wire  [7:0] rx_pdu_octet_mem_data
 );
 
+// TODO(2M-PHY):
+// 1) Add dedicated 2M Gaussian/BW profile tables and runtime-safe switching.
+// 2) Add packet abort propagation from LL into TX/RX datapaths for control procedures.
+// 3) Add formal PHY test modes (carrier/modulated/PRBS) with deterministic stop conditions.
+
 btle_tx # (
   .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH),
   .CRC_STATE_BIT_WIDTH(CRC_STATE_BIT_WIDTH),
@@ -102,6 +110,9 @@ btle_tx # (
   .rst(rst),
 
   .clkb(clkb),
+
+  .phy_2m_mode(phy_2m_mode),
+  .phy_test_mode(phy_test_mode),
 
   .gauss_filter_tap_index(tx_gauss_filter_tap_index),
   .gauss_filter_tap_value(tx_gauss_filter_tap_value),
@@ -155,6 +166,9 @@ btle_rx # (
   .rst(rst),
 
   .clkb(clkb),
+
+  .phy_2m_mode(phy_2m_mode),
+  .phy_test_mode(phy_test_mode),
   
   .unique_bit_sequence(rx_unique_bit_sequence),
   .channel_number(rx_channel_number),
@@ -177,4 +191,3 @@ btle_rx # (
 );
 
 endmodule
-

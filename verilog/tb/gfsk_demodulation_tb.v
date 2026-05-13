@@ -115,7 +115,7 @@ reg iq_valid;
 wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] signal_for_decision;
 wire signal_for_decision_valid;
 
-wire bit;
+wire bit_;
 wire bit_valid;
 
 // test process
@@ -201,7 +201,7 @@ always @ (posedge clk) begin
 
     // record the result
     if (bit_valid) begin
-      gfsk_demodulation_test_output_bit_mem[bit_out_count] <= bit;
+      gfsk_demodulation_test_output_bit_mem[bit_out_count] <= bit_;
       bit_out_count <= bit_out_count + 1;
     end
 
@@ -226,7 +226,7 @@ gfsk_demodulation # (
   .signal_for_decision(signal_for_decision),
   .signal_for_decision_valid(signal_for_decision_valid),
   
-  .phy_bit(bit),
+  .phy_bit(bit_),
   .bit_valid(bit_valid)
 );
 

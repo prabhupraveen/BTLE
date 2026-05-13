@@ -1,6 +1,6 @@
 // Author: Xianjun Jiao <putaoshu@msn.com>
 // SPDX-FileCopyrightText: 2025 Xianjun Jiao
-// SPDX-License-Identifier: LicenseRef-MyCompany-Commercial
+// SPDX-License-Identifier: Apache-2.0 license
 
 // This link layer module interfaces with the host via UART HCI (Host Controller Interface), 
 // and axi lite interface as alternative channel for configuration and control.
@@ -23,24 +23,24 @@ module btle_ll # (
   parameter integer C_S00_AXI_ADDR_WIDTH  = 8,
 
   // parameter CLK_FREQUENCE = 16_000_000, //hz
-  parameter CLK_FREQUENCE = 100_000_000, //hz
-  parameter BAUD_RATE     = 115200,     //9600、19200 、38400 、57600 、115200、230400、460800、921600
-  parameter PARITY        = "NONE",     //"NONE","EVEN","ODD"
-  parameter FRAME_WD      = 8,          //if PARITY="NONE",it can be 5~9;else 5~8
+  parameter integer CLK_FREQUENCE = 100_000_000, //hz
+  parameter integer BAUD_RATE     = 115200,     //9600、19200 、38400 、57600 、115200、230400、460800、921600
+  parameter         PARITY        = "NONE",     //"NONE","EVEN","ODD"
+  parameter integer FRAME_WD      = 8,          //if PARITY="NONE",it can be 5~9;else 5~8
 
-  parameter RF_IQ_BIT_WIDTH = 64,
-  parameter RF_I_OR_Q_BIT_WIDTH = (RF_IQ_BIT_WIDTH/4),
+  parameter integer RF_IQ_BIT_WIDTH = 64,
+  parameter integer RF_I_OR_Q_BIT_WIDTH = (RF_IQ_BIT_WIDTH/4),
 
-  parameter GAUSS_FILTER_BIT_WIDTH = 16,
-  parameter SIN_COS_ADDR_BIT_WIDTH = 11,
-  parameter IQ_BIT_WIDTH = 8,
-  parameter CRC_STATE_BIT_WIDTH = 24,
-  parameter CHANNEL_NUMBER_BIT_WIDTH = 6,
+  parameter integer GAUSS_FILTER_BIT_WIDTH = 16,
+  parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
+  parameter integer IQ_BIT_WIDTH = 8,
+  parameter integer CRC_STATE_BIT_WIDTH = 24,
+  parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
 
-  parameter GFSK_DEMODULATION_BIT_WIDTH = 16,
+  parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
 
-  parameter LEN_UNIQUE_BIT_SEQUENCE = 32,
-  parameter NUM_BIT_PAYLOAD_LENGTH = 8 // 8 bit in the core spec 6.2
+  parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
+  parameter integer NUM_BIT_PAYLOAD_LENGTH = 8 // 8 bit in the core spec 6.2
 ) (
   input  wire bb_clk,
   input  wire bb_rst,
@@ -52,24 +52,24 @@ module btle_ll # (
   output wire uart_tx,
 
   // ==========to phy tx======
-  output wire [3:0] tx_gauss_filter_tap_index, // only need to set 0~8, 9~16 will be mirror of 0~7
-  output wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] tx_gauss_filter_tap_value,
+  `KEEP_FOR_DBG output wire [3:0] tx_gauss_filter_tap_index, // only need to set 0~8, 9~16 will be mirror of 0~7
+  `KEEP_FOR_DBG output wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] tx_gauss_filter_tap_value,
 
-  output wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] tx_cos_table_write_address,
-  output wire signed [(IQ_BIT_WIDTH-1) : 0] tx_cos_table_write_data,
-  output wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] tx_sin_table_write_address,
-  output wire signed [(IQ_BIT_WIDTH-1) : 0] tx_sin_table_write_data,
+  `KEEP_FOR_DBG output wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] tx_cos_table_write_address,
+  `KEEP_FOR_DBG output wire signed [(IQ_BIT_WIDTH-1) : 0] tx_cos_table_write_data,
+  `KEEP_FOR_DBG output wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] tx_sin_table_write_address,
+  `KEEP_FOR_DBG output wire signed [(IQ_BIT_WIDTH-1) : 0] tx_sin_table_write_data,
 
-  output wire [7:0]  tx_preamble,
+  `KEEP_FOR_DBG output wire [7:0]  tx_preamble,
 
-  output wire [31:0] tx_access_address,
-  output wire [(CRC_STATE_BIT_WIDTH-1) : 0] tx_crc_state_init_bit,
-  output wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] tx_channel_number,
+  `KEEP_FOR_DBG output wire [31:0] tx_access_address,
+  `KEEP_FOR_DBG output wire [(CRC_STATE_BIT_WIDTH-1) : 0] tx_crc_state_init_bit,
+  `KEEP_FOR_DBG output wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] tx_channel_number,
 
   `KEEP_FOR_DBG output wire [7:0] tx_pdu_octet_mem_data,
   `KEEP_FOR_DBG output wire [NUM_BIT_PAYLOAD_LENGTH:0] tx_pdu_octet_mem_addr,  // 1 more addr bit is needed: the octet_valid actually will output 2 bytes header, payload length, 3 bytes CRC
-  output wire tx_start,
-  input  wire tx_iq_valid_last,
+  `KEEP_FOR_DBG output wire tx_start,
+  `KEEP_FOR_DBG input  wire tx_iq_valid_last,
 
   // =========to phy rx=======
   output wire [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0]  rx_unique_bit_sequence,
@@ -86,6 +86,8 @@ module btle_ll # (
   `KEEP_FOR_DBG input  wire [7:0] rx_pdu_octet_mem_data,
 
   // ===============Auxiliary Signals================
+  input wire                              bram_addr_b_half_flag,
+  input wire [C_S00_AXI_DATA_WIDTH-1 : 0] bram_addr_b,
   `KEEP_FOR_DBG output wire [15:0] ll_gpio,
   output wire ll_itrpt0,
   output wire ll_itrpt1,
@@ -283,6 +285,8 @@ localparam [2:0] STANDBY                  = 0,
 `KEEP_FOR_DBG reg ref_1pps_delay2;
 `KEEP_FOR_DBG reg ref_1pps_delay3;
 
+wire [C_S00_AXI_DATA_WIDTH-1 : 0] bram_addr_b_axi;
+
 // ====================bb clk domain internal signals for crosing================
 `KEEP_FOR_DBG wire [15:0] reg_gpio;
 
@@ -311,7 +315,7 @@ localparam [2:0] STANDBY                  = 0,
 assign ll_gpio                        = reg_gpio;
 assign ll_itrpt0                      = rx_decode_end;
 assign ll_itrpt1                      = rx_hit_flag;
-assign ll_itrpt2                      = 0;
+assign ll_itrpt2                      = bram_addr_b_half_flag;
 assign ll_itrpt3                      = 0;
 assign ll_itrpt4                      = 0;
 assign ll_itrpt5                      = 0;
@@ -369,6 +373,8 @@ assign slv_reg56 = timestamp_rx_hit_flag_lock_by_decode_end_axi[(C_S00_AXI_DATA_
 assign slv_reg57 = timestamp_rx_hit_flag_lock_by_decode_end_axi[(2*C_S00_AXI_DATA_WIDTH-1) : C_S00_AXI_DATA_WIDTH];
 
 assign slv_reg58 = ref_1pps_flip_and_count;
+
+assign slv_reg59 = bram_addr_b_axi;
 
 assign slv_reg60 = timestamp_axi[(C_S00_AXI_DATA_WIDTH-1) : 0];
 assign slv_reg61 = timestamp_axi[(2*C_S00_AXI_DATA_WIDTH-1) : C_S00_AXI_DATA_WIDTH];
@@ -648,6 +654,7 @@ clk_cross_bus #
               C_S00_AXI_DATA_WIDTH+
               C_S00_AXI_DATA_WIDTH+
               C_S00_AXI_DATA_WIDTH+
+              C_S00_AXI_DATA_WIDTH+
               (2*C_S00_AXI_DATA_WIDTH)+
               (2*C_S00_AXI_DATA_WIDTH)+
               (2*C_S00_AXI_DATA_WIDTH)+
@@ -662,7 +669,8 @@ clk_cross_bus #
   .write_clk(bb_clk),
   .rst(bb_rst),
 
-  .write_data({event0_counter,
+  .write_data({bram_addr_b,
+               event0_counter,
                event1_counter,
                event2_counter,
                event3_counter,
@@ -680,7 +688,8 @@ clk_cross_bus #
                rx_payload_length}),
 
   .read_clk(axi_aclk),
-  .read_data({event0_counter_axi,
+  .read_data({bram_addr_b_axi,
+              event0_counter_axi,
               event1_counter_axi,
               event2_counter_axi,
               event3_counter_axi,
@@ -986,12 +995,12 @@ endmodule
 // ======================sub modules==========================================
 module rx_ram #
 (
-  parameter LEN_UNIQUE_BIT_SEQUENCE = 32,
-  parameter CHANNEL_NUMBER_BIT_WIDTH = 6,
-  parameter CRC_STATE_BIT_WIDTH = 24,
-  parameter C_S00_AXI_DATA_WIDTH  = 32,
-  parameter NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
-  parameter RD_DATA_AXI_REG_IDX = 40
+  parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
+  parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
+  parameter integer CRC_STATE_BIT_WIDTH = 24,
+  parameter integer C_S00_AXI_DATA_WIDTH  = 32,
+  parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
+  parameter integer RD_DATA_AXI_REG_IDX = 40
 ) (
   input wire bb_clk,
   input wire bb_rst,
@@ -1047,8 +1056,8 @@ localparam ADDR_WIDTH_DPRAM = NUM_BIT_PAYLOAD_LENGTH+1;
 
 `KEEP_FOR_DBG wire [(ADDR_WIDTH_DPRAM-1) : 0] header_payload_crc_len;
 
-`KEEP_FOR_DBG assign write_data = word_out;
-`KEEP_FOR_DBG assign write_enable = word_out_strobe;
+assign write_data = word_out;
+assign write_enable = word_out_strobe;
 assign header_payload_crc_len = 2 + rx_payload_length_axi_lock + 3; // 2 bytes header, payload length, 3 bytes CRC
 
 // 5'd40 means slv_reg40 read signal
@@ -1158,8 +1167,8 @@ endmodule
 
 module octet_to_word #
 (
-  parameter NUM_OCTET_TOTAL_BITWIDTH = 7,
-  parameter C_S00_AXI_DATA_WIDTH  = 32
+  parameter integer NUM_OCTET_TOTAL_BITWIDTH = 7,
+  parameter integer C_S00_AXI_DATA_WIDTH  = 32
 ) (
   input wire clk,
   input wire rstn,
@@ -2206,807 +2215,5 @@ end
 
 endmodule
 
-// ===============================================================================
-// --------------------------------------------------------------------
-// >>>>>>>>>>>>>>>>>>>>>>>>> COPYRIGHT NOTICE <<<<<<<<<<<<<<<<<<<<<<<<<
-// --------------------------------------------------------------------
-// Author: halftop
-// Github: https://github.com/halftop
-// Email: yu.zh@live.com
-// Description: 
-// Dependencies: 
-// Since: 2019-06-09 16:31:56
-// LastEditors: halftop
-// LastEditTime: 2019-06-09 16:31:56
-// ********************************************************************
-// Module Function:
-`timescale 1ns / 1ps
-
-module uart_frame_rx
-#(
-  parameter  CLK_FREQUENCE  = 50_000_000,    //hz
-  BAUD_RATE    = 9600    ,    //9600、19200 、38400 、57600 、115200、230400、460800、921600
-  PARITY      = "NONE"  ,    //"NONE","EVEN","ODD"
-  FRAME_WD    = 8            //if PARITY="NONE",it can be 5~9;else 5~8
-)
-(
-  input clk,    //sys_clk
-  input rst_n,
-  input uart_rx,
-  output reg [FRAME_WD-1:0] rx_frame,    //frame_received,when rx_done = 1 it's valid
-  output reg rx_done,    //once_rx_done
-  output reg frame_error    //when the PARITY is enable if frame_error = 1,the frame received is wrong
-);
-
-wire sample_clk;
-wire frame_en;    //once_rx_start
-reg  cnt_en;    //sample_clk_cnt enable
-reg  [3:0] sample_clk_cnt;
-reg  [log2(FRAME_WD+1)-1:0] sample_bit_cnt;
-wire baud_rate_clk;
-
-localparam  IDLE       =  5'b0_0000,
-            START_BIT  =  5'b0_0001,
-            DATA_FRAME =  5'b0_0010,
-            PARITY_BIT =  5'b0_0100,
-            STOP_BIT   =  5'b0_1000,
-            DONE       =  5'b1_0000;
-
-reg  [4:0]  cstate;
-reg [4:0]  nstate;
-//
-wire  [1:0]  verify_mode;
-generate
-  if (PARITY == "ODD")
-    assign verify_mode = 2'b01;
-  else if (PARITY == "EVEN")
-    assign verify_mode = 2'b10;
-  else
-    assign verify_mode = 2'b00;
-endgenerate
-//detect the start condition--the negedge of uart_rx
-reg uart_rx0,uart_rx1,uart_rx2,uart_rx3;
-
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) begin
-    uart_rx0 <= 1'b0;
-    uart_rx1 <= 1'b0;
-    uart_rx2 <= 1'b0;
-    uart_rx3 <= 1'b0;
-  end else begin
-    uart_rx0 <= uart_rx ;
-    uart_rx1 <= uart_rx0;
-    uart_rx2 <= uart_rx1;
-    uart_rx3 <= uart_rx2;
-  end
-end
-//negedge of uart_rx-----start_bit
-assign frame_en = uart_rx3 & uart_rx2 & ~uart_rx1 & ~uart_rx0;
-
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    cnt_en <= 1'b0;
-  else if (frame_en) 
-    cnt_en <= 1'b1;
-  else if (rx_done) 
-    cnt_en <= 1'b0;
-  else
-    cnt_en <= cnt_en;
-end
-
-assign baud_rate_clk = sample_clk & sample_clk_cnt == 4'd8;
-
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    sample_clk_cnt <= 4'd0;
-  else if (cnt_en) begin
-    if (baud_rate_clk) 
-      sample_clk_cnt <= 4'd0;
-    else if (sample_clk)
-      sample_clk_cnt <= sample_clk_cnt + 1'b1;
-    else
-      sample_clk_cnt <= sample_clk_cnt;
-  end else 
-    sample_clk_cnt <= 4'd0;
-end
-//the start_bit is the first one (0),then the LSB of the data_frame is the second(1) ......
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    sample_bit_cnt <= 'd0;
-  else if (cstate == IDLE)
-    sample_bit_cnt <= 'd0;
-  else if (baud_rate_clk)
-    sample_bit_cnt <= sample_bit_cnt + 1'b1;
-  else
-    sample_bit_cnt <= sample_bit_cnt;
-end
-//read the readme
-reg    [1:0]  sample_result  ;
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    sample_result <= 1'b0;
-  else if (sample_clk) begin
-    case (sample_clk_cnt)
-      4'd0:sample_result <= 2'd0;
-      4'd3,4'd4,4'd5: sample_result <= sample_result + uart_rx;
-      default: sample_result <= sample_result;
-    endcase
-  end
-end
-//FSM-1
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    cstate <= IDLE;
-  else 
-    cstate <= nstate;
-end
-//FSM-2
-always @(*) begin
-  case (cstate)
-    IDLE       : nstate = frame_en ? START_BIT : IDLE ;
-    START_BIT  : nstate = (baud_rate_clk & sample_result[1] == 1'b0) ? DATA_FRAME : START_BIT ;
-    DATA_FRAME : begin
-                   case (verify_mode[1]^verify_mode[0])
-                     1'b1: nstate = (sample_bit_cnt == FRAME_WD & baud_rate_clk) ? PARITY_BIT : DATA_FRAME ;    //parity is enable
-                     1'b0: nstate = (sample_bit_cnt == FRAME_WD & baud_rate_clk) ? STOP_BIT : DATA_FRAME ;    //parity is disable
-                     default: nstate = (sample_bit_cnt == FRAME_WD & baud_rate_clk) ? STOP_BIT : DATA_FRAME ;  //defasult is disable
-                   endcase
-                 end
-    PARITY_BIT : nstate = baud_rate_clk ? STOP_BIT : PARITY_BIT ;
-    STOP_BIT   : nstate = (baud_rate_clk & sample_result[1] == 1'b1) ? DONE : STOP_BIT ;
-    DONE       : nstate = IDLE;
-    default    : nstate = IDLE;
-  endcase
-end
-//FSM-3
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) begin
-    rx_frame  <= 'd0;
-    rx_done    <= 1'b0;
-    frame_error  <= 1'b0;
-  end else begin
-    case (nstate)
-      IDLE    : begin
-              rx_frame  <= 'd0;
-              rx_done    <= 1'b0;
-              frame_error  <= 1'b0;
-            end 
-      START_BIT  : begin
-              rx_frame  <= 'd0;
-              rx_done    <= 1'b0;
-              frame_error  <= 1'b0;
-            end 
-      DATA_FRAME  : begin
-              if (sample_clk & sample_clk_cnt == 4'd6) 
-                rx_frame <= {sample_result[1],rx_frame[FRAME_WD-1:1]};
-              else
-                rx_frame  <= rx_frame;
-              rx_done    <= 1'b0;
-              frame_error  <= 1'b0;
-            end 
-      PARITY_BIT  : begin
-              rx_frame  <= rx_frame;
-              rx_done    <= 1'b0;
-              if (sample_clk_cnt == 4'd8)
-              frame_error  <= ^rx_frame ^ sample_result[1];
-              else
-              frame_error  <= frame_error;
-            end 
-      STOP_BIT  : begin
-              rx_frame  <= rx_frame;
-              rx_done    <= 1'b0;
-              frame_error  <= frame_error;
-            end 
-      DONE    : begin
-              frame_error  <= frame_error;
-              rx_done    <= 1'b1;
-              rx_frame  <= rx_frame;
-            end 
-      default: begin
-              rx_frame  <= rx_frame;
-              rx_done    <= 1'b0;
-              frame_error  <= frame_error;
-            end 
-    endcase
-  end
-end
-
-rx_clk_gen
-#(
-  .CLK_FREQUENCE  (CLK_FREQUENCE  ),  //hz
-  .BAUD_RATE    (BAUD_RATE    )  //9600、19200 、38400 、57600 、115200、230400、460800、921600
-)
-rx_clk_gen_inst
-(
-  .clk        ( clk     )  ,
-  .rst_n      ( rst_n     )  ,
-  .rx_start   ( frame_en   )  ,
-  .rx_done    ( rx_done   )  ,
-  .sample_clk ( sample_clk )  
-);  
-
-function integer log2(input integer v);
-  begin
-  log2=0;
-  while(v>>log2) 
-    log2=log2+1;
-  end
-endfunction
-
-endmodule
-
-// ===============================================================================
-// --------------------------------------------------------------------
-// >>>>>>>>>>>>>>>>>>>>>>>>> COPYRIGHT NOTICE <<<<<<<<<<<<<<<<<<<<<<<<<
-// --------------------------------------------------------------------
-// Author: halftop
-// Github: https://github.com/halftop
-// Email: yu.zh@live.com
-// Description: 
-// Dependencies: 
-// Since: 2019-06-08 16:51:59
-// LastEditors: halftop
-// LastEditTime: 2019-06-08 16:51:59
-// ********************************************************************
-// Module Function:
-`timescale 1ns / 1ps
-module uart_frame_tx
-#(
-  parameter CLK_FREQUENCE  = 50_000_000,    //hz
-            BAUD_RATE    = 9600    ,    //9600、19200 、38400 、57600 、115200、230400、460800、921600
-            PARITY      = "NONE"  ,    //"NONE","EVEN","ODD"
-            FRAME_WD    = 8          //if PARITY="NONE",it can be 5~9;else 5~8
-)
-(
-  input clk      ,  //system_clk
-  input rst_n    ,  //system_reset
-  input frame_en  ,  //once_tx_start
-  input [FRAME_WD-1:0]  data_frame  ,  //data_to_tx
-  output reg  tx_done    ,  //once_tx_done
-  output reg  uart_tx       //uart_tx_data
-);
-
-wire  bps_clk;
-
-tx_clk_gen
-#(
-  .CLK_FREQUENCE  (CLK_FREQUENCE),    //hz
-  .BAUD_RATE      (BAUD_RATE  )       //9600、19200 、38400 、57600 、115200、230400、460800、921600
-)
-tx_clk_gen_inst
-(
-  .clk        ( clk      ),    //system_clk
-  .rst_n      ( rst_n    ),    //system_reset
-  .tx_done    ( tx_done  ),    //once_tx_done
-  .tx_start   ( frame_en ),    //once_tx_start
-  .bps_clk    ( bps_clk  )     //baud_rate_clk
-);
-
-localparam  IDLE        =  6'b00_0000  ,
-            READY       =  6'b00_0001  ,
-            START_BIT   =  6'b00_0010  ,
-            SHIFT_PRO   =  6'b00_0100  ,
-            PARITY_BIT  =  6'b00_1000  ,
-            STOP_BIT    =  6'b01_0000  ,
-            DONE        =  6'b10_0000  ;
-
-wire  [1:0]  verify_mode;
-generate
-  if (PARITY == "ODD")
-    assign verify_mode = 2'b01;
-  else if (PARITY == "EVEN")
-    assign verify_mode = 2'b10;
-  else
-    assign verify_mode = 2'b00;
-endgenerate
-
-reg    [FRAME_WD-1:0]  data_reg;
-reg    [log2(FRAME_WD-1)-1:0] cnt;
-reg          parity_even;
-reg    [5:0] cstate;
-reg    [5:0] nstate;
-
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n)
-    cnt <= 'd0;
-  else if (cstate == SHIFT_PRO & bps_clk == 1'b1) 
-    if (cnt == FRAME_WD-1)
-      cnt <= 'd0;
-    else
-      cnt <= cnt + 1'b1;
-  else
-    cnt <= cnt;
-end
-//FSM-1
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n)
-    cstate <= IDLE;
-  else
-    cstate <= nstate;
-end
-//FSM-2
-always @(*) begin
-  case (cstate)
-    IDLE       : nstate = frame_en ? READY : IDLE  ;
-    READY      : nstate = (bps_clk == 1'b1) ? START_BIT : READY;
-    START_BIT  : nstate = (bps_clk == 1'b1) ? SHIFT_PRO : START_BIT;
-    SHIFT_PRO  : nstate = (cnt == FRAME_WD-1 & bps_clk == 1'b1) ? PARITY_BIT : SHIFT_PRO;
-    PARITY_BIT : nstate = (bps_clk == 1'b1) ? STOP_BIT : PARITY_BIT;
-    STOP_BIT   : nstate = (bps_clk == 1'b1) ? DONE : STOP_BIT;
-    DONE       : nstate = IDLE;
-    default    : nstate = IDLE;
-  endcase
-end
-//FSM-3
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) begin
-    data_reg <= 'd0;
-    uart_tx <= 1'b1;
-    tx_done <= 1'b0;
-    parity_even <= 1'b0;
-  end else begin
-    case (nstate)
-      IDLE    : begin
-              data_reg <= 'd0;
-              tx_done <= 1'b0;
-              uart_tx <= 1'b1;
-            end
-      READY    : begin
-              data_reg <= 'd0;
-              tx_done <= 1'b0;
-              uart_tx <= 1'b1;
-            end
-      START_BIT  : begin
-              data_reg <= data_frame;
-              parity_even <= ^data_frame;
-              uart_tx <= 1'b0;
-              tx_done <= 1'b0;
-            end
-      SHIFT_PRO  : begin
-              if(bps_clk == 1'b1) begin
-                data_reg <= {1'b0,data_reg[FRAME_WD-1:1]};
-                uart_tx <= data_reg[0];
-              end else begin
-                data_reg <= data_reg;
-                uart_tx <= uart_tx;
-              end
-              tx_done <= 1'b0;
-            end
-      PARITY_BIT  : begin
-              data_reg <= data_reg;
-              tx_done <= 1'b0;
-              case (verify_mode)
-                2'b00: uart_tx <= 1'b1;    //若无校验多发一位STOP_BIT
-                2'b01: uart_tx <= ~parity_even;
-                2'b10: uart_tx <= parity_even;
-                default: uart_tx <= 1'b1;
-              endcase
-            end
-      STOP_BIT  : uart_tx <= 1'b1;
-      DONE    : tx_done <= 1'b1;
-      default    :  begin
-              data_reg <= 'd0;
-              uart_tx <= 1'b1;
-              tx_done <= 1'b0;
-              parity_even <= 1'b0;
-            end
-    endcase
-  end
-end
-
-function integer log2(input integer v);
-  begin
-  log2=0;
-  while(v>>log2) 
-    log2=log2+1;
-  end
-endfunction
-
-endmodule
-
-// --------------------------------------------------------------------
-// >>>>>>>>>>>>>>>>>>>>>>>>> COPYRIGHT NOTICE <<<<<<<<<<<<<<<<<<<<<<<<<
-// --------------------------------------------------------------------
-// Author: halftop
-// Github: https://github.com/halftop
-// Email: yu.zh@live.com
-// Description: uart_tx_baud_rate_clk_generate
-// Dependencies: 
-// Since: 2019-06-07 15:36:59
-// LastEditors: halftop
-// LastEditTime: 2019-06-07 15:36:59
-// ********************************************************************
-// Module Function: generate_uart_tx_baud_rate_clk
-`timescale 1ns / 1ps
-module tx_clk_gen
-#(
-  parameter CLK_FREQUENCE  = 50_000_000,    //hz
-            BAUD_RATE    = 9600         //9600、19200 、38400 、57600 、115200、230400、460800、921600
-)
-(
-  input       clk,      //system_clk
-  input       rst_n,    //system_reset
-  input       tx_done,  //once_tx_done
-  input       tx_start, //once_tx_start
-  output  reg bps_clk   //baud_rate_clk
-);
-
-localparam  BPS_CNT =  CLK_FREQUENCE/BAUD_RATE-1,
-            BPS_WD  =  log2(BPS_CNT);
-
-reg [BPS_WD-1:0] count;
-reg c_state;
-reg n_state;
-//FSM-1      1'b0:IDLE  1'b1:send_data
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n)
-    c_state <= 1'b0;
-  else
-    c_state <= n_state;
-end
-//FSM-2
-always @(*) begin
-  case (c_state)
-    1'b0: n_state = tx_start ? 1'b1 : 1'b0;
-    1'b1: n_state = tx_done ? 1'b0 : 1'b1;
-    default: n_state = 1'b0;
-  endcase
-end
-//FSM-3 FSM's output(count_en) is equal to c_state
-
-//baud_rate_clk_counter
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n)
-    count <= {BPS_WD{1'b0}};
-  else if (!c_state)
-    count <= {BPS_WD{1'b0}};
-  else begin
-    if (count == BPS_CNT) 
-      count <= {BPS_WD{1'b0}};
-    else
-      count <= count + 1'b1;
-  end
-end
-//baud_rate_clk_output
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n)
-    bps_clk <= 1'b0;
-  else if (count == 'd1)
-    bps_clk <= 1'b1;
-  else
-    bps_clk <= 1'b0;
-end
-//get_the_width_of_
-function integer log2(input integer v);
-  begin
-  log2=0;
-  while(v>>log2) 
-    log2=log2+1;
-  end
-endfunction
-
-endmodule
-
-// --------------------------------------------------------------------
-// >>>>>>>>>>>>>>>>>>>>>>>>> COPYRIGHT NOTICE <<<<<<<<<<<<<<<<<<<<<<<<<
-// --------------------------------------------------------------------
-// Author: halftop
-// Github: https://github.com/halftop
-// Email: yu.zh@live.com
-// Description: generate uart rx sample clk = 9 x BAUD_RATE
-// Dependencies: 
-// Since: 2019-06-09 16:30:57
-// LastEditors: halftop
-// LastEditTime: 2019-06-09 16:30:57
-// ********************************************************************
-// Module Function: generate uart rx sample clk = 9 x BAUD_RATE
-`timescale 1ns / 1ps
-
-module rx_clk_gen
-#(
-  parameter CLK_FREQUENCE  = 50_000_000,  //hz
-            BAUD_RATE    = 9600       //9600、19200 、38400 、57600 、115200、230400、460800、921600
-)
-(
-  input       clk,
-  input       rst_n,
-  input       rx_start,
-  input       rx_done,
-  output  reg sample_clk
-);
-
-localparam  SMP_CLK_CNT  =  CLK_FREQUENCE/BAUD_RATE/9 - 1,
-            CNT_WIDTH    =  log2(SMP_CLK_CNT)       ;
-
-reg [CNT_WIDTH-1:0]  clk_count  ;
-reg cstate;
-reg nstate;
-//FSM-1  1'b0:IDLE 1'b1:RECEIVE
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) begin
-    cstate <= 1'b0;
-  end else begin
-    cstate <= nstate;
-  end
-end
-//FSM-2
-always @(*) begin
-  case (cstate)
-    1'b0: nstate = rx_start ? 1'b1 : 1'b0;
-    1'b1: nstate = rx_done ? 1'b0 : 1'b1 ;
-    default: nstate = 1'b0;
-  endcase
-end
-//FSM-3 FSM's output(clk_count_en) is equal to cstate
-
-//sample_clk_counter
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    clk_count <= 'd0;
-  else if (!cstate) 
-    clk_count <= 'd0;
-  else if (clk_count == SMP_CLK_CNT)
-    clk_count <= 'd0;
-  else
-    clk_count <= clk_count + 1'b1;
-end
-//generate sample_clk = 9xBAUD_RATE
-always @(posedge clk or negedge rst_n) begin
-  if (!rst_n) 
-    sample_clk <= 1'b0;
-  else if (clk_count == 1'b1) 
-    sample_clk <= 1'b1;
-  else 
-    sample_clk <= 1'b0;
-end
-//get the width of sample_clk_counter
-function integer log2(input integer v);
-  begin
-  log2=0;
-  while(v>>log2) 
-    log2=log2+1;
-  end
-endfunction
-
-endmodule
-
-// Author: Xianjun Jiao <putaoshu@msn.com>
-// SPDX-FileCopyrightText: 2025 Xianjun Jiao
-// SPDX-License-Identifier: Apache-2.0 license
-
-// Based on Xilinx UG901 2025-06-11
-// https://docs.amd.com/r/en-US/ug901-vivado-synthesis/Simple-Dual-Port-Block-RAM-with-Single-Clock-Verilog
-// Simple Dual-Port Block RAM with Single Clock (Verilog)
-
-`timescale 1ns / 1ps
-module sdpram_one_clk #
-(
-  parameter DATA_WIDTH = 8,
-  parameter ADDRESS_WIDTH = 11
-) (
-  input wire clk,
-  input wire rst,
-
-  input wire [ADDRESS_WIDTH-1:0] write_address,
-  input wire [DATA_WIDTH-1:0] write_data,
-  input wire write_enable,
-
-  input wire [ADDRESS_WIDTH-1:0] read_address,
-  output reg [DATA_WIDTH-1:0] read_data
-);
-
-reg [DATA_WIDTH-1:0] memory [((1<<ADDRESS_WIDTH)-1):0];
-
-always @ (posedge clk) begin
-  if (write_enable) begin
-    memory[write_address] <= write_data;
-  end
-end
-
-always @ (posedge clk) begin
-  read_data <= memory[read_address];
-end
-
-endmodule
-
-// Author: Xianjun Jiao <putaoshu@msn.com>
-// SPDX-FileCopyrightText: 2025 Xianjun Jiao
-// SPDX-License-Identifier: Apache-2.0 license
-
-// Based on Xilinx UG901 2025-06-11
-// https://docs.amd.com/r/en-US/ug901-vivado-synthesis/Simple-Dual-Port-Block-RAM-with-Single-Clock-Verilog
-// Simple Dual-Port Block RAM with Dual Clocks (Verilog)
-
-`timescale 1ns / 1ps
-module sdpram_two_clk #
-(
-  parameter DATA_WIDTH = 8,
-  parameter ADDRESS_WIDTH = 11
-) (
-  input wire clk,
-  input wire rst,
-
-  input wire [ADDRESS_WIDTH-1:0] write_address,
-  input wire [DATA_WIDTH-1:0] write_data,
-  input wire write_enable,
-
-  input wire clkb,
-  input wire [ADDRESS_WIDTH-1:0] read_address,
-  output reg [DATA_WIDTH-1:0] read_data
-);
-
-reg [DATA_WIDTH-1:0] memory [((1<<ADDRESS_WIDTH)-1):0];
-
-// Write logic (Port A)
-always @ (posedge clk) begin
-  if (write_enable) begin
-    memory[write_address] <= write_data;
-  end
-end
-
-// Read logic (Port B)
-always @ (posedge clkb) begin
-  read_data <= memory[read_address];
-end
-
-endmodule
-
-module clk_cross_bus #
-(
-  parameter DATA_WIDTH = 8
-) (
-  input wire write_clk,
-  `KEEP_FOR_DBG input wire rst,
-
-  `KEEP_FOR_DBG input wire [DATA_WIDTH-1:0] write_data,
-
-  input  wire read_clk,
-  `KEEP_FOR_DBG output wire [DATA_WIDTH-1:0] read_data
-);
-
-`define CROSS_CLK_BY_DPRAM
-
-`ifdef CROSS_CLK_BY_DPRAM
-
-sdpram_two_clk #
-(
-  .DATA_WIDTH(DATA_WIDTH),
-  .ADDRESS_WIDTH(1)
-) sdpram_two_clk_for_clk_cross_bus_i (
-  .clk(write_clk),
-  .rst(rst),
-
-  .write_address(1'd0),
-  .write_data(write_data),
-  .write_enable(1'd1),
-
-  .clkb(read_clk),
-  .read_address(1'd0),
-  .read_data(read_data)
-);
-
-`else
-
-`KEEP_FOR_DBG reg [DATA_WIDTH-1:0] write_data_delay;
-`KEEP_FOR_DBG reg wr_en;
-
-`KEEP_FOR_DBG wire [3:0] rd_data_count;
-`KEEP_FOR_DBG wire [3:0] wr_data_count;
-
-`KEEP_FOR_DBG wire empty;
-`KEEP_FOR_DBG wire full;
-`KEEP_FOR_DBG wire data_valid;
-`KEEP_FOR_DBG wire underflow;
-`KEEP_FOR_DBG wire wr_ack;
-`KEEP_FOR_DBG wire wr_rst_busy;
-`KEEP_FOR_DBG wire rd_rst_busy;
-`KEEP_FOR_DBG wire overflow;
-
-always @ (posedge write_clk) begin
-  if (rst) begin
-    write_data_delay <= {DATA_WIDTH{1'b0}};
-    wr_en <= 1'b0;
-  end else begin
-    write_data_delay <= write_data;
-    if (write_data != write_data_delay) begin
-      wr_en <= 1'b1;
-    end else begin
-      wr_en <= 1'b0;
-    end
-  end
-end
-
-xpm_fifo_async #(
-  .CASCADE_HEIGHT(0),            // DECIMAL
-  .CDC_SYNC_STAGES(2),           // DECIMAL
-  .DOUT_RESET_VALUE("0"),        // String
-  .ECC_MODE("no_ecc"),           // String
-//  .EN_SIM_ASSERT_ERR("warning"), // String
-  .FIFO_MEMORY_TYPE("auto"),     // String
-  .FIFO_READ_LATENCY(0),         // DECIMAL
-  .FIFO_WRITE_DEPTH(16),         // DECIMAL
-  .FULL_RESET_VALUE(0),          // DECIMAL
-  .PROG_EMPTY_THRESH(10),        // DECIMAL
-  .PROG_FULL_THRESH(10),         // DECIMAL
-  .RD_DATA_COUNT_WIDTH(4),       // DECIMAL
-  .READ_DATA_WIDTH(DATA_WIDTH),  // DECIMAL
-  .READ_MODE("fwft"),            // String
-  .RELATED_CLOCKS(0),            // DECIMAL
-  .SIM_ASSERT_CHK(0),            // DECIMAL; 0=disable simulation messages, 1=enable simulation messages
-  .USE_ADV_FEATURES("1717"),     // String
-  .WAKEUP_TIME(0),               // DECIMAL
-  .WRITE_DATA_WIDTH(DATA_WIDTH), // DECIMAL
-  .WR_DATA_COUNT_WIDTH(4)        // DECIMAL
-)
-xpm_fifo_async_clk_cross_inst (
-  .almost_empty(almost_empty),   // 1-bit output: Almost Empty : When asserted, this signal indicates that only one more read can be performed
-                                 // before the FIFO goes to empty.
-
-  .almost_full(almost_full),     // 1-bit output: Almost Full: When asserted, this signal indicates that only one more write can be performed
-                                 // before the FIFO is full.
-
-  .data_valid(data_valid),       // 1-bit output: Read Data Valid: When asserted, this signal indicates that valid data is available on the
-                                 // output bus (dout).
-
-  .dbiterr(dbiterr),             // 1-bit output: Double Bit Error: Indicates that the ECC decoder detected a double-bit error and data in the
-                                 // FIFO core is corrupted.
-
-  .dout(read_data),                   // READ_DATA_WIDTH-bit output: Read Data: The output data bus is driven when reading the FIFO.
-  .empty(empty),                 // 1-bit output: Empty Flag: When asserted, this signal indicates that the FIFO is empty. Read requests are
-                                 // ignored when the FIFO is empty, initiating a read while empty is not destructive to the FIFO.
-
-  .full(full),                   // 1-bit output: Full Flag: When asserted, this signal indicates that the FIFO is full. Write requests are
-                                 // ignored when the FIFO is full, initiating a write when the FIFO is full is not destructive to the contents of
-                                 // the FIFO.
-
-  .overflow(overflow),           // 1-bit output: Overflow: This signal indicates that a write request (wren) during the prior clock cycle was
-                                 // rejected, because the FIFO is full. Overflowing the FIFO is not destructive to the contents of the FIFO.
-
-  .prog_empty(prog_empty),       // 1-bit output: Programmable Empty: This signal is asserted when the number of words in the FIFO is less than
-                                 // or equal to the programmable empty threshold value. It is de-asserted when the number of words in the FIFO
-                                 // exceeds the programmable empty threshold value.
-
-  .prog_full(prog_full),         // 1-bit output: Programmable Full: This signal is asserted when the number of words in the FIFO is greater than
-                                 // or equal to the programmable full threshold value. It is de-asserted when the number of words in the FIFO is
-                                 // less than the programmable full threshold value.
-
-  .rd_data_count(rd_data_count), // RD_DATA_COUNT_WIDTH-bit output: Read Data Count: This bus indicates the number of words read from the FIFO.
-  .rd_rst_busy(rd_rst_busy),     // 1-bit output: Read Reset Busy: Active-High indicator that the FIFO read domain is currently in a reset state.
-  .sbiterr(sbiterr),             // 1-bit output: Single Bit Error: Indicates that the ECC decoder detected and fixed a single-bit error.
-  .underflow(underflow),         // 1-bit output: Underflow: Indicates that the read request (rd_en) during the previous clock cycle was rejected
-                                 // because the FIFO is empty. Under flowing the FIFO is not destructive to the FIFO.
-
-  .wr_ack(wr_ack),               // 1-bit output: Write Acknowledge: This signal indicates that a write request (wr_en) during the prior clock
-                                 // cycle is succeeded.
-
-  .wr_data_count(wr_data_count), // WR_DATA_COUNT_WIDTH-bit output: Write Data Count: This bus indicates the number of words written into the
-                                 // FIFO.
-
-  .wr_rst_busy(wr_rst_busy),     // 1-bit output: Write Reset Busy: Active-High indicator that the FIFO write domain is currently in a reset
-                                 // state.
-
-  .din(write_data_delay),        // WRITE_DATA_WIDTH-bit input: Write Data: The input data bus used when writing the FIFO.
-  .injectdbiterr(injectdbiterr), // 1-bit input: Double Bit Error Injection: Injects a double bit error if the ECC feature is used on block RAMs
-                                 // or UltraRAM macros.
-
-  .injectsbiterr(injectsbiterr), // 1-bit input: Single Bit Error Injection: Injects a single bit error if the ECC feature is used on block RAMs
-                                 // or UltraRAM macros.
-
-  .rd_clk(read_clk),             // 1-bit input: Read clock: Used for read operation. rd_clk must be a free running clock.
-  .rd_en(1'b1),                  // 1-bit input: Read Enable: If the FIFO is not empty, asserting this signal causes data (on dout) to be read
-                                 // from the FIFO. Must be held active-low when rd_rst_busy is active high.
-
-  .rst(rst),                     // 1-bit input: Reset: Must be synchronous to wr_clk. The clock(s) can be unstable at the time of applying
-                                 // reset, but reset must be released only after the clock(s) is/are stable.
-
-  .sleep(sleep),                 // 1-bit input: Dynamic power saving: If sleep is High, the memory/fifo block is in power saving mode.
-  .wr_clk(write_clk),               // 1-bit input: Write clock: Used for write operation. wr_clk must be a free running clock.
-  .wr_en(wr_en)                  // 1-bit input: Write Enable: If the FIFO is not full, asserting this signal causes data (on din) to be written
-                                 // to the FIFO. Must be held active-low when rst or wr_rst_busy is active high.
-);
-
-`endif
-
-endmodule
 
 // `pragma protect end

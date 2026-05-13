@@ -5,16 +5,19 @@
 `timescale 1ns / 1ps
 module gfsk_modulation #
 (
-  parameter SAMPLE_PER_SYMBOL = 8,
-  parameter GAUSS_FILTER_BIT_WIDTH = 16,
-  parameter NUM_TAP_GAUSS_FILTER = 17,
-  parameter VCO_BIT_WIDTH = 16,
-  parameter SIN_COS_ADDR_BIT_WIDTH = 11,
-  parameter IQ_BIT_WIDTH = 8,
-  parameter GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1
+  parameter integer SAMPLE_PER_SYMBOL = 8,
+  parameter integer GAUSS_FILTER_BIT_WIDTH = 16,
+  parameter integer NUM_TAP_GAUSS_FILTER = 17,
+  parameter integer VCO_BIT_WIDTH = 16,
+  parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
+  parameter integer IQ_BIT_WIDTH = 8,
+  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1
 ) (
   input wire clk,
   input wire rst,
+
+  input wire phy_2m_mode,
+  input wire osr_16x_en,
 
   input wire [3:0] gauss_filter_tap_index, // only need to set 0~8, 9~16 will be mirror of 0~7
   input wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] gauss_filter_tap_value,
@@ -43,6 +46,12 @@ module gfsk_modulation #
   output wire bit_upsample_gauss_filter_valid_last
 );
 
+wire signed [(GAUSS_FILTER_BIT_WIDTH-1):0] deviation_scaled;
+
+assign deviation_scaled = (phy_2m_mode ?
+                           {{(GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT+1){1'b1}}, bit_upsample_gauss_filter[(GAUSS_FILTER_BIT_WIDTH-1):(GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT+1)]} :
+                           {{GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT{1'b1}}, bit_upsample_gauss_filter[(GAUSS_FILTER_BIT_WIDTH-1):GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT]});
+
 // wire bit_upsample;
 // wire bit_upsample_valid;
 // wire bit_upsample_valid_last;
@@ -62,6 +71,9 @@ bit_repeat_upsample # (
 ) bit_repeat_upsample_i (
   .clk(clk),
   .rst(rst),
+
+  .phy_2m_mode(phy_2m_mode),
+  .osr_16x_en(osr_16x_en),
 
   .phy_bit(phy_bit),
   .bit_valid(bit_valid),
@@ -104,7 +116,8 @@ vco # (
   .sin_table_write_address(sin_table_write_address),
   .sin_table_write_data(sin_table_write_data),
 
-  .voltage_signal({{GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT{1'b1}}, bit_upsample_gauss_filter[(GAUSS_FILTER_BIT_WIDTH-1) : GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT]}),
+  // 2M uses a tighter deviation profile by default for better eye margin.
+  .voltage_signal(deviation_scaled),
   .voltage_signal_valid(bit_upsample_gauss_filter_valid),
   .voltage_signal_valid_last(bit_upsample_gauss_filter_valid_last),
   

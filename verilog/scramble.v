@@ -7,8 +7,8 @@
 `timescale 1ns / 1ps
 module scramble #
 (
-  parameter NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
-  parameter CHANNEL_NUMBER_BIT_WIDTH = 6
+  parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
+  parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6
 ) (
   input wire clk,
   input wire rst,
@@ -51,7 +51,7 @@ assign data_out_valid_last = data_in_valid_last_delay;
 
 scramble_core # (
   .CHANNEL_NUMBER_BIT_WIDTH(CHANNEL_NUMBER_BIT_WIDTH)
-) crc24_core_i (
+) scramble_core_i (
   .clk(clk),
   .rst(rst),
 

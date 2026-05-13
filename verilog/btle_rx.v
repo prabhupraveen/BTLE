@@ -9,12 +9,12 @@
 `timescale 1ns / 1ps
 module btle_rx #
 (
-  parameter SAMPLE_PER_SYMBOL = 8,
-  parameter GFSK_DEMODULATION_BIT_WIDTH = 16,
-  parameter LEN_UNIQUE_BIT_SEQUENCE = 32,
-  parameter CHANNEL_NUMBER_BIT_WIDTH = 6,
-  parameter CRC_STATE_BIT_WIDTH = 24,
-  parameter NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
+  parameter integer SAMPLE_PER_SYMBOL = 8,
+  parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
+  parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
+  parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
+  parameter integer CRC_STATE_BIT_WIDTH = 24,
+  parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
 
   // Optional RX control/guard features (default disabled to preserve legacy behavior)
   parameter ENABLE_RX_ED_CCA = 0,
@@ -33,6 +33,9 @@ module btle_rx #
   input wire rst,
 
   input wire clkb, // for reading pkt from ram with different/higher clock speed
+
+  input wire phy_2m_mode,
+  input wire [2:0] phy_test_mode,
 
   input wire [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0] unique_bit_sequence,
   input wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] channel_number,
@@ -113,6 +116,7 @@ wire cca_busy;
 wire [31:0] ed_level;
 wire ed_valid;
 wire timing_abort;
+wire [31:0] rx_ed_threshold_sel;
 
 wire rst_rx;
 
@@ -122,6 +126,7 @@ assign ed_valid = (ENABLE_RX_ED_CCA ? ed_valid_raw : 1'b0);
 
 assign timing_abort = (ENABLE_PKT_TIMING_ENFORCE ? timing_abort_raw : 1'b0);
 assign rst_rx = (rst | abort_pulse);
+assign rx_ed_threshold_sel = (phy_2m_mode ? (RX_ED_THRESHOLD + 32'd64) : RX_ED_THRESHOLD);
 
 assign payload_length_store_wire[0] = payload_length_store[0];
 assign payload_length_store_wire[1] = payload_length_store[1];
@@ -305,6 +310,9 @@ generate
       .clk(clk),
       .rst(rst_rx|decode_end_early|decode_end_all),
 
+      .phy_2m_mode(phy_2m_mode),
+      .phy_test_mode(phy_test_mode),
+
       .unique_bit_sequence(unique_bit_sequence),
       .channel_number(channel_number),
       .crc_state_init_bit(crc_state_init_bit),
@@ -383,7 +391,7 @@ rx_energy_detect_cca # (
   .q(q),
   .iq_valid(iq_valid),
 
-  .ed_threshold(RX_ED_THRESHOLD),
+  .ed_threshold(rx_ed_threshold_sel),
 
   .cca_busy(cca_busy_raw),
   .ed_level(ed_level_raw),

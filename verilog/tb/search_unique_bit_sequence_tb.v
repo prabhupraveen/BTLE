@@ -87,7 +87,7 @@ always begin
   #((1000.0/16.0)/2.0) clk = !clk; //16MHz
 end
 
-reg bit;
+reg bit_;
 reg bit_valid;
 reg [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0] unique_bit_sequence;
 
@@ -98,7 +98,7 @@ reg [31:0] clk_count;
 reg [31:0] bit_in_count;
 always @ (posedge clk) begin
   if (rst) begin
-    bit <= 0;
+    bit_ <= 0;
     bit_valid <= 0;
     unique_bit_sequence <= 0;
 
@@ -112,7 +112,7 @@ always @ (posedge clk) begin
 
     if (clk_count[3:0] == 0) begin // speed 1M
       if (bit_in_count < NUM_BIT_INPUT) begin
-        bit <= search_unique_bit_sequence_test_input_mem[bit_in_count];
+        bit_ <= search_unique_bit_sequence_test_input_mem[bit_in_count];
         bit_valid <= 1;
       end
       bit_in_count <= bit_in_count + 1;
@@ -170,7 +170,7 @@ search_unique_bit_sequence # (
   .clk(clk),
   .rst(rst),
 
-  .phy_bit(bit),
+  .phy_bit(bit_),
   .bit_valid(bit_valid),
   .unique_bit_sequence(unique_bit_sequence),
 

@@ -7,14 +7,17 @@
 `timescale 1ns / 1ps
 module btle_rx_core #
 (
-  parameter GFSK_DEMODULATION_BIT_WIDTH = 16,
-  parameter LEN_UNIQUE_BIT_SEQUENCE = 32,
-  parameter CHANNEL_NUMBER_BIT_WIDTH = 6,
-  parameter CRC_STATE_BIT_WIDTH = 24,
-  parameter NUM_BIT_PAYLOAD_LENGTH = 8 // 8 bit in the core spec 6.2
+  parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
+  parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
+  parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
+  parameter integer CRC_STATE_BIT_WIDTH = 24,
+  parameter integer NUM_BIT_PAYLOAD_LENGTH = 8 // 8 bit in the core spec 6.2
 ) (
   input wire clk,
   `KEEP_FOR_DBG input wire rst,
+
+  input wire phy_2m_mode,
+  input wire [2:0] phy_test_mode,
 
   input wire [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0] unique_bit_sequence,
   input wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] channel_number,
@@ -38,6 +41,11 @@ module btle_rx_core #
   `KEEP_FOR_DBG output reg  crc_ok
 );
 
+// TODO(2M-RX):
+// 1) Replace shared timing-recovery metric with 2M-tuned matched-filter discriminator.
+// 2) Add adaptive threshold tracking per channel for sensitivity vs false-hit control.
+// 3) Add optional fast reacquisition path for test-mode burst measurements.
+
 localparam [1:0] IDLE           = 0,
                  EXTRACT_LENGTH = 1,
                  CHECK_CRC      = 2;
@@ -53,6 +61,9 @@ wire [(CRC_STATE_BIT_WIDTH-1) : 0] crc24_bit;
 // Symbol timing recovery signals
 `KEEP_FOR_DBG wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] signal_for_decision;
 `KEEP_FOR_DBG wire signal_for_decision_valid;
+
+wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] decision_threshold;
+wire [15:0] update_period_sym_runtime;
 
 `KEEP_FOR_DBG wire [2:0] phase_sel;
 `KEEP_FOR_DBG wire sym_strobe;
@@ -75,6 +86,8 @@ assign octet_count = bit_count[(NUM_BIT_PAYLOAD_LENGTH+3):3];
 assign crc24_bit = lfsr;
 
 assign payload_length_out = payload_length[(NUM_BIT_PAYLOAD_LENGTH-1) : 0];
+assign decision_threshold = (phy_2m_mode ? {{(2*GFSK_DEMODULATION_BIT_WIDTH-8){1'b0}}, 8'd8} : 0);
+assign update_period_sym_runtime = (phy_2m_mode ? 16'd16 : 16'd32);
 
 // state machine to extract payload length and check crc
 always @ (posedge clk) begin
@@ -159,6 +172,9 @@ gfsk_demodulation # (
   .clk(clk),
   .rst(rst),
 
+  .phy_2m_mode(phy_2m_mode),
+  .decision_threshold(decision_threshold),
+
   .i(i),
   .q(q),
   .iq_valid(iq_valid),
@@ -182,12 +198,14 @@ symbol_timing_recovery_simple # (
 
   .decision_in(signal_for_decision),
   .decision_valid(signal_for_decision_valid),
+  .update_period_sym_runtime(update_period_sym_runtime),
 
   .phase_sel(phase_sel),
   .sym_strobe(sym_strobe),
   .decision_sym(decision_sym)
 );
 
+// TODO: Try with aa_correlator_threshold.v in a separate branch
 // Bit slicing at optimal phase selected by timing recovery
 assign phy_bit_from_timing_recovery = (decision_sym > 0);
 assign bit_valid_from_timing_recovery = sym_strobe;

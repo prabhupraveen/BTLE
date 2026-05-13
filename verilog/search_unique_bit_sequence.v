@@ -2,12 +2,16 @@
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
 
+// search_unique_bit_sequence.v is good+small, but aa_correlator_threshold is better but large;
+// search_unique_bit_sequence.v looks for exact match, while aa_correlator_threshold allows 
+//    some bit errors, for low SNR connections.
+
 `define KEEP_FOR_DBG (*mark_debug="true",DONT_TOUCH="TRUE"*)
 
 `timescale 1ns / 1ps
 module search_unique_bit_sequence #
 (
-  parameter LEN_UNIQUE_BIT_SEQUENCE = 32
+  parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32
 ) (
   input wire clk,
   input wire rst,

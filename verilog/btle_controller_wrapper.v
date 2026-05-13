@@ -3,27 +3,28 @@
 // SPDX-License-Identifier: Apache-2.0 license
 
 // iverilog -o btle_controller_wrapper btle_controller_wrapper.v btle_controller.v btle_ll.v uart_frame_rx.v uart_frame_tx.v rx_clk_gen.v tx_clk_gen.v btle_phy.v btle_rx.v btle_rx_core.v gfsk_demodulation.v symbol_timing_recovery_simple.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v rx_energy_detect_cca.v packet_timing_enforce.v packet_abort_on_crc_fail.v packet_abort_early_term.v
+`define KEEP_FOR_DBG (*mark_debug="true",DONT_TOUCH="TRUE"*)
 
 `timescale 1ns / 1ps
 module btle_controller_wrapper #
 (
-	parameter	CLK_FREQUENCE	= 16_000_000,	//hz
-  parameter BAUD_RATE		= 115200		,		  //9600、19200 、38400 、57600 、115200、230400、460800、921600
-  parameter PARITY			= "NONE"	,		  //"NONE","EVEN","ODD"
-  parameter FRAME_WD		= 8,					    //if PARITY="NONE",it can be 5~9;else 5~8
+	parameter	integer CLK_FREQUENCE	= 16_000_000,	//hz
+  parameter integer BAUD_RATE		= 115200		,		  //9600、19200 、38400 、57600 、115200、230400、460800、921600
+  parameter         PARITY			= "NONE"	,		  //"NONE","EVEN","ODD"
+  parameter integer FRAME_WD		= 8,					    //if PARITY="NONE",it can be 5~9;else 5~8
 
-  parameter CRC_STATE_BIT_WIDTH = 24,
-  parameter CHANNEL_NUMBER_BIT_WIDTH = 6,
-  parameter SAMPLE_PER_SYMBOL = 8,
-  parameter GAUSS_FILTER_BIT_WIDTH = 16,
-  parameter NUM_TAP_GAUSS_FILTER = 17,
-  parameter VCO_BIT_WIDTH = 16,
-  parameter SIN_COS_ADDR_BIT_WIDTH = 11,
-  parameter IQ_BIT_WIDTH = 8,
-  parameter GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
+  parameter integer CRC_STATE_BIT_WIDTH = 24,
+  parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
+  parameter integer SAMPLE_PER_SYMBOL = 8,
+  parameter integer GAUSS_FILTER_BIT_WIDTH = 16,
+  parameter integer NUM_TAP_GAUSS_FILTER = 17,
+  parameter integer VCO_BIT_WIDTH = 16,
+  parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
+  parameter integer IQ_BIT_WIDTH = 8,
+  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
 
-  parameter GFSK_DEMODULATION_BIT_WIDTH = 16,
-  parameter LEN_UNIQUE_BIT_SEQUENCE = 32
+  parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
+  parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32
 ) (
   input clk,
   input rst,
@@ -50,54 +51,54 @@ module btle_controller_wrapper #
 
 // ====baremetal phy interface. should be via uart in the future====
 // for phy tx
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [3:0] ext_tx_gauss_filter_tap_index; // only need to set 0~8, 9~16 will be mirror of 0~7
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] ext_tx_gauss_filter_tap_value;
+`KEEP_FOR_DBG reg [3:0] ext_tx_gauss_filter_tap_index; // only need to set 0~8, 9~16 will be mirror of 0~7
+`KEEP_FOR_DBG reg signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] ext_tx_gauss_filter_tap_value;
 
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] ext_tx_cos_table_write_address;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg signed [(IQ_BIT_WIDTH-1) : 0] ext_tx_cos_table_write_data;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] ext_tx_sin_table_write_address;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg signed [(IQ_BIT_WIDTH-1) : 0] ext_tx_sin_table_write_data;
+`KEEP_FOR_DBG reg [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] ext_tx_cos_table_write_address;
+`KEEP_FOR_DBG reg signed [(IQ_BIT_WIDTH-1) : 0] ext_tx_cos_table_write_data;
+`KEEP_FOR_DBG reg [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] ext_tx_sin_table_write_address;
+`KEEP_FOR_DBG reg signed [(IQ_BIT_WIDTH-1) : 0] ext_tx_sin_table_write_data;
 
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [7:0]  ext_tx_preamble;
+`KEEP_FOR_DBG reg [7:0]  ext_tx_preamble;
 
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [31:0] ext_tx_access_address;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [(CRC_STATE_BIT_WIDTH-1) : 0] ext_tx_crc_state_init_bit;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg ext_tx_crc_state_init_bit_load;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] ext_tx_channel_number;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg ext_tx_channel_number_load;
+`KEEP_FOR_DBG reg [31:0] ext_tx_access_address;
+`KEEP_FOR_DBG reg [(CRC_STATE_BIT_WIDTH-1) : 0] ext_tx_crc_state_init_bit;
+`KEEP_FOR_DBG reg ext_tx_crc_state_init_bit_load;
+`KEEP_FOR_DBG reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] ext_tx_channel_number;
+`KEEP_FOR_DBG reg ext_tx_channel_number_load;
 
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [7:0] ext_tx_pdu_octet_mem_data;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [5:0] ext_tx_pdu_octet_mem_addr;
+`KEEP_FOR_DBG reg [7:0] ext_tx_pdu_octet_mem_data;
+`KEEP_FOR_DBG reg [5:0] ext_tx_pdu_octet_mem_addr;
 
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg ext_tx_start;
+`KEEP_FOR_DBG reg ext_tx_start;
 
 // for phy tx debug purpose
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire ext_tx_phy_bit;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire ext_tx_phy_bit_valid;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire ext_tx_phy_bit_valid_last;
+`KEEP_FOR_DBG wire ext_tx_phy_bit;
+`KEEP_FOR_DBG wire ext_tx_phy_bit_valid;
+`KEEP_FOR_DBG wire ext_tx_phy_bit_valid_last;
 
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire ext_tx_bit_upsample;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire ext_tx_bit_upsample_valid;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire ext_tx_bit_upsample_valid_last;
+`KEEP_FOR_DBG wire ext_tx_bit_upsample;
+`KEEP_FOR_DBG wire ext_tx_bit_upsample_valid;
+`KEEP_FOR_DBG wire ext_tx_bit_upsample_valid_last;
 
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] ext_tx_bit_upsample_gauss_filter;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire ext_tx_bit_upsample_gauss_filter_valid;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire ext_tx_bit_upsample_gauss_filter_valid_last;
+`KEEP_FOR_DBG wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] ext_tx_bit_upsample_gauss_filter;
+`KEEP_FOR_DBG wire ext_tx_bit_upsample_gauss_filter_valid;
+`KEEP_FOR_DBG wire ext_tx_bit_upsample_gauss_filter_valid_last;
 
 // for phy rx
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0]  ext_rx_unique_bit_sequence;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] ext_rx_channel_number;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg [(CRC_STATE_BIT_WIDTH-1) : 0]      ext_rx_crc_state_init_bit;
+`KEEP_FOR_DBG reg [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0]  ext_rx_unique_bit_sequence;
+`KEEP_FOR_DBG reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] ext_rx_channel_number;
+`KEEP_FOR_DBG reg [(CRC_STATE_BIT_WIDTH-1) : 0]      ext_rx_crc_state_init_bit;
 
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire  rx_hit_flag;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire  rx_decode_run;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire  rx_decode_end;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire  rx_crc_ok;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire  [2:0] rx_best_phase;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire  [6:0] rx_payload_length;
+`KEEP_FOR_DBG wire  rx_hit_flag;
+`KEEP_FOR_DBG wire  rx_decode_run;
+`KEEP_FOR_DBG wire  rx_decode_end;
+`KEEP_FOR_DBG wire  rx_crc_ok;
+`KEEP_FOR_DBG wire  [2:0] rx_best_phase;
+`KEEP_FOR_DBG wire  [6:0] rx_payload_length;
 
-(*mark_debug="true",DONT_TOUCH="TRUE"*) reg  [5:0] ext_rx_pdu_octet_mem_addr;
-(*mark_debug="true",DONT_TOUCH="TRUE"*) wire  [7:0] rx_pdu_octet_mem_data;
+`KEEP_FOR_DBG reg  [5:0] ext_rx_pdu_octet_mem_addr;
+`KEEP_FOR_DBG wire  [7:0] rx_pdu_octet_mem_data;
 
 //fake outputs
 assign fake_pins = rx_pdu_octet_mem_data+rx_payload_length+rx_best_phase+rx_crc_ok+rx_decode_end+rx_decode_run+rx_hit_flag+

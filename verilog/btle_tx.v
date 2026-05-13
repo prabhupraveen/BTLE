@@ -4,63 +4,69 @@
 
 // iverilog -o btle_tx btle_tx.v sdpram_one_clk.v sdpram_two_clk.v crc24.v crc24_core.v scramble.v scramble_core.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v 
 
+
+`define KEEP_FOR_DBG (*mark_debug="true",DONT_TOUCH="TRUE"*)
+
 `timescale 1ns / 1ps
 module btle_tx #
 (
-  parameter NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
-  parameter CRC_STATE_BIT_WIDTH = 24,
-  parameter CHANNEL_NUMBER_BIT_WIDTH = 6,
-  parameter SAMPLE_PER_SYMBOL = 8,
-  parameter GAUSS_FILTER_BIT_WIDTH = 16,
-  parameter NUM_TAP_GAUSS_FILTER = 17,
-  parameter VCO_BIT_WIDTH = 16,
-  parameter SIN_COS_ADDR_BIT_WIDTH = 11,
-  parameter IQ_BIT_WIDTH = 8,
-  parameter GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1
+  parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
+  parameter integer CRC_STATE_BIT_WIDTH = 24,
+  parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
+  parameter integer SAMPLE_PER_SYMBOL = 8,
+  parameter integer GAUSS_FILTER_BIT_WIDTH = 16,
+  parameter integer NUM_TAP_GAUSS_FILTER = 17,
+  parameter integer VCO_BIT_WIDTH = 16,
+  parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
+  parameter integer IQ_BIT_WIDTH = 8,
+  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1
 ) (
   input wire clk, // for baseband processing, 16MHz
   input wire rst,
 
   input wire clkb, // for writing pkt to ram with different/higher clock speed
 
-  input wire [3:0] gauss_filter_tap_index, // only need to set 0~8, 9~16 will be mirror of 0~7
-  input wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] gauss_filter_tap_value,
+  input wire phy_2m_mode,
+  input wire [2:0] phy_test_mode,
+
+  `KEEP_FOR_DBG input wire [3:0] gauss_filter_tap_index, // only need to set 0~8, 9~16 will be mirror of 0~7
+  `KEEP_FOR_DBG input wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] gauss_filter_tap_value,
   
-  input  wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] cos_table_write_address,
-  input  wire signed [(IQ_BIT_WIDTH-1) : 0] cos_table_write_data,
-  input  wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] sin_table_write_address,
-  input  wire signed [(IQ_BIT_WIDTH-1) : 0] sin_table_write_data,
+  `KEEP_FOR_DBG input  wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] cos_table_write_address,
+  `KEEP_FOR_DBG input  wire signed [(IQ_BIT_WIDTH-1) : 0] cos_table_write_data,
+  `KEEP_FOR_DBG input  wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] sin_table_write_address,
+  `KEEP_FOR_DBG input  wire signed [(IQ_BIT_WIDTH-1) : 0] sin_table_write_data,
 
-  input  wire [7:0]  preamble,
+  `KEEP_FOR_DBG input  wire [7:0]  preamble,
 
-  input  wire [31:0] access_address,
-  input  wire [(CRC_STATE_BIT_WIDTH-1) : 0] crc_state_init_bit, // load into lfsr (linear feedback shift register) upon crc_state_init_bit_load==1
-  input  wire crc_state_init_bit_load,
-  input  wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] channel_number, // load into lfsr (linear feedback shift register) upon channel_number_load==1
-  input  wire channel_number_load,
+  `KEEP_FOR_DBG input  wire [31:0] access_address,
+  `KEEP_FOR_DBG input  wire [(CRC_STATE_BIT_WIDTH-1) : 0] crc_state_init_bit, // load into lfsr (linear feedback shift register) upon crc_state_init_bit_load==1
+  `KEEP_FOR_DBG input  wire crc_state_init_bit_load,
+  `KEEP_FOR_DBG input  wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] channel_number, // load into lfsr (linear feedback shift register) upon channel_number_load==1
+  `KEEP_FOR_DBG input  wire channel_number_load,
 
-  input  wire [7:0] pdu_octet_mem_data,
-  input  wire [NUM_BIT_PAYLOAD_LENGTH:0] pdu_octet_mem_addr,
+  `KEEP_FOR_DBG input  wire [7:0] pdu_octet_mem_data,
+  `KEEP_FOR_DBG input  wire [NUM_BIT_PAYLOAD_LENGTH:0] pdu_octet_mem_addr,
 
-  input  wire tx_start,
+  `KEEP_FOR_DBG input  wire tx_start,
 
-  output wire signed [(IQ_BIT_WIDTH-1) : 0] i,
-  output wire signed [(IQ_BIT_WIDTH-1) : 0] q,
-  output wire iq_valid,
-  output wire iq_valid_last,
+  `KEEP_FOR_DBG output wire signed [(IQ_BIT_WIDTH-1) : 0] i,
+  `KEEP_FOR_DBG output wire signed [(IQ_BIT_WIDTH-1) : 0] q,
+  `KEEP_FOR_DBG output wire iq_valid,
+  `KEEP_FOR_DBG output wire iq_valid_last,
 
   // for debug purpose
-  output wire phy_bit,
-  output wire phy_bit_valid,
-  output wire phy_bit_valid_last,
+  `KEEP_FOR_DBG output wire phy_bit,
+  `KEEP_FOR_DBG output wire phy_bit_valid,
+  `KEEP_FOR_DBG output wire phy_bit_valid_last,
 
-  output wire bit_upsample,
-  output wire bit_upsample_valid,
-  output wire bit_upsample_valid_last,
+  `KEEP_FOR_DBG output wire bit_upsample,
+  `KEEP_FOR_DBG output wire bit_upsample_valid,
+  `KEEP_FOR_DBG output wire bit_upsample_valid_last,
 
-  output wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] bit_upsample_gauss_filter,
-  output wire bit_upsample_gauss_filter_valid,
-  output wire bit_upsample_gauss_filter_valid_last
+  `KEEP_FOR_DBG output wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] bit_upsample_gauss_filter,
+  `KEEP_FOR_DBG output wire bit_upsample_gauss_filter_valid,
+  `KEEP_FOR_DBG output wire bit_upsample_gauss_filter_valid_last
 );
 
 localparam [1:0] IDLE               = 0,
@@ -68,33 +74,80 @@ localparam [1:0] IDLE               = 0,
                  TX_PDU             = 2,
                  WAIT_LAST_SAMPLE   = 3;
 
-reg  [1:0] phy_tx_state;
-reg  [NUM_BIT_PAYLOAD_LENGTH:0] addr;
-wire [7:0] data;
-reg  [7:0] octet;
+`KEEP_FOR_DBG reg  [1:0] phy_tx_state;
+`KEEP_FOR_DBG reg  [NUM_BIT_PAYLOAD_LENGTH:0] addr;
+`KEEP_FOR_DBG wire [7:0] data;
+`KEEP_FOR_DBG reg  [7:0] octet;
 // wire adv_pdu_flag;
-reg  [NUM_BIT_PAYLOAD_LENGTH:0] payload_length;
-reg  [(NUM_BIT_PAYLOAD_LENGTH+3):0] bit_count;
-reg  [5:0] bit_count_preamble_access;
+`KEEP_FOR_DBG reg  [NUM_BIT_PAYLOAD_LENGTH:0] payload_length;
+`KEEP_FOR_DBG reg  [(NUM_BIT_PAYLOAD_LENGTH+3):0] bit_count;
+`KEEP_FOR_DBG reg  [5:0] bit_count_preamble_access;
 
-reg info_bit;
-reg info_bit_valid;
-reg info_bit_valid_last;
+`KEEP_FOR_DBG reg info_bit;
+`KEEP_FOR_DBG reg info_bit_valid;
+`KEEP_FOR_DBG reg info_bit_valid_last;
 
-reg  [39:0] preamble_access_address;
+`KEEP_FOR_DBG reg  [47:0] preamble_access_address;
 
-wire info_bit_after_crc24;
-wire info_bit_after_crc24_valid;
-wire info_bit_after_crc24_valid_last;
+`KEEP_FOR_DBG wire [5:0] preamble_aa_len_bits;
+`KEEP_FOR_DBG wire [15:0] preamble_word;
+`KEEP_FOR_DBG wire symbol_tick;
+`KEEP_FOR_DBG wire octet_tick;
+
+`KEEP_FOR_DBG localparam [2:0] PHY_TEST_MODE_NORMAL   = 3'd0,
+                               PHY_TEST_MODE_PRBS9    = 3'd1,
+                               PHY_TEST_MODE_ALT_10   = 3'd2,
+                               PHY_TEST_MODE_ALL_1    = 3'd3,
+                               PHY_TEST_MODE_ALL_0    = 3'd4,
+                               PHY_TEST_MODE_OSR16    = 3'd5;
+
+`KEEP_FOR_DBG reg [8:0] prbs9_lfsr;
+`KEEP_FOR_DBG wire tx_test_enable;
+`KEEP_FOR_DBG wire phy_bit_from_pipeline;
+`KEEP_FOR_DBG wire phy_bit_valid_from_pipeline;
+`KEEP_FOR_DBG wire phy_bit_valid_last_from_pipeline;
+`KEEP_FOR_DBG wire phy_bit_mux;
+`KEEP_FOR_DBG wire phy_bit_valid_mux;
+`KEEP_FOR_DBG wire phy_bit_valid_last_mux;
+
+`KEEP_FOR_DBG wire info_bit_after_crc24;
+`KEEP_FOR_DBG wire info_bit_after_crc24_valid;
+`KEEP_FOR_DBG wire info_bit_after_crc24_valid_last;
+
+`KEEP_FOR_DBG wire phy_bit_from_scramble;
+`KEEP_FOR_DBG wire phy_bit_valid_from_scramble;
+`KEEP_FOR_DBG wire phy_bit_valid_last_from_scramble;
 
 // wire phy_bit;
 // wire phy_bit_valid;
 // wire phy_bit_valid_last;
 
-wire signed [(IQ_BIT_WIDTH-1) : 0] i_internal;
-wire signed [(IQ_BIT_WIDTH-1) : 0] q_internal;
+`KEEP_FOR_DBG wire signed [(IQ_BIT_WIDTH-1) : 0] i_internal;
+`KEEP_FOR_DBG wire signed [(IQ_BIT_WIDTH-1) : 0] q_internal;
 
-reg [6:0] clk_count; // assume clk speed 16M, baseband phy_bit rate 1M. octet rate 1/8M. need 128x clk speed down to read octet memory.
+`KEEP_FOR_DBG reg [6:0] clk_count; // assume clk speed 16M, baseband phy_bit rate 1M. octet rate 1/8M. need 128x clk speed down to read octet memory.
+
+assign preamble_aa_len_bits = (phy_2m_mode ? 6'd48 : 6'd40);
+assign preamble_word = (phy_2m_mode ? {preamble, preamble} : {8'h00, preamble});
+assign symbol_tick = (phy_2m_mode ? (clk_count[2:0] == 3'd1) : (clk_count[3:0] == 4'd1));
+assign octet_tick = (phy_2m_mode ? (clk_count[5:0] == 6'd0) : (clk_count[6:0] == 7'd0));
+assign tx_test_enable = (phy_test_mode != PHY_TEST_MODE_NORMAL);
+
+assign phy_bit_from_pipeline = (tx_test_enable ?
+                                (phy_test_mode == PHY_TEST_MODE_PRBS9 ? prbs9_lfsr[0] :
+                                 (phy_test_mode == PHY_TEST_MODE_ALT_10 ? bit_count[0] :
+                                  (phy_test_mode == PHY_TEST_MODE_ALL_1 ? 1'b1 : 1'b0))) :
+                                phy_bit_from_scramble);
+assign phy_bit_valid_from_pipeline = (tx_test_enable ? info_bit_valid : phy_bit_valid_from_scramble);
+assign phy_bit_valid_last_from_pipeline = (tx_test_enable ? info_bit_valid_last : phy_bit_valid_last_from_scramble);
+
+assign phy_bit_mux = phy_bit_from_pipeline;
+assign phy_bit_valid_mux = phy_bit_valid_from_pipeline;
+assign phy_bit_valid_last_mux = phy_bit_valid_last_from_pipeline;
+
+assign phy_bit = phy_bit_mux;
+assign phy_bit_valid = phy_bit_valid_mux;
+assign phy_bit_valid_last = phy_bit_valid_last_mux;
 
 // assign adv_pdu_flag = (channel_number==37 || channel_number==38 || channel_number==39);
 
@@ -118,6 +171,8 @@ always @ (posedge clk) begin
 
     clk_count <= 0;
 
+    prbs9_lfsr <= 9'h1FF;
+
     phy_tx_state <= IDLE;
   end else begin
     // if (phy_bit_valid) begin
@@ -139,20 +194,25 @@ always @ (posedge clk) begin
 
         clk_count <= 0;
 
-        preamble_access_address <= (tx_start? {access_address, preamble} : preamble_access_address);
+        prbs9_lfsr <= (tx_start ? 9'h1FF : prbs9_lfsr);
+
+        preamble_access_address <= (tx_start? {access_address, preamble_word} : preamble_access_address);
         phy_tx_state <= (tx_start? TX_PREAMBLE_ACCESS : phy_tx_state);
       end
 
       TX_PREAMBLE_ACCESS: begin
         clk_count <= clk_count + 1;
-        if (clk_count[3:0] == 1) begin // speed 1M
+        if (symbol_tick) begin
           info_bit <= preamble_access_address[0];
           info_bit_valid <= 1;
-          preamble_access_address[38:0] <= preamble_access_address[39:1];
+          preamble_access_address[46:0] <= preamble_access_address[47:1];
 
           bit_count_preamble_access <= bit_count_preamble_access + 1;
+          if (tx_test_enable) begin
+            prbs9_lfsr <= {prbs9_lfsr[4]^prbs9_lfsr[8], prbs9_lfsr[8:1]};
+          end
 
-          if (bit_count_preamble_access == (40 - 1)) begin
+          if (bit_count_preamble_access == (preamble_aa_len_bits - 1)) begin
             phy_tx_state <= TX_PDU;
           end
         end else begin
@@ -162,16 +222,19 @@ always @ (posedge clk) begin
 
       TX_PDU: begin
         clk_count <= clk_count + 1;
-        if (clk_count == 0) begin // speed 1/8M
+        if (octet_tick) begin
           addr <= addr + 1;
           octet <= data;
         end
-        if (clk_count[3:0] == 1) begin // speed 1M
+        if (symbol_tick) begin
           info_bit <= octet[0];
           info_bit_valid <= 1;
           octet[6:0] <= octet[7:1];
 
           bit_count <= bit_count + 1;
+          if (tx_test_enable) begin
+            prbs9_lfsr <= {prbs9_lfsr[4]^prbs9_lfsr[8], prbs9_lfsr[8:1]};
+          end
 
           if (bit_count == ((payload_length+2)*8 - 1)) begin
             info_bit_valid_last <= 1;
@@ -181,7 +244,7 @@ always @ (posedge clk) begin
           info_bit_valid <= 0;
         end
 
-        if (addr == 2 && clk_count == 1) begin
+        if (addr == 2 && symbol_tick) begin
           // payload_length <= (adv_pdu_flag? octet[5:0] : octet[4:0]);
           payload_length <= {{(NUM_BIT_PAYLOAD_LENGTH+1-8){1'b0}}, octet};
         end
@@ -249,9 +312,9 @@ scramble # (
   .data_in_valid(info_bit_after_crc24_valid),
   .data_in_valid_last(info_bit_after_crc24_valid_last),
 
-  .data_out(phy_bit),
-  .data_out_valid(phy_bit_valid),
-  .data_out_valid_last(phy_bit_valid_last)
+  .data_out(phy_bit_from_scramble),
+  .data_out_valid(phy_bit_valid_from_scramble),
+  .data_out_valid_last(phy_bit_valid_last_from_scramble)
 );
 
 gfsk_modulation # (
@@ -274,9 +337,11 @@ gfsk_modulation # (
   .sin_table_write_address(sin_table_write_address),
   .sin_table_write_data(sin_table_write_data),
 
-  .phy_bit(phy_bit),
-  .bit_valid(phy_bit_valid),
-  .bit_valid_last(phy_bit_valid_last),
+  .phy_2m_mode(phy_2m_mode),
+  .osr_16x_en(phy_test_mode == PHY_TEST_MODE_OSR16),
+  .phy_bit(phy_bit_mux),
+  .bit_valid(phy_bit_valid_mux),
+  .bit_valid_last(phy_bit_valid_last_mux),
 
   .cos_out(i_internal),
   .sin_out(q_internal),
