@@ -62,7 +62,6 @@ wire [(CRC_STATE_BIT_WIDTH-1) : 0] crc24_bit;
 `KEEP_FOR_DBG wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] signal_for_decision;
 `KEEP_FOR_DBG wire signal_for_decision_valid;
 
-wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] decision_threshold;
 wire [15:0] update_period_sym_runtime;
 
 `KEEP_FOR_DBG wire [2:0] phase_sel;
@@ -86,7 +85,7 @@ assign octet_count = bit_count[(NUM_BIT_PAYLOAD_LENGTH+3):3];
 assign crc24_bit = lfsr;
 
 assign payload_length_out = payload_length[(NUM_BIT_PAYLOAD_LENGTH-1) : 0];
-assign decision_threshold = (phy_2m_mode ? {{(2*GFSK_DEMODULATION_BIT_WIDTH-8){1'b0}}, 8'd8} : 0);
+
 assign update_period_sym_runtime = (phy_2m_mode ? 16'd16 : 16'd32);
 
 // state machine to extract payload length and check crc
@@ -173,7 +172,6 @@ gfsk_demodulation # (
   .rst(rst),
 
   .phy_2m_mode(phy_2m_mode),
-  .decision_threshold(decision_threshold),
 
   .i(i),
   .q(q),

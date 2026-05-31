@@ -474,7 +474,8 @@ btle_phy #
 
   .GFSK_DEMODULATION_BIT_WIDTH(GFSK_DEMODULATION_BIT_WIDTH),
   .LEN_UNIQUE_BIT_SEQUENCE(LEN_UNIQUE_BIT_SEQUENCE),
-  .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH)
+  .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH),
+  .RF_I_OR_Q_BIT_WIDTH(RF_I_OR_Q_BIT_WIDTH)
 ) btle_phy_i (
   .clk(bb_clk),
   .rst(bb_rst),
@@ -531,6 +532,7 @@ btle_phy #
   .rx_i_signal(rx_i_signal),
   .rx_q_signal(rx_q_signal),
   .rx_iq_valid(rx_iq_valid),
+  .rx_magnitude(i_abs_add_q_abs), // |I| + |Q| : from auxiliary daemon
 
   .rx_hit_flag(ext_rx_hit_flag),
   .rx_decode_run(ext_rx_decode_run),

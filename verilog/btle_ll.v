@@ -417,6 +417,10 @@ always @ (posedge axi_aclk) begin
         if (tx_iq_valid_last)
           ll_state <= STANDBY;
       end
+      default: begin
+        if (tx_iq_valid_last)
+          ll_state <= ADVERTISING;
+      end
     endcase
   end
 end

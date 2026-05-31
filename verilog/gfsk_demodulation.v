@@ -1,7 +1,3 @@
-// Author: Xianjun Jiao <putaoshu@msn.com>
-// SPDX-FileCopyrightText: 2024 Xianjun Jiao
-// SPDX-License-Identifier: Apache-2.0 license
-
 `define KEEP_FOR_DBG (*mark_debug="true",DONT_TOUCH="TRUE"*)
 
 `timescale 1ns / 1ps
@@ -13,7 +9,6 @@ module gfsk_demodulation #
   input wire rst,
 
   input wire phy_2m_mode,
-  input wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] decision_threshold,
 
   `KEEP_FOR_DBG input wire signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] i,
   `KEEP_FOR_DBG input wire signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] q,
@@ -22,7 +17,7 @@ module gfsk_demodulation #
   `KEEP_FOR_DBG output reg signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] signal_for_decision,
   `KEEP_FOR_DBG output wire signal_for_decision_valid,
 
-  `KEEP_FOR_DBG output reg  phy_bit,
+  `KEEP_FOR_DBG output reg phy_bit,
   `KEEP_FOR_DBG output wire bit_valid
 );
 
@@ -30,15 +25,17 @@ module gfsk_demodulation #
 `KEEP_FOR_DBG reg signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] i1;
 `KEEP_FOR_DBG reg signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] q0;
 `KEEP_FOR_DBG reg signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] q1;
-wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] signal_for_decision_shaped;
+
+`KEEP_FOR_DBG reg signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] signal_for_decision_reg;
+`KEEP_FOR_DBG reg signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1) : 0] signal_for_decision_shaped_reg;
 
 reg iq_valid_delay1;
 reg iq_valid_delay2;
 reg iq_valid_delay3;
+reg iq_valid_delay4;
 
-assign signal_for_decision_valid = iq_valid_delay2;
-assign bit_valid = iq_valid_delay3;
-assign signal_for_decision_shaped = (phy_2m_mode ? (signal_for_decision >>> 1) : signal_for_decision);
+assign signal_for_decision_valid = iq_valid_delay4;
+assign bit_valid = iq_valid_delay4;
 
 always @ (posedge clk) begin
   if (rst) begin
@@ -47,16 +44,22 @@ always @ (posedge clk) begin
     q0 <= 0;
     q1 <= 0;
 
+    signal_for_decision_reg <= 0;
+    signal_for_decision_shaped_reg <= 0;
     signal_for_decision <= 0;
+
     phy_bit <= 0;
 
     iq_valid_delay1 <= 0;
     iq_valid_delay2 <= 0;
     iq_valid_delay3 <= 0;
+    iq_valid_delay4 <= 0;
+
   end else begin
     iq_valid_delay1 <= iq_valid;
     iq_valid_delay2 <= iq_valid_delay1;
     iq_valid_delay3 <= iq_valid_delay2;
+    iq_valid_delay4 <= iq_valid_delay3;
 
     if (iq_valid) begin
       i1 <= {{GFSK_DEMODULATION_BIT_WIDTH{i[GFSK_DEMODULATION_BIT_WIDTH-1]}}, i};
@@ -65,8 +68,18 @@ always @ (posedge clk) begin
       q0 <= q1;
     end
 
-    signal_for_decision <= i0*q1 - i1*q0;
-    phy_bit <= (signal_for_decision_shaped > decision_threshold);
+    // Stage 1: discriminator
+    signal_for_decision_reg <= i0*q1 - i1*q0;
+
+    // Stage 2: scaling
+    if (phy_2m_mode)
+      signal_for_decision_shaped_reg <= signal_for_decision_reg >>> 1;
+    else
+      signal_for_decision_shaped_reg <= signal_for_decision_reg;
+
+    // Stage 3: output + decision
+    signal_for_decision <= signal_for_decision_shaped_reg;
+    phy_bit <= (signal_for_decision_shaped_reg > 0);
 
   end
 end

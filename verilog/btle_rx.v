@@ -15,6 +15,7 @@ module btle_rx #
   parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
   parameter integer CRC_STATE_BIT_WIDTH = 24,
   parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
+  parameter integer RF_I_OR_Q_BIT_WIDTH = 16,   // width of pre-computed magnitude inputs
 
   // Optional RX control/guard features (default disabled to preserve legacy behavior)
   parameter ENABLE_RX_ED_CCA = 0,
@@ -26,8 +27,8 @@ module btle_rx #
   parameter PKT_PRE_AA_TIMEOUT_US = 80,
   parameter PKT_MAX_US = 4000,
   parameter RX_CLK_HZ = 16000000,
-  parameter RX_ED_THRESHOLD = 32'd0,
-  parameter RX_ED_WINDOW_SAMPLES = 128
+  parameter RX_ED_THRESHOLD = 32'd0,   // yet to know
+  parameter RX_ED_WINDOW_SAMPLES = 128 // must be a power of 2
 ) (
   input wire clk, // for baseband processing, 16MHz
   input wire rst,
@@ -44,6 +45,7 @@ module btle_rx #
   `KEEP_FOR_DBG input wire signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] i,
   `KEEP_FOR_DBG input wire signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] q,
   `KEEP_FOR_DBG input wire iq_valid,
+  input wire [RF_I_OR_Q_BIT_WIDTH : 0] magnitude,  // |I|+|Q| from auxiliary_daemon
 
   output wire hit_flag,
   output reg  decode_run,
@@ -382,7 +384,8 @@ endgenerate
 rx_energy_detect_cca # (
   .IQ_W(GFSK_DEMODULATION_BIT_WIDTH),
   .ACC_W(32),
-  .WINDOW_SAMPLES(RX_ED_WINDOW_SAMPLES)
+  .WINDOW_SAMPLES(RX_ED_WINDOW_SAMPLES),
+  .MAG_W(RF_I_OR_Q_BIT_WIDTH + 1)
 ) rx_energy_detect_cca_i (
   .clk(clk),
   .rst(rst_rx),
@@ -390,6 +393,7 @@ rx_energy_detect_cca # (
   .i(i),
   .q(q),
   .iq_valid(iq_valid),
+  .rx_magnitude(magnitude),
 
   .ed_threshold(rx_ed_threshold_sel),
 

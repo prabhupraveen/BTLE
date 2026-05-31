@@ -19,7 +19,8 @@ module btle_phy #
 
   parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
   parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
-  parameter integer NUM_BIT_PAYLOAD_LENGTH = 8 // 8 bit in the core spec 6.2
+  parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
+  parameter integer RF_I_OR_Q_BIT_WIDTH = 16    // width of pre-computed magnitude inputs
 ) (
   input wire clk,
   input wire rst,
@@ -77,6 +78,7 @@ module btle_phy #
   input wire  signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] rx_i_signal,
   input wire  signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] rx_q_signal,
   input wire  rx_iq_valid,
+  input wire [RF_I_OR_Q_BIT_WIDTH : 0] rx_magnitude,  // pre-computed |I|+|Q| from auxiliary_daemon
 
   output wire  rx_hit_flag,
   output wire  rx_decode_run,
@@ -160,7 +162,8 @@ btle_rx # (
   .LEN_UNIQUE_BIT_SEQUENCE(LEN_UNIQUE_BIT_SEQUENCE),
   .CHANNEL_NUMBER_BIT_WIDTH(CHANNEL_NUMBER_BIT_WIDTH),
   .CRC_STATE_BIT_WIDTH(CRC_STATE_BIT_WIDTH),
-  .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH)
+  .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH),
+  .RF_I_OR_Q_BIT_WIDTH(RF_I_OR_Q_BIT_WIDTH)
 ) btle_rx_i (
   .clk(clk),
   .rst(rst),
@@ -177,6 +180,7 @@ btle_rx # (
   .i(rx_i_signal),
   .q(rx_q_signal),
   .iq_valid(rx_iq_valid),
+  .magnitude(rx_magnitude), // |I| + |Q| from auxiliary daemon
 
   .hit_flag(rx_hit_flag),
   .decode_run(rx_decode_run),

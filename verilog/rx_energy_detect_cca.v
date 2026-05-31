@@ -11,7 +11,8 @@
 module rx_energy_detect_cca #(
   parameter integer IQ_W = 16,
   parameter integer ACC_W = 32,
-  parameter integer WINDOW_SAMPLES = 128
+  parameter integer WINDOW_SAMPLES = 128,
+  parameter integer MAG_W = 17  // width of pre-computed magnitude (typically IQ_W+1)
 )(
   input  wire clk,
   input  wire rst,
@@ -19,17 +20,18 @@ module rx_energy_detect_cca #(
   input  wire signed [IQ_W-1:0] i,
   input  wire signed [IQ_W-1:0] q,
   input  wire iq_valid,
+  input  wire [MAG_W-1:0] rx_magnitude,  // rx magnitude from auxiliary_daemon
 
-  input  wire [ACC_W-1:0] ed_threshold, // compare against average magnitude
+  input  wire [ACC_W-1:0] ed_threshold,  // compare against average magnitude
 
   output reg  cca_busy,
   output reg  [ACC_W-1:0] ed_level,
   output reg  ed_valid
 );
 
-  wire [IQ_W-1:0] abs_i = i[IQ_W-1] ? (~i + 1'b1) : i;
-  wire [IQ_W-1:0] abs_q = q[IQ_W-1] ? (~q + 1'b1) : q;
-  wire [IQ_W:0] mag = abs_i + abs_q; // |I|+|Q|
+  // Magnitude computation is performed by auxiliary_daemon (|I| + |Q|).
+  // This module uses only the pre-computed rx_magnitude for CCA windowed accumulation.
+  wire [MAG_W-1:0] mag = rx_magnitude;
 
   reg [ACC_W-1:0] acc;
   reg [31:0]      cnt;
@@ -45,7 +47,7 @@ module rx_energy_detect_cca #(
       ed_valid <= 1'b0;
 
       if (iq_valid) begin
-        acc <= acc + {{(ACC_W-(IQ_W+1)){1'b0}}, mag};
+        acc <= acc + {{(ACC_W-MAG_W){1'b0}}, mag};
         cnt <= cnt + 1;
 
         if (cnt == (WINDOW_SAMPLES-1)) begin
