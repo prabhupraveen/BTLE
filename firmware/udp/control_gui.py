@@ -24,7 +24,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QGroupBox, QLabel, QPushButton, QLineEdit, QCheckBox, QDialog,
     QFormLayout, QDialogButtonBox, QMessageBox, QPlainTextEdit, QSizePolicy,
-    QFrame, QScrollArea, QSpacerItem, QTabWidget
+    QFrame, QScrollArea, QSpacerItem, QTabWidget, QRadioButton, QButtonGroup
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt6.QtGui import QColor, QTextCharFormat, QFont, QTextCursor, QPalette
@@ -56,6 +56,7 @@ class AppConfig:
     default_channel:     str  = "37"
     default_aa:          str  = "0x8E89BED6"
     default_crc_init:    str  = "0x555555"
+    default_phy_2m_mode: str  = "0"
     sudo_password:       str  = ""
     use_sudo_fpga_ctl:   bool = True
     use_sudo_send_cmd:   bool = True
@@ -564,9 +565,26 @@ class ConfigDialog(QDialog):
         self.def_ch  = self._le(self.cfg.default_channel)
         self.def_aa  = self._le(self.cfg.default_aa)
         self.def_crc = self._le(self.cfg.default_crc_init)
+        self.def_phy_1m = QRadioButton("1M")
+        self.def_phy_2m = QRadioButton("2M")
+        self.def_phy_group = QButtonGroup(self)
+        self.def_phy_group.addButton(self.def_phy_1m, 0)
+        self.def_phy_group.addButton(self.def_phy_2m, 1)
+        if self.cfg.default_phy_2m_mode == "1":
+            self.def_phy_2m.setChecked(True)
+        else:
+            self.def_phy_1m.setChecked(True)
+        phy_widget = QWidget()
+        phy_row = QHBoxLayout(phy_widget)
+        phy_row.setContentsMargins(0, 0, 0, 0)
+        phy_row.setSpacing(12)
+        phy_row.addWidget(self.def_phy_1m)
+        phy_row.addWidget(self.def_phy_2m)
+        phy_row.addStretch()
         self._row(f, "Default Channel:",      self.def_ch)
         self._row(f, "Default Access Addr:",  self.def_aa)
         self._row(f, "Default CRC Init:",     self.def_crc)
+        self._row(f, "Default PHY:",          phy_widget)
         lay.addWidget(g)
 
         # ── Sudo ─────────────────────────────────────
@@ -611,6 +629,7 @@ class ConfigDialog(QDialog):
             default_channel=self.def_ch.text().strip(),
             default_aa=self.def_aa.text().strip(),
             default_crc_init=self.def_crc.text().strip(),
+            default_phy_2m_mode=str(self.def_phy_group.checkedId()),
             sudo_password=self.sudo_pass.text(),
             use_sudo_fpga_ctl=self.sudo_fpga_ctl.isChecked(),
             use_sudo_send_cmd=self.sudo_send_cmd.isChecked(),
@@ -651,16 +670,35 @@ class BtleLLPanel(QGroupBox):
         self.n_edit = QLineEdit(self.cfg.default_channel)
         self.c_edit = QLineEdit(self.cfg.default_crc_init)
         self.a_edit = QLineEdit(self.cfg.default_aa)
+        self.phy_1m_rb = QRadioButton("1M")
+        self.phy_2m_rb = QRadioButton("2M")
+        self.phy_group = QButtonGroup(self)
+        self.phy_group.addButton(self.phy_1m_rb, 0)
+        self.phy_group.addButton(self.phy_2m_rb, 1)
+        if self.cfg.default_phy_2m_mode == "1":
+            self.phy_2m_rb.setChecked(True)
+        else:
+            self.phy_1m_rb.setChecked(True)
+        phy_widget = QWidget()
+        phy_row = QHBoxLayout(phy_widget)
+        phy_row.setContentsMargins(0, 0, 0, 0)
+        phy_row.setSpacing(12)
+        phy_row.addWidget(self.phy_1m_rb)
+        phy_row.addWidget(self.phy_2m_rb)
+        phy_row.addStretch()
         for w in (self.n_edit, self.c_edit, self.a_edit):
             w.setFont(QFont("monospace", 10))
         form.addRow(_lbl("-n  Channel:"),      self.n_edit)
         form.addRow(_lbl("-c  CRC Init:"),     self.c_edit)
         form.addRow(_lbl("-a  Access Addr:"),  self.a_edit)
+        form.addRow(_lbl("-M  PHY Mode:"),     phy_widget)
         lay.addLayout(form)
 
         # Emit params_changed on edit (for mismatch detection)
         for w in (self.n_edit, self.c_edit, self.a_edit):
             w.textChanged.connect(self.params_changed)
+        self.phy_1m_rb.toggled.connect(self.params_changed)
+        self.phy_2m_rb.toggled.connect(self.params_changed)
 
         # Command preview
         self._preview = QLabel()
@@ -670,6 +708,8 @@ class BtleLLPanel(QGroupBox):
         lay.addWidget(self._preview)
         for w in (self.n_edit, self.c_edit, self.a_edit):
             w.textChanged.connect(self._update_preview)
+        self.phy_1m_rb.toggled.connect(self._update_preview)
+        self.phy_2m_rb.toggled.connect(self._update_preview)
 
         # Separator
         sep = QFrame()
@@ -708,7 +748,8 @@ class BtleLLPanel(QGroupBox):
                 f" -L {c.cmd_port}"
                 f" -n {self.get_n()}"
                 f" -c {self.get_c()}"
-                f" -a {self.get_a()}")
+                f" -a {self.get_a()}"
+                f" -M {self.get_phy_mode()}")
 
     def get_ssh_cmd(self) -> str:
         return self._build_cmd()
@@ -721,12 +762,15 @@ class BtleLLPanel(QGroupBox):
     def get_n(self) -> str: return self.n_edit.text().strip() or self.cfg.default_channel
     def get_c(self) -> str: return self.c_edit.text().strip() or self.cfg.default_crc_init
     def get_a(self) -> str: return self.a_edit.text().strip() or self.cfg.default_aa
+    def get_phy_mode(self) -> str: return str(self.phy_group.checkedId())
 
     def set_running(self, running: bool):
         self.start_btn.setEnabled(not running)
         self.stop_btn.setEnabled(running)
         for w in (self.n_edit, self.c_edit, self.a_edit):
             w.setEnabled(not running)
+        self.phy_1m_rb.setEnabled(not running)
+        self.phy_2m_rb.setEnabled(not running)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -775,8 +819,35 @@ class SendCmdPanel(QGroupBox):
             grid, 1, "-a", "Access Addr:", self.cfg.default_aa)
         self.c_cb, self.c_edit = self._mk_row(
             grid, 2, "-c", "CRC Init:",    self.cfg.default_crc_init)
+        self.phy_cb = QCheckBox("-M  PHY Mode:")
+        self.phy_cb.setStyleSheet("color:#94a3b8; font-size:10px;")
+        self.phy_1m_rb = QRadioButton("1M")
+        self.phy_2m_rb = QRadioButton("2M")
+        self.phy_group = QButtonGroup(self)
+        self.phy_group.addButton(self.phy_1m_rb, 0)
+        self.phy_group.addButton(self.phy_2m_rb, 1)
+        if self.cfg.default_phy_2m_mode == "1":
+            self.phy_2m_rb.setChecked(True)
+        else:
+            self.phy_1m_rb.setChecked(True)
+        phy_widget = QWidget()
+        phy_row = QHBoxLayout(phy_widget)
+        phy_row.setContentsMargins(0, 0, 0, 0)
+        phy_row.setSpacing(12)
+        phy_row.addWidget(self.phy_1m_rb)
+        phy_row.addWidget(self.phy_2m_rb)
+        phy_row.addStretch()
+        self.phy_1m_rb.setEnabled(False)
+        self.phy_2m_rb.setEnabled(False)
+        self.phy_cb.toggled.connect(self.phy_1m_rb.setEnabled)
+        self.phy_cb.toggled.connect(self.phy_2m_rb.setEnabled)
+        self.phy_cb.toggled.connect(self.params_changed)
+        self.phy_1m_rb.toggled.connect(self.params_changed)
+        self.phy_2m_rb.toggled.connect(self.params_changed)
+        grid.addWidget(self.phy_cb, 3, 0)
+        grid.addWidget(phy_widget, 3, 1)
         self.m_cb, self.m_edit = self._mk_row(
-            grid, 3, "-m", "Message:",     "",
+            grid, 4, "-m", "Message:",     "",
             placeholder="max 26 chars", maxlen=26)
         lay.addLayout(grid)
 
@@ -786,8 +857,10 @@ class SendCmdPanel(QGroupBox):
             "color:#475569; font-size:9px; font-family:monospace; padding:4px 0;")
         self._preview.setWordWrap(True)
         lay.addWidget(self._preview)
-        for cb in (self.n_cb, self.a_cb, self.c_cb, self.m_cb):
+        for cb in (self.n_cb, self.a_cb, self.c_cb, self.phy_cb, self.m_cb):
             cb.toggled.connect(self._update_preview)
+        self.phy_1m_rb.toggled.connect(self._update_preview)
+        self.phy_2m_rb.toggled.connect(self._update_preview)
         for le in (self.n_edit, self.a_edit, self.c_edit, self.m_edit):
             le.textChanged.connect(self._update_preview)
 
@@ -837,6 +910,8 @@ class SendCmdPanel(QGroupBox):
             args += ["-a", self.a_edit.text().strip()]
         if self.c_cb.isChecked() and self.c_edit.text().strip():
             args += ["-c", self.c_edit.text().strip()]
+        if self.phy_cb.isChecked():
+            args += ["-M", self.get_phy_mode()]
         if self.m_cb.isChecked() and self.m_edit.text():
             args += ["-m", self.m_edit.text()]
         return args
@@ -856,6 +931,8 @@ class SendCmdPanel(QGroupBox):
             cmd_list.append(["-a", self.a_edit.text().strip()])
         if self.c_cb.isChecked() and self.c_edit.text().strip():
             cmd_list.append(["-c", self.c_edit.text().strip()])
+        if self.phy_cb.isChecked():
+            cmd_list.append(["-M", self.get_phy_mode()])
         
         # Messages (-m) are sent as a combined command with all other params
         if self.m_cb.isChecked() and self.m_edit.text():
@@ -880,6 +957,10 @@ class SendCmdPanel(QGroupBox):
         return self.c_edit.text().strip() if self.c_cb.isChecked() else None
     def get_a(self) -> Optional[str]:
         return self.a_edit.text().strip() if self.a_cb.isChecked() else None
+    def get_phy_mode(self) -> str:
+        return str(self.phy_group.checkedId())
+    def get_checked_phy_mode(self) -> Optional[str]:
+        return self.get_phy_mode() if self.phy_cb.isChecked() else None
 
     def set_busy(self, busy: bool):
         self.send_btn.setEnabled(not busy)
@@ -1151,6 +1232,7 @@ class MainWindow(QMainWindow):
         sc_n = self.send_panel.get_n()
         sc_c = self.send_panel.get_c()
         sc_a = self.send_panel.get_a()
+        sc_m = self.send_panel.get_checked_phy_mode()
 
         if sc_n and norm(self.btle_panel.get_n()) != norm(sc_n):
             msgs.append(f"-n: btle_ll={self.btle_panel.get_n()}  vs  send_cmd={sc_n}")
@@ -1158,6 +1240,8 @@ class MainWindow(QMainWindow):
             msgs.append(f"-c: btle_ll={self.btle_panel.get_c()}  vs  send_cmd={sc_c}")
         if sc_a and norm(self.btle_panel.get_a()) != norm(sc_a):
             msgs.append(f"-a: btle_ll={self.btle_panel.get_a()}  vs  send_cmd={sc_a}")
+        if sc_m and norm(self.btle_panel.get_phy_mode()) != norm(sc_m):
+            msgs.append(f"-M: btle_ll={self.btle_panel.get_phy_mode()}  vs  send_cmd={sc_m}")
 
         mismatch_text = "\n".join(msgs)
         self.send_panel.set_mismatch(mismatch_text)

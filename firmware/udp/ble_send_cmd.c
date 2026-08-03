@@ -34,6 +34,11 @@
 //   => 37 - 6 - 3 - 2 = 26 bytes of usable name.
 #define BLE_MAX_ADV_NAME_LEN 26
 
+#define BTLE_LL_REG_RX_UNIQUE_BIT_SEQ_IDX 10
+#define BTLE_LL_REG_RX_CHANNEL_NUMBER_IDX 11
+#define BTLE_LL_REG_RX_CRC_INIT_BIT_IDX   12
+#define BTLE_LL_REG_PHY_2M_MODE_IDX       14
+
 int sockfd = -1;
 struct sockaddr_in dest_addr;
 
@@ -107,6 +112,7 @@ static inline void print_usage() {
   printf("  -n <channel>   Channel number (e.g. 37, 38, 39) -> register 11\n");
   printf("  -c <crc_init>  CRC init value (e.g. 0x555555)   -> register 12\n");
   printf("  -a <aa>        Access address (e.g. 0x8E89BED6) -> register 10\n");
+  printf("  -M <0|1>       PHY 2M mode: 0=1M, 1=2M          -> register 14\n");
   printf("\nTransmit options (control=1):\n");
   printf("  -m <message>   Transmit message as BLE ADV_NONCONN_IND advertisement\n");
   printf("                 Max %d characters. The AntSDR FPGA will broadcast it\n", BLE_MAX_ADV_NAME_LEN);
@@ -188,7 +194,7 @@ int main(int argc, char *argv[])
   uint8_t packet_byte[256] = {0};
   uint32_t num_byte, runtime_len;
 
-  while ((opt = getopt(argc, argv, "t:p:n:c:a:m:")) != -1) {
+  while ((opt = getopt(argc, argv, "t:p:n:c:a:m:M:")) != -1) {
     switch (opt) {
       case 't':
         strncpy(dest_ip, optarg, sizeof(dest_ip) - 1);
@@ -205,7 +211,7 @@ int main(int argc, char *argv[])
         break;
       case 'n':
         channel_number = atoi(optarg);
-        reg_idx = 11;
+        reg_idx = BTLE_LL_REG_RX_CHANNEL_NUMBER_IDX;
         reg_val = channel_number;
         break;
       case 'c':
@@ -216,7 +222,7 @@ int main(int argc, char *argv[])
           return EXIT_FAILURE;
         }
         crc_init = (uint32_t)tmp;
-        reg_idx = 12;
+        reg_idx = BTLE_LL_REG_RX_CRC_INIT_BIT_IDX;
         reg_val = crc_init;
         break;
       case 'a':
@@ -227,8 +233,18 @@ int main(int argc, char *argv[])
           return EXIT_FAILURE;
         }
         unique_bit_seq = (uint32_t)tmp;
-        reg_idx = 10;
+        reg_idx = BTLE_LL_REG_RX_UNIQUE_BIT_SEQ_IDX;
         reg_val = unique_bit_seq;
+        break;
+      case 'M':
+        errno = 0;
+        tmp = strtoul(optarg, NULL, 0);
+        if (errno != 0 || tmp > 1) {
+          fprintf(stderr, "Invalid PHY 2M mode value: %s\n", optarg);
+          return EXIT_FAILURE;
+        }
+        reg_idx = BTLE_LL_REG_PHY_2M_MODE_IDX;
+        reg_val = (uint32_t)tmp;
         break;
       case 'm':
         strncpy(tx_message, optarg, BLE_MAX_ADV_NAME_LEN);
@@ -320,7 +336,7 @@ int main(int argc, char *argv[])
   }
 
   if (reg_idx < 0 && !do_tx) {
-    printf("No command to send. Use -n/-c/-a for register writes or -m for TX.\n");
+    printf("No command to send. Use -n/-c/-a/-M for register writes or -m for TX.\n");
     print_usage();
   }
 

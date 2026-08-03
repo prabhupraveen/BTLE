@@ -10,10 +10,35 @@ import csv
 SAVE_FOR_VERILOG = 1 # Change to 1 to save files for verilog test bench
 SAVE_DIR = '../verilog/test_data/' #The directory to store the test vector files
 
+PHY_MODE = '1M'  # '1M' = 8 Msps/1 Mbps = 8 samples/symbol, '2M' = 8 Msps/2 Mbps = 4 samples/symbol
 SAMPLE_PER_SYMBOL = 8
 NUM_SYMBOL_GAUSS_FILTER_SPAN = 2
 BT = 0.5
 MODULATION_INDEX = 0.5
+
+def set_phy_mode(mode):
+  """Set PHY mode ('1M' or '2M') and update SAMPLE_PER_SYMBOL accordingly."""
+  global PHY_MODE, SAMPLE_PER_SYMBOL
+  if mode not in ['1M', '2M']:
+    print(f"Invalid PHY_MODE {mode}. Must be '1M' or '2M'")
+    return False
+  PHY_MODE = mode
+  SAMPLE_PER_SYMBOL = 8 if mode == '1M' else 4
+  # Clear cached VCO tables so they regenerate with new SAMPLE_PER_SYMBOL
+  if hasattr(vco_fixed_point, "cos_table"):
+    delattr(vco_fixed_point, "cos_table")
+  if hasattr(vco_fixed_point, "sin_table"):
+    delattr(vco_fixed_point, "sin_table")
+  if hasattr(vco_fixed_point, "table_size"):
+    delattr(vco_fixed_point, "table_size")
+  if hasattr(gfsk_modulation_fixed_point, "gauss_fir"):
+    delattr(gfsk_modulation_fixed_point, "gauss_fir")
+  if hasattr(gfsk_modulation_fixed_point, "gauss_fir_tap_amp_scale_up_factor"):
+    delattr(gfsk_modulation_fixed_point, "gauss_fir_tap_amp_scale_up_factor")
+  if hasattr(gfsk_modulation_fixed_point, "vco_input_gain"):
+    delattr(gfsk_modulation_fixed_point, "vco_input_gain")
+  print(f"PHY mode set to {mode}, SAMPLE_PER_SYMBOL = {SAMPLE_PER_SYMBOL}")
+  return True
 
 def extract_iq_from_csv_to_txt(filename_csv, filename_txt, col_i_idx, col_q_idx):
   # Please DO remove the csv text headers for all columns!

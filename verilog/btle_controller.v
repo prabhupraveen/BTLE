@@ -220,6 +220,8 @@ wire tx_channel_number_load;
 wire [7:0] tx_pdu_octet_mem_data;
 wire [NUM_BIT_PAYLOAD_LENGTH:0] tx_pdu_octet_mem_addr; // 1 more addr bit is needed: the octet_valid actually will output 2 bytes header, payload length, 3 bytes CRC
 wire tx_start;
+wire ll_phy_2m_mode;
+wire [2:0] ll_phy_test_mode;
 
 // ==============link layer to phy rx=======================
 wire [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0]  ll_rx_unique_bit_sequence;
@@ -237,12 +239,14 @@ wire  [NUM_BIT_PAYLOAD_LENGTH:0] ll_rx_pdu_octet_mem_addr; // 1 more addr bit is
 
 // PHY 2M/test-mode controls:
 // - In baremetal mode these come from gpio for quick bring-up.
-// - In LL mode they are sourced from ll_gpio hooks.
+// - In LL mode they are sourced from link-layer AXI registers.
 wire phy_2m_mode;
 wire [2:0] phy_test_mode;
 
-assign phy_2m_mode = (baremetal_phy_intf_mode ? gpio[1] : ll_gpio[5]);
-assign phy_test_mode = (baremetal_phy_intf_mode ? gpio[4:2] : ll_gpio[8:6]);
+// assign phy_2m_mode = (baremetal_phy_intf_mode ? gpio[1] : ll_phy_2m_mode);
+// assign phy_test_mode = (baremetal_phy_intf_mode ? gpio[4:2] : ll_phy_test_mode);
+assign phy_2m_mode = ll_phy_2m_mode;
+assign phy_test_mode = ll_phy_test_mode;
 
 // =======switch between external baremetal phy control and link layer phy control========
 // phy tx
@@ -396,6 +400,8 @@ btle_ll #
   .tx_pdu_octet_mem_addr(ll_tx_pdu_octet_mem_addr),
   .tx_start             (ll_tx_start),
   .tx_iq_valid_last     (tx_iq_valid_last),
+  .phy_2m_mode          (ll_phy_2m_mode),
+  .phy_test_mode        (ll_phy_test_mode),
 
   // ====to phy rx====
   .rx_unique_bit_sequence(ll_rx_unique_bit_sequence),

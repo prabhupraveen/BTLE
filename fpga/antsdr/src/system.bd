@@ -1,12 +1,12 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0x80F32D85D22D6834",
+      "boundary_crc": "0x80F32D85C9BC39CB",
       "device": "xc7z020clg400-1",
       "name": "system",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
       "synth_flow_mode": "None",
-      "tool_version": "2022.2",
+      "tool_version": "2025.1",
       "validated": "true"
     },
     "design_tree": {
@@ -410,9 +410,11 @@
     "components": {
       "sys_ps7": {
         "vlnv": "xilinx.com:ip:processing_system7:5.5",
+        "ip_revision": "7",
         "xci_name": "system_sys_ps7_0",
         "xci_path": "ip/system_sys_ps7_0/system_sys_ps7_0.xci",
         "inst_hier_path": "sys_ps7",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "PCW_ACT_APU_PERIPHERAL_FREQMHZ": {
             "value": "666.666687"
@@ -2157,6 +2159,12 @@
         },
         "interface_ports": {
           "M_AXI_GP0": {
+            "bd_attributes": {
+              "TYPE": {
+                "value": "END_POINT",
+                "value_src": "auto"
+              }
+            },
             "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
             "mode": "Master",
             "address_space_ref": "Data",
@@ -2167,6 +2175,12 @@
             }
           },
           "M_AXI_GP1": {
+            "bd_attributes": {
+              "TYPE": {
+                "value": "END_POINT",
+                "value_src": "auto"
+              }
+            },
             "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
             "mode": "Master",
             "address_space_ref": "Data",
@@ -2308,9 +2322,11 @@
       },
       "sys_rstgen": {
         "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
+        "ip_revision": "17",
         "xci_name": "system_sys_rstgen_0",
         "xci_path": "ip/system_sys_rstgen_0/system_sys_rstgen_0.xci",
         "inst_hier_path": "sys_rstgen",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "C_EXT_RST_WIDTH": {
             "value": "1"
@@ -2319,9 +2335,11 @@
       },
       "axi_ad9361": {
         "vlnv": "analog.com:user:axi_ad9361:1.0",
+        "ip_revision": "1",
         "xci_name": "system_axi_ad9361_0",
         "xci_path": "ip/system_axi_ad9361_0/system_axi_ad9361_0.xci",
         "inst_hier_path": "axi_ad9361",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "ADC_DATAFORMAT_DISABLE": {
             "value": "0"
@@ -2375,9 +2393,11 @@
       },
       "util_ad9361_tdd_sync": {
         "vlnv": "analog.com:user:util_tdd_sync:1.0",
+        "ip_revision": "1",
         "xci_name": "system_util_ad9361_tdd_sync_0",
         "xci_path": "ip/system_util_ad9361_tdd_sync_0/system_util_ad9361_tdd_sync_0.xci",
         "inst_hier_path": "util_ad9361_tdd_sync",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "TDD_SYNC_PERIOD": {
             "value": "10000000"
@@ -2386,9 +2406,11 @@
       },
       "util_ad9361_divclk_sel": {
         "vlnv": "xilinx.com:ip:util_reduced_logic:2.0",
+        "ip_revision": "7",
         "xci_name": "system_util_ad9361_divclk_sel_0",
         "xci_path": "ip/system_util_ad9361_divclk_sel_0/system_util_ad9361_divclk_sel_0.xci",
         "inst_hier_path": "util_ad9361_divclk_sel",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "C_SIZE": {
             "value": "2"
@@ -2397,15 +2419,19 @@
       },
       "util_ad9361_divclk_reset": {
         "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
+        "ip_revision": "17",
         "xci_name": "system_util_ad9361_divclk_reset_0",
         "xci_path": "ip/system_util_ad9361_divclk_reset_0/system_util_ad9361_divclk_reset_0.xci",
-        "inst_hier_path": "util_ad9361_divclk_reset"
+        "inst_hier_path": "util_ad9361_divclk_reset",
+        "has_run_ip_tcl": "true"
       },
       "util_ad9361_adc_fifo": {
         "vlnv": "analog.com:user:util_wfifo:1.0",
+        "ip_revision": "1",
         "xci_name": "system_util_ad9361_adc_fifo_0",
         "xci_path": "ip/system_util_ad9361_adc_fifo_0/system_util_ad9361_adc_fifo_0.xci",
         "inst_hier_path": "util_ad9361_adc_fifo",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "DIN_ADDRESS_WIDTH": {
             "value": "4"
@@ -2423,9 +2449,11 @@
       },
       "util_ad9361_adc_pack": {
         "vlnv": "analog.com:user:util_cpack2:1.0",
+        "ip_revision": "1",
         "xci_name": "system_util_ad9361_adc_pack_0",
         "xci_path": "ip/system_util_ad9361_adc_pack_0/system_util_ad9361_adc_pack_0.xci",
         "inst_hier_path": "util_ad9361_adc_pack",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "NUM_OF_CHANNELS": {
             "value": "4"
@@ -2437,9 +2465,11 @@
       },
       "axi_ad9361_dac_fifo": {
         "vlnv": "analog.com:user:util_rfifo:1.0",
+        "ip_revision": "1",
         "xci_name": "system_axi_ad9361_dac_fifo_0",
         "xci_path": "ip/system_axi_ad9361_dac_fifo_0/system_axi_ad9361_dac_fifo_0.xci",
         "inst_hier_path": "axi_ad9361_dac_fifo",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "DIN_ADDRESS_WIDTH": {
             "value": "4"
@@ -2454,9 +2484,11 @@
       },
       "util_ad9361_dac_upack": {
         "vlnv": "analog.com:user:util_upack2:1.0",
+        "ip_revision": "1",
         "xci_name": "system_util_ad9361_dac_upack_0",
         "xci_path": "ip/system_util_ad9361_dac_upack_0/system_util_ad9361_dac_upack_0.xci",
         "inst_hier_path": "util_ad9361_dac_upack",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "NUM_OF_CHANNELS": {
             "value": "4"
@@ -2468,9 +2500,11 @@
       },
       "axi_gpreg": {
         "vlnv": "analog.com:user:axi_gpreg:1.0",
+        "ip_revision": "1",
         "xci_name": "system_axi_gpreg_0",
         "xci_path": "ip/system_axi_gpreg_0/system_axi_gpreg_0.xci",
         "inst_hier_path": "axi_gpreg",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "NUM_OF_CLK_MONS": {
             "value": "0"
@@ -2482,9 +2516,11 @@
       },
       "GND_1": {
         "vlnv": "xilinx.com:ip:xlconstant:1.1",
+        "ip_revision": "10",
         "xci_name": "system_GND_1_0",
         "xci_path": "ip/system_GND_1_0/system_GND_1_0.xci",
         "inst_hier_path": "GND_1",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "CONST_VAL": {
             "value": "0"
@@ -2629,9 +2665,11 @@
         "components": {
           "xbar": {
             "vlnv": "xilinx.com:ip:axi_crossbar:2.1",
-            "xci_name": "system_xbar_0",
-            "xci_path": "ip/system_xbar_0/system_xbar_0.xci",
+            "ip_revision": "37",
+            "xci_name": "system_axi_cpu_interconnect_imp_xbar_0",
+            "xci_path": "ip/system_axi_cpu_interconnect_imp_xbar_0/system_axi_cpu_interconnect_imp_xbar_0.xci",
             "inst_hier_path": "axi_cpu_interconnect/xbar",
+            "has_run_ip_tcl": "true",
             "parameters": {
               "NUM_MI": {
                 "value": "4"
@@ -2645,6 +2683,16 @@
             },
             "interface_ports": {
               "S00_AXI": {
+                "bd_attributes": {
+                  "BRIDGES": {
+                    "value": "M00_AXI:M01_AXI:M02_AXI:M03_AXI",
+                    "value_src": "auto"
+                  },
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                },
                 "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
                 "mode": "Slave",
                 "bridges": [
@@ -2653,6 +2701,38 @@
                   "M02_AXI",
                   "M03_AXI"
                 ]
+              },
+              "M00_AXI": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                }
+              },
+              "M01_AXI": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                }
+              },
+              "M02_AXI": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                }
+              },
+              "M03_AXI": {
+                "bd_attributes": {
+                  "TYPE": {
+                    "value": "interior",
+                    "value_src": "default"
+                  }
+                }
               }
             }
           },
@@ -2706,9 +2786,11 @@
             "components": {
               "auto_pc": {
                 "vlnv": "xilinx.com:ip:axi_protocol_converter:2.1",
-                "xci_name": "system_auto_pc_0",
-                "xci_path": "ip/system_auto_pc_0/system_auto_pc_0.xci",
+                "ip_revision": "36",
+                "xci_name": "system_axi_cpu_interconnect_imp_auto_pc_0",
+                "xci_path": "ip/system_axi_cpu_interconnect_imp_auto_pc_0/system_axi_cpu_interconnect_imp_auto_pc_0.xci",
                 "inst_hier_path": "axi_cpu_interconnect/s00_couplers/auto_pc",
+                "has_run_ip_tcl": "true",
                 "parameters": {
                   "MI_PROTOCOL": {
                     "value": "AXI4LITE"
@@ -2719,11 +2801,29 @@
                 },
                 "interface_ports": {
                   "S_AXI": {
+                    "bd_attributes": {
+                      "BRIDGES": {
+                        "value": "M_AXI",
+                        "value_src": "auto"
+                      },
+                      "TYPE": {
+                        "value": "interior",
+                        "value_src": "default"
+                      }
+                    },
                     "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
                     "mode": "Slave",
                     "bridges": [
                       "M_AXI"
                     ]
+                  },
+                  "M_AXI": {
+                    "bd_attributes": {
+                      "TYPE": {
+                        "value": "interior",
+                        "value_src": "default"
+                      }
+                    }
                   }
                 }
               }
@@ -2991,26 +3091,26 @@
           },
           "m00_couplers_to_axi_cpu_interconnect": {
             "interface_ports": [
-              "M00_AXI",
-              "m00_couplers/M_AXI"
+              "m00_couplers/M_AXI",
+              "M00_AXI"
             ]
           },
           "m01_couplers_to_axi_cpu_interconnect": {
             "interface_ports": [
-              "M01_AXI",
-              "m01_couplers/M_AXI"
+              "m01_couplers/M_AXI",
+              "M01_AXI"
             ]
           },
           "m02_couplers_to_axi_cpu_interconnect": {
             "interface_ports": [
-              "M02_AXI",
-              "m02_couplers/M_AXI"
+              "m02_couplers/M_AXI",
+              "M02_AXI"
             ]
           },
           "m03_couplers_to_axi_cpu_interconnect": {
             "interface_ports": [
-              "M03_AXI",
-              "m03_couplers/M_AXI"
+              "m03_couplers/M_AXI",
+              "M03_AXI"
             ]
           },
           "s00_couplers_to_xbar": {
@@ -3081,9 +3181,11 @@
       },
       "axi_iic_main": {
         "vlnv": "xilinx.com:ip:axi_iic:2.1",
+        "ip_revision": "11",
         "xci_name": "system_axi_iic_main_0",
         "xci_path": "ip/system_axi_iic_main_0/system_axi_iic_main_0.xci",
         "inst_hier_path": "axi_iic_main",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "IIC_BOARD_INTERFACE": {
             "value": "Custom"
@@ -3095,9 +3197,11 @@
       },
       "sys_concat_intc": {
         "vlnv": "xilinx.com:ip:xlconcat:2.1",
+        "ip_revision": "7",
         "xci_name": "system_sys_concat_intc_0",
         "xci_path": "ip/system_sys_concat_intc_0/system_sys_concat_intc_0.xci",
         "inst_hier_path": "sys_concat_intc",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "NUM_PORTS": {
             "value": "16"
@@ -3109,9 +3213,11 @@
       },
       "sys_logic_inv": {
         "vlnv": "xilinx.com:ip:util_vector_logic:2.0",
+        "ip_revision": "5",
         "xci_name": "system_sys_logic_inv_0",
         "xci_path": "ip/system_sys_logic_inv_0/system_sys_logic_inv_0.xci",
         "inst_hier_path": "sys_logic_inv",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "C_OPERATION": {
             "value": "not"
@@ -3123,9 +3229,11 @@
       },
       "util_ad9361_divclk_sel_concat": {
         "vlnv": "xilinx.com:ip:xlconcat:2.1",
+        "ip_revision": "7",
         "xci_name": "system_util_ad9361_divclk_sel_concat_0",
         "xci_path": "ip/system_util_ad9361_divclk_sel_concat_0/system_util_ad9361_divclk_sel_concat_0.xci",
         "inst_hier_path": "util_ad9361_divclk_sel_concat",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "NUM_PORTS": {
             "value": "2"
@@ -3134,9 +3242,11 @@
       },
       "btle_controller_0": {
         "vlnv": "user.org:user:btle_controller:1.0",
+        "ip_revision": "2",
         "xci_name": "system_btle_controller_0_0",
         "xci_path": "ip/system_btle_controller_0_0/system_btle_controller_0_0.xci",
         "inst_hier_path": "btle_controller_0",
+        "has_run_ip_tcl": "true",
         "interface_ports": {
           "s00_axi": {
             "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
@@ -3147,9 +3257,11 @@
       },
       "clk_wiz_1": {
         "vlnv": "xilinx.com:ip:clk_wiz:6.0",
+        "ip_revision": "16",
         "xci_name": "system_clk_wiz_1_0",
         "xci_path": "ip/system_clk_wiz_1_0/system_clk_wiz_1_0.xci",
         "inst_hier_path": "clk_wiz_1",
+        "has_run_ip_tcl": "true",
         "parameters": {
           "CLKIN1_JITTER_PS": {
             "value": "312.5"

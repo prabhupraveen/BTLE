@@ -12,7 +12,7 @@ else
 fi
 
 ./save_fpga_img_ila.sh $HARDWARE
-./BOOT_BIN_gen.sh $HARDWARE
+# ./BOOT_BIN_gen.sh $HARDWARE
 # ./devicetree_gen.sh
 
 set -x

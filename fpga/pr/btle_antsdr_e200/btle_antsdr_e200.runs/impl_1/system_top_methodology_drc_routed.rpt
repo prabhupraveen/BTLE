@@ -1,0 +1,186 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.1 (lin64) Build 6140274 Wed May 21 22:58:25 MDT 2025
+| Date         : Fri Jun 12 15:03:47 2026
+| Host         : planet-clockwork running 64-bit EndeavourOS Linux
+| Command      : report_methodology -file system_top_methodology_drc_routed.rpt -pb system_top_methodology_drc_routed.pb -rpx system_top_methodology_drc_routed.rpx
+| Design       : system_top
+| Device       : xc7z020clg400-1
+| Speed File   : -1
+| Design State : Fully Routed
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Report Methodology
+
+Table of Contents
+-----------------
+1. REPORT SUMMARY
+2. REPORT DETAILS
+
+1. REPORT SUMMARY
+-----------------
+            Netlist: netlist
+          Floorplan: design_1
+      Design limits: <entire design considered>
+             Max checks: <unlimited>
+             Checks found: 27
++-----------+------------------+-------------------------------------------------------------------------------------------------------+--------+
+| Rule      | Severity         | Description                                                                                           | Checks |
++-----------+------------------+-------------------------------------------------------------------------------------------------------+--------+
+| TIMING-4  | Critical Warning | Invalid primary clock redefinition on a clock tree                                                    | 1      |
+| TIMING-27 | Critical Warning | Invalid primary clock on hierarchical pin                                                             | 1      |
+| CKBF-1    | Warning          | connects_I_driver_BUFR                                                                                | 1      |
+| LUTAR-1   | Warning          | LUT drives async reset alert                                                                          | 2      |
+| PDRC-190  | Warning          | Suboptimally placed synchronized register chain                                                       | 5      |
+| TIMING-9  | Warning          | Unknown CDC Logic                                                                                     | 1      |
+| TIMING-10 | Warning          | Missing property on synchronizer                                                                      | 1      |
+| TIMING-18 | Warning          | Missing input or output delay                                                                         | 11     |
+| TIMING-47 | Warning          | False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks | 4      |
++-----------+------------------+-------------------------------------------------------------------------------------------------------+--------+
+
+2. REPORT DETAILS
+-----------------
+TIMING-4#1 Critical Warning
+Invalid primary clock redefinition on a clock tree  
+Invalid clock redefinition on a clock tree. The primary clock i_system_wrapper/system_i/clk_wiz_1/inst/clk_in1 is defined downstream of clock rx_clk and overrides its insertion delay and/or waveform definition
+Related violations: <none>
+
+TIMING-27#1 Critical Warning
+Invalid primary clock on hierarchical pin  
+A primary clock i_system_wrapper/system_i/clk_wiz_1/inst/clk_in1 is created on an inappropriate internal pin i_system_wrapper/system_i/clk_wiz_1/inst/clk_in1. It is not recommended to create a primary clock on a hierarchical pin when its driver pin has a fanout connected to multiple clock pins
+Related violations: <none>
+
+CKBF-1#1 Warning
+connects_I_driver_BUFR  
+The BUFGCTRL cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/i_bufgmux_gmii_clk_25m_2_5m I0 pin is driven by a BUFR cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_system_gmii_to_rgmii_0_0_clocking/clk10_div_buf. For 7-Series devices, this is not a recommended clock topology. Please analyze your clock network and remove the BUFR to BUFGCTRL cascade.
+Related violations: <none>
+
+LUTAR-1#1 Warning
+LUT drives async reset alert  
+LUT cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_mgmt_reset_i_1, with 2 or more inputs, drives asynchronous preset/clear pin(s) i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_mgmt_reset/reset_sync1/PRE,
+i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_mgmt_reset/reset_sync2/PRE,
+i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_mgmt_reset/reset_sync3/PRE,
+i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_mgmt_reset/reset_sync4/PRE
+i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_mgmt_reset/reset_sync5/PRE. The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
+Related violations: <none>
+
+LUTAR-1#2 Warning
+LUT drives async reset alert  
+LUT cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_system_gmii_to_rgmii_0_0_clocking/system_gmii_to_rgmii_0_0_core_i_1, with 2 or more inputs, drives asynchronous preset/clear pin(s) i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_tx_reset/reset_sync1/PRE,
+i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_tx_reset/reset_sync2/PRE,
+i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_tx_reset/reset_sync3/PRE,
+i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_tx_reset/reset_sync4/PRE
+i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_tx_reset/reset_sync5/PRE. The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
+Related violations: <none>
+
+PDRC-190#1 Warning
+Suboptimally placed synchronized register chain  
+The FDPE cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/gmii_to_rgmii_core_non_versal.i_gmii_to_rgmii/i_reset_sync_tx_reset/reset_sync5 in site SLICE_X105Y119 is part of a synchronized register chain that is suboptimally placed as the load FDPE cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/gmii_to_rgmii_core_non_versal.i_gmii_to_rgmii/i_reset_sync_tx_reset/reset_sync6 is not placed in the same (SLICE) site.
+Related violations: <none>
+
+PDRC-190#2 Warning
+Suboptimally placed synchronized register chain  
+The FDPE cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_mgmt_reset/reset_sync5 in site SLICE_X104Y120 is part of a synchronized register chain that is suboptimally placed as the load FDPE cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_mgmt_reset/reset_sync6 is not placed in the same (SLICE) site.
+Related violations: <none>
+
+PDRC-190#3 Warning
+Suboptimally placed synchronized register chain  
+The FDPE cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_rx_reset/reset_sync5 in site SLICE_X104Y118 is part of a synchronized register chain that is suboptimally placed as the load FDPE cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_rx_reset/reset_sync6 is not placed in the same (SLICE) site.
+Related violations: <none>
+
+PDRC-190#4 Warning
+Suboptimally placed synchronized register chain  
+The FDPE cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_tx_reset/reset_sync5 in site SLICE_X105Y115 is part of a synchronized register chain that is suboptimally placed as the load FDPE cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/system_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_reset_sync_tx_reset/reset_sync6 is not placed in the same (SLICE) site.
+Related violations: <none>
+
+PDRC-190#5 Warning
+Suboptimally placed synchronized register chain  
+The FDPE cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_system_gmii_to_rgmii_0_0_resets/idelayctrl_reset_gen/reset_sync5 in site SLICE_X111Y118 is part of a synchronized register chain that is suboptimally placed as the load FDPE cell i_system_wrapper/system_i/gmii_to_rgmii_0/U0/i_system_gmii_to_rgmii_0_0_resets/idelayctrl_reset_gen/reset_sync6 is not placed in the same (SLICE) site.
+Related violations: <none>
+
+TIMING-9#1 Warning
+Unknown CDC Logic  
+One or more asynchronous Clock Domain Crossing has been detected between 2 clock domains through a set_false_path or a set_clock_groups or set_max_delay -datapath_only constraint but no double-registers logic synchronizer has been found on the side of the capture clock. It is recommended to run report_cdc for a complete and detailed CDC coverage. Please consider using XPM_CDC to avoid Critical severities
+Related violations: <none>
+
+TIMING-10#1 Warning
+Missing property on synchronizer  
+One or more logic synchronizer has been detected between 2 clock domains but the synchronizer does not have the property ASYNC_REG defined on one or both registers. It is recommended to run report_cdc for a complete and detailed CDC coverage
+Related violations: <none>
+
+TIMING-18#1 Warning
+Missing input or output delay  
+An input delay is missing on iic_scl relative to the rising and/or falling clock edge(s) of clk_fpga_0.
+Related violations: <none>
+
+TIMING-18#2 Warning
+Missing input or output delay  
+An input delay is missing on iic_sda relative to the rising and/or falling clock edge(s) of clk_fpga_0.
+Related violations: <none>
+
+TIMING-18#3 Warning
+Missing input or output delay  
+An input delay is missing on mdio_phy_mdio_io relative to the rising and/or falling clock edge(s) of clk_fpga_2.
+Related violations: <none>
+
+TIMING-18#4 Warning
+Missing input or output delay  
+An output delay is missing on iic_scl relative to the rising and/or falling clock edge(s) of clk_fpga_0.
+Related violations: <none>
+
+TIMING-18#5 Warning
+Missing input or output delay  
+An output delay is missing on iic_sda relative to the rising and/or falling clock edge(s) of clk_fpga_0.
+Related violations: <none>
+
+TIMING-18#6 Warning
+Missing input or output delay  
+An output delay is missing on rgmii_td[0] relative to the rising and/or falling clock edge(s) of system_gmii_to_rgmii_0_0_rgmii_rx_clk.
+Related violations: <none>
+
+TIMING-18#7 Warning
+Missing input or output delay  
+An output delay is missing on rgmii_td[1] relative to the rising and/or falling clock edge(s) of system_gmii_to_rgmii_0_0_rgmii_rx_clk.
+Related violations: <none>
+
+TIMING-18#8 Warning
+Missing input or output delay  
+An output delay is missing on rgmii_td[2] relative to the rising and/or falling clock edge(s) of system_gmii_to_rgmii_0_0_rgmii_rx_clk.
+Related violations: <none>
+
+TIMING-18#9 Warning
+Missing input or output delay  
+An output delay is missing on rgmii_td[3] relative to the rising and/or falling clock edge(s) of system_gmii_to_rgmii_0_0_rgmii_rx_clk.
+Related violations: <none>
+
+TIMING-18#10 Warning
+Missing input or output delay  
+An output delay is missing on rgmii_tx_ctl relative to the rising and/or falling clock edge(s) of system_gmii_to_rgmii_0_0_rgmii_rx_clk.
+Related violations: <none>
+
+TIMING-18#11 Warning
+Missing input or output delay  
+An output delay is missing on rgmii_txc relative to the rising and/or falling clock edge(s) of system_gmii_to_rgmii_0_0_rgmii_rx_clk.
+Related violations: <none>
+
+TIMING-47#1 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks system_gmii_to_rgmii_0_0_rgmii_rx_clk and rgmii_rx_clk (see constraint position 50 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#2 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks system_gmii_to_rgmii_0_0_rgmii_rx_clk and rgmii_rx_clk (see constraint position 51 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#3 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks system_gmii_to_rgmii_0_0_rgmii_rx_clk and rgmii_rx_clk (see constraint position 52 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#4 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks system_gmii_to_rgmii_0_0_rgmii_rx_clk and rgmii_rx_clk (see constraint position 53 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+

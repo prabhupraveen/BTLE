@@ -6,8 +6,7 @@
       "name": "system",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
       "synth_flow_mode": "None",
-      "tool_version": "2025.1",
-      "validated": "true"
+      "tool_version": "2025.1"
     },
     "design_tree": {
       "sys_ps7": "",
@@ -37,8 +36,8 @@
       "sys_concat_intc": "",
       "sys_logic_inv": "",
       "util_ad9361_divclk_sel_concat": "",
-      "btle_controller_0": "",
-      "clk_wiz_1": ""
+      "clk_wiz_1": "",
+      "ble_controller_new": ""
     },
     "interface_ports": {
       "ddr": {
@@ -376,17 +375,7 @@
         "right": "0"
       },
       "otg_vbusoc": {
-        "direction": "I",
-        "parameters": {
-          "PortType": {
-            "value": "undef",
-            "value_src": "ip_prop"
-          },
-          "PortType.PROP_SRC": {
-            "value": "false",
-            "value_src": "ip_prop"
-          }
-        }
+        "direction": "I"
       },
       "enable": {
         "direction": "O"
@@ -2460,21 +2449,6 @@
           }
         }
       },
-      "btle_controller_0": {
-        "vlnv": "user.org:user:btle_controller:1.0",
-        "ip_revision": "2",
-        "xci_name": "system_btle_controller_0_0",
-        "xci_path": "ip/system_btle_controller_0_0/system_btle_controller_0_0.xci",
-        "inst_hier_path": "btle_controller_0",
-        "has_run_ip_tcl": "true",
-        "interface_ports": {
-          "s00_axi": {
-            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
-            "mode": "Slave",
-            "memory_map_ref": "s00_axi"
-          }
-        }
-      },
       "clk_wiz_1": {
         "vlnv": "xilinx.com:ip:clk_wiz:6.0",
         "ip_revision": "16",
@@ -2532,6 +2506,21 @@
             "value": "Single_ended_clock_capable_pin"
           }
         }
+      },
+      "ble_controller_new": {
+        "vlnv": "pentarisc.systems:pspl-ble:ble_controller:1.0",
+        "ip_revision": "2",
+        "xci_name": "system_ble_controller_new_0",
+        "xci_path": "ip/system_ble_controller_new_0/system_ble_controller_new_0.xci",
+        "inst_hier_path": "ble_controller_new",
+        "has_run_ip_tcl": "true",
+        "interface_ports": {
+          "s00_axi": {
+            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+            "mode": "Slave",
+            "memory_map_ref": "s00_axi"
+          }
+        }
       }
     },
     "interface_nets": {
@@ -2557,12 +2546,6 @@
         "interface_ports": [
           "axi_gpreg/s_axi",
           "axi_cpu_interconnect/M02_AXI"
-        ]
-      },
-      "axi_cpu_interconnect_M03_AXI": {
-        "interface_ports": [
-          "axi_cpu_interconnect/M03_AXI",
-          "btle_controller_0/s00_axi"
         ]
       },
       "axi_iic_main_IIC": {
@@ -2616,9 +2599,7 @@
           "sys_concat_intc/In9",
           "sys_concat_intc/In10",
           "sys_concat_intc/In15",
-          "btle_controller_0/baremetal_phy_intf_mode",
           "util_ad9361_adc_pack/packed_fifo_wr_overflow",
-          "btle_controller_0/gpio",
           "sys_concat_intc/In2",
           "sys_concat_intc/In3",
           "sys_concat_intc/In4",
@@ -2626,7 +2607,9 @@
           "sys_concat_intc/In6",
           "sys_concat_intc/In7",
           "sys_concat_intc/In12",
-          "sys_concat_intc/In13"
+          "sys_concat_intc/In13",
+          "ble_controller_new/gpio",
+          "ble_controller_new/baremetal_phy_intf_mode"
         ]
       },
       "axi_ad9361_adc_data_i0": {
@@ -2912,32 +2895,30 @@
       },
       "btle_controller_0_ll_itrpt0": {
         "ports": [
-          "btle_controller_0/ll_itrpt0",
           "sys_concat_intc/In0"
         ]
       },
       "btle_controller_0_ll_itrpt1": {
         "ports": [
-          "btle_controller_0/ll_itrpt1",
           "sys_concat_intc/In1"
         ]
       },
       "btle_controller_0_tx_iq_signal_ext": {
         "ports": [
-          "btle_controller_0/tx_iq_signal_ext",
+          "ble_controller_new/tx_iq_signal_ext",
           "util_ad9361_dac_upack/s_axis_data"
         ]
       },
       "btle_controller_0_tx_iq_valid_ext": {
         "ports": [
-          "btle_controller_0/tx_iq_valid_ext",
+          "ble_controller_new/tx_iq_valid_ext",
           "util_ad9361_dac_upack/s_axis_valid"
         ]
       },
       "clk_wiz_1_clk_out2": {
         "ports": [
           "clk_wiz_1/clk_out2",
-          "btle_controller_0/bb_clk"
+          "ble_controller_new/bb_clk"
         ]
       },
       "clk_wiz_1_locked": {
@@ -2962,7 +2943,7 @@
       "gpio_status_1": {
         "ports": [
           "gpio_status",
-          "btle_controller_0/rf_gpio"
+          "ble_controller_new/rf_gpio"
         ]
       },
       "gps_pps_1": {
@@ -3090,7 +3071,6 @@
           "sys_ps7/S_AXI_HP3_ACLK",
           "sys_ps7/S_AXI_ACP_ACLK",
           "sys_ps7/M_AXI_GP1_ACLK",
-          "btle_controller_0/s00_axi_aclk",
           "axi_cpu_interconnect/M03_ACLK"
         ]
       },
@@ -3115,7 +3095,6 @@
           "axi_cpu_interconnect/M01_ARESETN",
           "axi_cpu_interconnect/M02_ARESETN",
           "axi_iic_main/s_axi_aresetn",
-          "btle_controller_0/s00_axi_aresetn",
           "axi_cpu_interconnect/M03_ARESETN"
         ]
       },
@@ -3290,13 +3269,13 @@
       "util_ad9361_adc_pack_packed_fifo_wr_data": {
         "ports": [
           "util_ad9361_adc_pack/packed_fifo_wr_data",
-          "btle_controller_0/rx_iq_signal_ext"
+          "ble_controller_new/rx_iq_signal_ext"
         ]
       },
       "util_ad9361_adc_pack_packed_fifo_wr_en": {
         "ports": [
           "util_ad9361_adc_pack/packed_fifo_wr_en",
-          "btle_controller_0/rx_iq_valid_ext"
+          "ble_controller_new/rx_iq_valid_ext"
         ]
       },
       "util_ad9361_dac_upack_fifo_rd_data_0": {
@@ -3346,7 +3325,7 @@
           "util_ad9361_adc_pack/clk",
           "axi_ad9361_dac_fifo/din_clk",
           "util_ad9361_dac_upack/clk",
-          "btle_controller_0/rf_clk"
+          "ble_controller_new/rf_clk"
         ]
       },
       "util_ad9361_divclk_reset_peripheral_aresetn": {
@@ -3361,8 +3340,8 @@
           "util_ad9361_divclk_reset/peripheral_reset",
           "util_ad9361_adc_pack/reset",
           "util_ad9361_dac_upack/reset",
-          "btle_controller_0/rf_rst",
-          "btle_controller_0/bb_rst"
+          "ble_controller_new/rf_rst",
+          "ble_controller_new/bb_rst"
         ]
       },
       "util_ad9361_divclk_sel_concat_dout": {
@@ -3384,11 +3363,6 @@
         "address_spaces": {
           "Data": {
             "segments": {
-              "SEG_btle_controller_0_reg0": {
-                "address_block": "/btle_controller_0/s00_axi/reg0",
-                "offset": "0x40000000",
-                "range": "4K"
-              },
               "SEG_data_axi_ad9361": {
                 "address_block": "/axi_ad9361/s_axi/axi_lite",
                 "offset": "0x79020000",

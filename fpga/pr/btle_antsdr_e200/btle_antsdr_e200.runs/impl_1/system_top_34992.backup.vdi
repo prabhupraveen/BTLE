@@ -1,0 +1,952 @@
+#-----------------------------------------------------------
+# Vivado v2025.1 (64-bit)
+# SW Build 6140274 on Wed May 21 22:58:25 MDT 2025
+# IP Build 6138677 on Thu May 22 03:10:11 MDT 2025
+# SharedData Build 6139179 on Tue May 20 17:58:58 MDT 2025
+# Start of session at: Fri Jun 12 15:01:01 2026
+# Process ID         : 34992
+# Current directory  : /home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/btle_antsdr_e200/btle_antsdr_e200.runs/impl_1
+# Command line       : vivado -log system_top.vdi -applog -product Vivado -messageDb vivado.pb -mode batch -source system_top.tcl -notrace
+# Log file           : /home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/btle_antsdr_e200/btle_antsdr_e200.runs/impl_1/system_top.vdi
+# Journal file       : /home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/btle_antsdr_e200/btle_antsdr_e200.runs/impl_1/vivado.jou
+# Running On         : planet-clockwork
+# Platform           : EndeavourOS
+# Operating System   : EndeavourOS Linux
+# Processor Detail   : Intel(R) Core(TM) i5-9300HF CPU @ 2.40GHz
+# CPU Frequency      : 3999.995 MHz
+# CPU Physical cores : 4
+# CPU Logical cores  : 8
+# Host memory        : 16536 MB
+# Swap memory        : 0 MB
+# Total Virtual      : 16536 MB
+# Available Virtual  : 8518 MB
+#-----------------------------------------------------------
+source system_top.tcl -notrace
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/ip_core'.
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/ip_core_old'.
+CRITICAL WARNING: [IP_Flow 19-11780] Skipping module reference component xilinx.com:module_ref:sync_bits:1.0 found in user repository /home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/adi-hdl 
+CRITICAL WARNING: [IP_Flow 19-11780] Skipping module reference component xilinx.com:module_ref:util_pulse_gen:1.0 found in user repository /home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/adi-hdl 
+CRITICAL WARNING: [IP_Flow 19-11780] Skipping module reference component xilinx.com:module_ref:ad_bus_mux:1.0 found in user repository /home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/adi-hdl 
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/adi-hdl'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx/2025.1/Vivado/data/ip'.
+Command: link_design -top system_top -part xc7z020clg400-1
+Design is defaulting to srcset: sources_1
+Design is defaulting to constrset: constrs_1
+INFO: [Device 21-403] Loading part xc7z020clg400-1
+Netlist sorting complete. Time (s): cpu = 00:00:00.2 ; elapsed = 00:00:00.2 . Memory (MB): peak = 1860.785 ; gain = 0.000 ; free physical = 1436 ; free virtual = 7406
+INFO: [Netlist 29-17] Analyzing 1615 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2025.1
+INFO: [Project 1-570] Preparing netlist for logic optimization
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_sys_ps7_0/system_sys_ps7_0.xdc] for cell 'i_system_wrapper/system_i/sys_ps7/inst'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_sys_ps7_0/system_sys_ps7_0.xdc] for cell 'i_system_wrapper/system_i/sys_ps7/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_sys_rstgen_0/system_sys_rstgen_0_board.xdc] for cell 'i_system_wrapper/system_i/sys_rstgen/U0'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_sys_rstgen_0/system_sys_rstgen_0_board.xdc] for cell 'i_system_wrapper/system_i/sys_rstgen/U0'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/bef3/up_xfer_cntrl_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/bef3/up_xfer_cntrl_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/bef3/ad_rst_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/bef3/ad_rst_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/bef3/up_xfer_status_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/bef3/up_xfer_status_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/bef3/up_clock_mon_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/bef3/up_clock_mon_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/axi_ad9361_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/axi_ad9361_constr.xdc:6]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/axi_ad9361_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+CRITICAL WARNING: [Designutils 20-1280] Could not find module 'system_util_ad9361_tdd_sync_0'. The XDC file /home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_util_ad9361_tdd_sync_0/util_tdd_sync_constr.xdc will not be read for any cell of this module.
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_util_ad9361_divclk_reset_0/system_util_ad9361_divclk_reset_0_board.xdc] for cell 'i_system_wrapper/system_i/util_ad9361_divclk_reset/U0'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_util_ad9361_divclk_reset_0/system_util_ad9361_divclk_reset_0_board.xdc] for cell 'i_system_wrapper/system_i/util_ad9361_divclk_reset/U0'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_util_ad9361_adc_fifo_0/util_wfifo_constr.xdc] for cell 'i_system_wrapper/system_i/util_ad9361_adc_fifo/inst'
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_util_ad9361_adc_fifo_0/util_wfifo_constr.xdc:8]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_util_ad9361_adc_fifo_0/util_wfifo_constr.xdc] for cell 'i_system_wrapper/system_i/util_ad9361_adc_fifo/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_dac_fifo_0/util_rfifo_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361_dac_fifo/inst'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_dac_fifo_0/util_rfifo_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361_dac_fifo/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_gpreg_0/bef3/ad_rst_constr.xdc] for cell 'i_system_wrapper/system_i/axi_gpreg/inst'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_gpreg_0/bef3/ad_rst_constr.xdc] for cell 'i_system_wrapper/system_i/axi_gpreg/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_iic_main_0/system_axi_iic_main_0_board.xdc] for cell 'i_system_wrapper/system_i/axi_iic_main/U0'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_iic_main_0/system_axi_iic_main_0_board.xdc] for cell 'i_system_wrapper/system_i/axi_iic_main/U0'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0.xdc] for cell 'i_system_wrapper/system_i/gmii_to_rgmii_0/U0'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0.xdc] for cell 'i_system_wrapper/system_i/gmii_to_rgmii_0/U0'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_clk_wiz_1_0/system_clk_wiz_1_0_board.xdc] for cell 'i_system_wrapper/system_i/clk_wiz_1/inst'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_clk_wiz_1_0/system_clk_wiz_1_0_board.xdc] for cell 'i_system_wrapper/system_i/clk_wiz_1/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_clk_wiz_1_0/system_clk_wiz_1_0.xdc] for cell 'i_system_wrapper/system_i/clk_wiz_1/inst'
+INFO: [Timing 38-35] Done setting XDC timing constraints. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_clk_wiz_1_0/system_clk_wiz_1_0.xdc:54]
+INFO: [Timing 38-2] Deriving generated clocks [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_clk_wiz_1_0/system_clk_wiz_1_0.xdc:54]
+get_clocks: Time (s): cpu = 00:00:08 ; elapsed = 00:00:06 . Memory (MB): peak = 2642.812 ; gain = 552.734 ; free physical = 768 ; free virtual = 6755
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_clk_wiz_1_0/system_clk_wiz_1_0.xdc] for cell 'i_system_wrapper/system_i/clk_wiz_1/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc]
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[0].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:43]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[0].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:43]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[1].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:44]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[1].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:44]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[2].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:45]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[2].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:45]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[3].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:46]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[3].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:46]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[4].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:47]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[4].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:47]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[5].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:48]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[5].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:48]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[6].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:49]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[6].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:49]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[7].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:50]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[7].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/C}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:50]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[0].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:52]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[0].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:52]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[1].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:53]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[1].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:53]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[2].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:54]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[2].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:54]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[3].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:55]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[3].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:55]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[4].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:56]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[4].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:56]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[5].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:57]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[5].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:57]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[6].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:58]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[6].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:58]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[7].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:59]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/genblk1[7].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/read_data_reg[*]/D}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:59]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-508] No pins matched 'i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_tx_i/btle_tx_sdpram_two_clk_i/read_data_reg[*]/D'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:64]
+CRITICAL WARNING: [Vivado 12-4739] set_false_path:No valid object(s) found for '-through [get_pins {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_tx_i/btle_tx_sdpram_two_clk_i/read_data_reg[*]/D}]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:64]
+Resolution: Check if the specified object(s) exists in the current design. If it does, ensure that the correct design hierarchy was specified for the object. If you are working with clocks, make sure create_clock was used to create the clock object before it is referenced.
+WARNING: [Vivado 12-584] No ports matched 'dac_sync'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:76]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:76]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+WARNING: [Vivado 12-584] No ports matched 'dac_sclk'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:77]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:77]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+WARNING: [Vivado 12-584] No ports matched 'dac_din'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:78]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:78]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+WARNING: [Vivado 12-584] No ports matched 'pps_in'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:79]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:79]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+WARNING: [Vivado 12-584] No ports matched 'clkin_10m_req'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:80]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:80]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+WARNING: [Vivado 12-584] No ports matched 'clkin_10m'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:81]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc:81]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/system_no_ila.xdc]
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/system_axi_ad9361_0_pps_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_ad9361_0/system_axi_ad9361_0_pps_constr.xdc] for cell 'i_system_wrapper/system_i/axi_ad9361/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_gpreg_0/system_axi_gpreg_0_constr.xdc] for cell 'i_system_wrapper/system_i/axi_gpreg/inst'
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_axi_gpreg_0/system_axi_gpreg_0_constr.xdc] for cell 'i_system_wrapper/system_i/axi_gpreg/inst'
+Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc] for cell 'i_system_wrapper/system_i/gmii_to_rgmii_0/U0'
+INFO: [Constraints 18-483] create_clock: no pin(s)/port(s)/net(s) specified as objects, only virtual clock 'system_gmii_to_rgmii_0_0_rgmii_rx_clk' will be created. If you don't want this, please specify pin(s)/ports(s)/net(s) as objects to the command. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:7]
+WARNING: [Vivado 12-1008] No clocks found for command 'get_clocks -of [get_ports -scoped_to_current_instance gmii_clk_125m*]'. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:27]
+Resolution: Verify the create_clock command was called to create the clock object before it is referenced.
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:27]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:30]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:31]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:32]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:33]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:35]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:36]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:37]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:38]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:40]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:41]
+INFO: [Vivado 12-626] No clocks found. Please use 'create_clock' or 'create_generated_clock' command to create clocks. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:46]
+Finished Parsing XDC File [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc] for cell 'i_system_wrapper/system_i/gmii_to_rgmii_0/U0'
+INFO: [Project 1-1714] 6 XPM XDC files have been applied to the design.
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+INFO: [Project 1-1687] 40 scoped IP constraints or related sub-commands were skipped due to synthesis logic optimizations usually triggered by constant connectivity or unconnected output pins. To review the skipped constraints and messages, run the command 'set_param netlist.IPMsgFiltering false' before opening the design.
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 2658.656 ; gain = 0.000 ; free physical = 722 ; free virtual = 6712
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 19 instances were transformed.
+  IOBUF => IOBUF (IBUF, OBUFT): 11 instances
+  OBUFDS => OBUFDS: 8 instances
+
+29 Infos, 24 Warnings, 29 Critical Warnings and 0 Errors encountered.
+link_design completed successfully
+link_design: Time (s): cpu = 00:00:18 ; elapsed = 00:00:16 . Memory (MB): peak = 2658.691 ; gain = 1025.562 ; free physical = 722 ; free virtual = 6712
+Command: opt_design
+Attempting to get a license for feature 'Implementation' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xc7z020'
+Running DRC as a precondition to command opt_design
+
+Starting DRC Task
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Project 1-461] DRC finished with 0 Errors
+INFO: [Project 1-462] Please refer to the DRC report (report_drc) for more information.
+
+Time (s): cpu = 00:00:03 ; elapsed = 00:00:00.68 . Memory (MB): peak = 2658.691 ; gain = 0.000 ; free physical = 702 ; free virtual = 6693
+
+Starting Cache Timing Information Task
+INFO: [Constraints 18-483] create_clock: no pin(s)/port(s)/net(s) specified as objects, only virtual clock 'system_gmii_to_rgmii_0_0_rgmii_rx_clk' will be created. If you don't want this, please specify pin(s)/ports(s)/net(s) as objects to the command. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:7]
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+Ending Cache Timing Information Task | Checksum: 2276c6a63
+
+Time (s): cpu = 00:00:03 ; elapsed = 00:00:00.86 . Memory (MB): peak = 2658.691 ; gain = 0.000 ; free physical = 696 ; free virtual = 6685
+
+Starting Logic Optimization Task
+
+Phase 1 Initialization
+
+Phase 1.1 Core Generation And Design Setup
+Phase 1.1 Core Generation And Design Setup | Checksum: 2276c6a63
+
+Time (s): cpu = 00:00:00.03 ; elapsed = 00:00:00.02 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 446 ; free virtual = 6436
+
+Phase 1.2 Setup Constraints And Sort Netlist
+Phase 1.2 Setup Constraints And Sort Netlist | Checksum: 2276c6a63
+
+Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.04 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 446 ; free virtual = 6436
+Phase 1 Initialization | Checksum: 2276c6a63
+
+Time (s): cpu = 00:00:00.05 ; elapsed = 00:00:00.04 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 446 ; free virtual = 6436
+
+Phase 2 Timer Update And Timing Data Collection
+
+Phase 2.1 Timer Update
+Phase 2.1 Timer Update | Checksum: 2276c6a63
+
+Time (s): cpu = 00:00:02 ; elapsed = 00:00:00.6 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 437 ; free virtual = 6426
+
+Phase 2.2 Timing Data Collection
+Phase 2.2 Timing Data Collection | Checksum: 2276c6a63
+
+Time (s): cpu = 00:00:02 ; elapsed = 00:00:00.63 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 436 ; free virtual = 6426
+Phase 2 Timer Update And Timing Data Collection | Checksum: 2276c6a63
+
+Time (s): cpu = 00:00:02 ; elapsed = 00:00:00.64 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 436 ; free virtual = 6426
+
+Phase 3 Retarget
+INFO: [Opt 31-1851] Number of loadless carry chains removed were: 0
+INFO: [Opt 31-1834] Total Chains To Be Transformed Were: 0 AND Number of Transformed insts Created are: 0
+INFO: [Opt 31-1566] Pulled 7 inverters resulting in an inversion of 40 pins
+INFO: [Opt 31-138] Pushed 9 inverter(s) to 9 load pin(s).
+INFO: [Opt 31-49] Retargeted 0 cell(s).
+Phase 3 Retarget | Checksum: eb9f751d
+
+Time (s): cpu = 00:00:03 ; elapsed = 00:00:01 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 411 ; free virtual = 6402
+Retarget | Checksum: eb9f751d
+INFO: [Opt 31-389] Phase Retarget created 29 cells and removed 81 cells
+INFO: [Opt 31-1021] In phase Retarget, 1202 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 4 Constant propagation
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Phase 4 Constant propagation | Checksum: 180f82df1
+
+Time (s): cpu = 00:00:03 ; elapsed = 00:00:01 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 399 ; free virtual = 6390
+Constant propagation | Checksum: 180f82df1
+INFO: [Opt 31-389] Phase Constant propagation created 36 cells and removed 59 cells
+INFO: [Opt 31-1021] In phase Constant propagation, 1288 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 5 Sweep
+INFO: [Constraints 18-11670] Building netlist checker database with flags, 0x8
+Done building netlist checker database: Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 399 ; free virtual = 6390
+INFO: [Constraints 18-11670] Building netlist checker database with flags, 0x8
+Done building netlist checker database: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 399 ; free virtual = 6390
+INFO: [Opt 31-120] Instance i_system_wrapper/system_i/btle_controller_0/inst/auxiliary_daemon_i/sdpram_two_clk_auxiliary_daemon_i (sdpram_two_clk) has been optimized to an empty box cell during sweep but it has constraints that prevent its removal. Empty box cells do not impact the implementation flow but they have no functional relevance.
+Resolution: If this is not expected, please check for DONT_TOUCH properties or timing constraint set on the empty box cell or on nets connected to the cell. If found, remove the relevant DONT_TOUCH property or timing constraint and re-run opt_design.
+Phase 5 Sweep | Checksum: 14c30df6a
+
+Time (s): cpu = 00:00:04 ; elapsed = 00:00:02 . Memory (MB): peak = 2983.555 ; gain = 0.000 ; free physical = 402 ; free virtual = 6393
+Sweep | Checksum: 14c30df6a
+INFO: [Opt 31-389] Phase Sweep created 0 cells and removed 433 cells
+INFO: [Opt 31-1021] In phase Sweep, 7850 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 6 BUFG optimization
+Phase 6 BUFG optimization | Checksum: 1b3c191dd
+
+Time (s): cpu = 00:00:04 ; elapsed = 00:00:02 . Memory (MB): peak = 3015.570 ; gain = 32.016 ; free physical = 384 ; free virtual = 6375
+BUFG optimization | Checksum: 1b3c191dd
+INFO: [Opt 31-662] Phase BUFG optimization created 0 cells of which 0 are BUFGs and removed 1 cells.
+
+Phase 7 Shift Register Optimization
+INFO: [Opt 31-1064] SRL Remap converted 0 SRLs to 0 registers and converted 0 registers of register chains to 0 SRLs
+Phase 7 Shift Register Optimization | Checksum: 1b3c191dd
+
+Time (s): cpu = 00:00:04 ; elapsed = 00:00:02 . Memory (MB): peak = 3015.570 ; gain = 32.016 ; free physical = 384 ; free virtual = 6375
+Shift Register Optimization | Checksum: 1b3c191dd
+INFO: [Opt 31-389] Phase Shift Register Optimization created 0 cells and removed 0 cells
+
+Phase 8 Post Processing Netlist
+Phase 8 Post Processing Netlist | Checksum: 1b22ba133
+
+Time (s): cpu = 00:00:04 ; elapsed = 00:00:02 . Memory (MB): peak = 3015.570 ; gain = 32.016 ; free physical = 384 ; free virtual = 6375
+Post Processing Netlist | Checksum: 1b22ba133
+INFO: [Opt 31-389] Phase Post Processing Netlist created 0 cells and removed 0 cells
+INFO: [Opt 31-1021] In phase Post Processing Netlist, 200 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 9 Finalization
+
+Phase 9.1 Finalizing Design Cores and Updating Shapes
+Phase 9.1 Finalizing Design Cores and Updating Shapes | Checksum: 1ee220f4e
+
+Time (s): cpu = 00:00:05 ; elapsed = 00:00:03 . Memory (MB): peak = 3015.570 ; gain = 32.016 ; free physical = 384 ; free virtual = 6376
+
+Phase 9.2 Verifying Netlist Connectivity
+
+Starting Connectivity Check Task
+
+Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.04 . Memory (MB): peak = 3015.570 ; gain = 0.000 ; free physical = 384 ; free virtual = 6376
+Phase 9.2 Verifying Netlist Connectivity | Checksum: 1ee220f4e
+
+Time (s): cpu = 00:00:05 ; elapsed = 00:00:03 . Memory (MB): peak = 3015.570 ; gain = 32.016 ; free physical = 384 ; free virtual = 6376
+Phase 9 Finalization | Checksum: 1ee220f4e
+
+Time (s): cpu = 00:00:05 ; elapsed = 00:00:03 . Memory (MB): peak = 3015.570 ; gain = 32.016 ; free physical = 384 ; free virtual = 6376
+Opt_design Change Summary
+=========================
+
+
+-------------------------------------------------------------------------------------------------------------------------
+|  Phase                        |  #Cells created  |  #Cells Removed  |  #Constrained objects preventing optimizations  |
+-------------------------------------------------------------------------------------------------------------------------
+|  Retarget                     |              29  |              81  |                                           1202  |
+|  Constant propagation         |              36  |              59  |                                           1288  |
+|  Sweep                        |               0  |             433  |                                           7850  |
+|  BUFG optimization            |               0  |               1  |                                              0  |
+|  Shift Register Optimization  |               0  |               0  |                                              0  |
+|  Post Processing Netlist      |               0  |               0  |                                            200  |
+-------------------------------------------------------------------------------------------------------------------------
+
+
+Ending Logic Optimization Task | Checksum: 1ee220f4e
+
+Time (s): cpu = 00:00:05 ; elapsed = 00:00:03 . Memory (MB): peak = 3015.570 ; gain = 32.016 ; free physical = 384 ; free virtual = 6376
+
+Starting Power Optimization Task
+INFO: [Pwropt 34-132] Skipping clock gating for clocks with a period < 2.00 ns.
+INFO: [Constraints 18-483] create_clock: no pin(s)/port(s)/net(s) specified as objects, only virtual clock 'system_gmii_to_rgmii_0_0_rgmii_rx_clk' will be created. If you don't want this, please specify pin(s)/ports(s)/net(s) as objects to the command. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:7]
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [Pwropt 34-9] Applying IDT optimizations ...
+INFO: [Pwropt 34-10] Applying ODC optimizations ...
+Running Vector-less Activity Propagation...
+
+Finished Running Vector-less Activity Propagation
+
+
+Starting PowerOpt Patch Enables Task
+INFO: [Pwropt 34-162] WRITE_MODE attribute of 0 BRAM(s) out of a total of 13 has been updated to save power. Run report_power_opt to get a complete listing of the BRAMs updated.
+INFO: [Pwropt 34-201] Structural ODC has moved 0 WE to EN ports
+Number of BRAM Ports augmented: 2 newly gated: 14 Total Ports: 26
+Ending PowerOpt Patch Enables Task | Checksum: 20e5c111c
+
+Time (s): cpu = 00:00:00.28 ; elapsed = 00:00:00.13 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 287 ; free virtual = 6245
+Ending Power Optimization Task | Checksum: 20e5c111c
+
+Time (s): cpu = 00:00:09 ; elapsed = 00:00:03 . Memory (MB): peak = 3343.445 ; gain = 327.875 ; free physical = 278 ; free virtual = 6237
+
+Starting Final Cleanup Task
+
+Starting Logic Optimization Task
+INFO: [Constraints 18-483] create_clock: no pin(s)/port(s)/net(s) specified as objects, only virtual clock 'system_gmii_to_rgmii_0_0_rgmii_rx_clk' will be created. If you don't want this, please specify pin(s)/ports(s)/net(s) as objects to the command. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:7]
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+Ending Logic Optimization Task | Checksum: 16544cd3f
+
+Time (s): cpu = 00:00:05 ; elapsed = 00:00:02 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 282 ; free virtual = 6248
+Ending Final Cleanup Task | Checksum: 16544cd3f
+
+Time (s): cpu = 00:00:07 ; elapsed = 00:00:04 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 282 ; free virtual = 6248
+
+Starting Netlist Obfuscation Task
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 282 ; free virtual = 6248
+Ending Netlist Obfuscation Task | Checksum: 16544cd3f
+
+Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.02 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 282 ; free virtual = 6248
+INFO: [Common 17-83] Releasing license: Implementation
+65 Infos, 24 Warnings, 29 Critical Warnings and 0 Errors encountered.
+opt_design completed successfully
+opt_design: Time (s): cpu = 00:00:30 ; elapsed = 00:00:14 . Memory (MB): peak = 3343.445 ; gain = 684.754 ; free physical = 282 ; free virtual = 6248
+INFO: [Vivado 12-24828] Executing command : report_drc -file system_top_drc_opted.rpt -pb system_top_drc_opted.pb -rpx system_top_drc_opted.rpx
+Command: report_drc -file system_top_drc_opted.rpt -pb system_top_drc_opted.pb -rpx system_top_drc_opted.rpx
+INFO: [IP_Flow 19-1839] IP Catalog is up to date.
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Vivado_Tcl 2-168] The results of DRC are in file /home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/btle_antsdr_e200/btle_antsdr_e200.runs/impl_1/system_top_drc_opted.rpt.
+report_drc completed successfully
+INFO: [Constraints 18-483] create_clock: no pin(s)/port(s)/net(s) specified as objects, only virtual clock 'system_gmii_to_rgmii_0_0_rgmii_rx_clk' will be created. If you don't want this, please specify pin(s)/ports(s)/net(s) as objects to the command. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:7]
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [Timing 38-480] Writing timing data to binary archive.
+Wrote PlaceDB: Time (s): cpu = 00:00:00.09 ; elapsed = 00:00:00.02 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 263 ; free virtual = 6226
+Wrote PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 263 ; free virtual = 6226
+Writing XDEF routing.
+Write ShapeDB Complete: Time (s): cpu = 00:00:00.19 ; elapsed = 00:00:00.04 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 263 ; free virtual = 6229
+Writing XDEF routing logical nets.
+Writing XDEF routing special nets.
+Wrote RouteStorage: Time (s): cpu = 00:00:00.3 ; elapsed = 00:00:00.07 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 263 ; free virtual = 6230
+Wrote Netlist Cache: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 263 ; free virtual = 6230
+Wrote Device Cache: Time (s): cpu = 00:00:00.05 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 263 ; free virtual = 6232
+Write Physdb Complete: Time (s): cpu = 00:00:00.46 ; elapsed = 00:00:00.11 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 263 ; free virtual = 6232
+INFO: [Common 17-1381] The checkpoint '/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/btle_antsdr_e200/btle_antsdr_e200.runs/impl_1/system_top_opt.dcp' has been generated.
+Command: place_design
+Attempting to get a license for feature 'Implementation' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xc7z020'
+INFO: [Common 17-83] Releasing license: Implementation
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Vivado_Tcl 4-198] DRC finished with 0 Errors
+INFO: [Vivado_Tcl 4-199] Please refer to the DRC report (report_drc) for more information.
+Running DRC as a precondition to command place_design
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Vivado_Tcl 4-198] DRC finished with 0 Errors, 19 Warnings
+INFO: [Vivado_Tcl 4-199] Please refer to the DRC report (report_drc) for more information.
+INFO: [Place 30-611] Multithreading enabled for place_design using a maximum of 8 CPUs
+
+Starting Placer Task
+
+Phase 1 Placer Initialization
+
+Phase 1.1 Placer Initialization Netlist Sorting
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 213 ; free virtual = 6185
+Phase 1.1 Placer Initialization Netlist Sorting | Checksum: 1481ab3cd
+
+Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 214 ; free virtual = 6185
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 214 ; free virtual = 6185
+
+Phase 1.2 IO Placement/ Clock Placement/ Build Placer Device
+Phase 1.2 IO Placement/ Clock Placement/ Build Placer Device | Checksum: 1c1f0022c
+
+Time (s): cpu = 00:00:03 ; elapsed = 00:00:02 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 223 ; free virtual = 6177
+
+Phase 1.3 Build Placer Netlist Model
+Phase 1.3 Build Placer Netlist Model | Checksum: 269de86e2
+
+Time (s): cpu = 00:00:14 ; elapsed = 00:00:06 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 648 ; free virtual = 6210
+
+Phase 1.4 Constrain Clocks/Macros
+Phase 1.4 Constrain Clocks/Macros | Checksum: 269de86e2
+
+Time (s): cpu = 00:00:14 ; elapsed = 00:00:06 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 648 ; free virtual = 6210
+Phase 1 Placer Initialization | Checksum: 269de86e2
+
+Time (s): cpu = 00:00:14 ; elapsed = 00:00:06 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 648 ; free virtual = 6209
+
+Phase 2 Global Placement
+
+Phase 2.1 Floorplanning
+Phase 2.1 Floorplanning | Checksum: 2042cfec7
+
+Time (s): cpu = 00:00:20 ; elapsed = 00:00:08 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 646 ; free virtual = 6216
+
+Phase 2.2 Update Timing before SLR Path Opt
+Phase 2.2 Update Timing before SLR Path Opt | Checksum: 20e2d1460
+
+Time (s): cpu = 00:00:24 ; elapsed = 00:00:09 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 644 ; free virtual = 6214
+
+Phase 2.3 Post-Processing in Floorplanning
+Phase 2.3 Post-Processing in Floorplanning | Checksum: 20e2d1460
+
+Time (s): cpu = 00:00:24 ; elapsed = 00:00:09 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 644 ; free virtual = 6214
+
+Phase 2.4 Global Place Phase1
+Phase 2.4 Global Place Phase1 | Checksum: 1f9d1f1bd
+
+Time (s): cpu = 00:01:18 ; elapsed = 00:00:23 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 634 ; free virtual = 6221
+
+Phase 2.5 Global Place Phase2
+
+Phase 2.5.1 UpdateTiming Before Physical Synthesis
+Phase 2.5.1 UpdateTiming Before Physical Synthesis | Checksum: 1cf09b1df
+
+Time (s): cpu = 00:01:23 ; elapsed = 00:00:24 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 617 ; free virtual = 6200
+
+Phase 2.5.2 Physical Synthesis In Placer
+INFO: [Physopt 32-1035] Found 6 LUTNM shape to break, 818 LUT instances to create LUTNM shape
+INFO: [Physopt 32-1044] Break lutnm for timing: one critical 4, two critical 2, total 6, new lutff created 0
+INFO: [Physopt 32-1138] End 1 Pass. Optimized 247 nets or LUTs. Breaked 6 LUTs, combined 241 existing LUTs and moved 0 existing LUT
+INFO: [Physopt 32-65] No nets found for high-fanout optimization.
+INFO: [Physopt 32-232] Optimized 0 net. Created 0 new instance.
+INFO: [Physopt 32-775] End 1 Pass. Optimized 0 net or cell. Created 0 new cell, deleted 0 existing cell and moved 0 existing cell
+INFO: [Physopt 32-712] Optimization is not feasible on net q0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net i0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net q0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net i0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net q0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net i0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net q0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net i0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net q0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net i0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net q0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net i0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net q0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net i0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net q0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-712] Optimization is not feasible on net i0[31] due to MARK_DEBUG attribute.
+INFO: [Physopt 32-456] No candidate cells for DSP register optimization found in the design.
+INFO: [Physopt 32-775] End 2 Pass. Optimized 0 net or cell. Created 0 new cell, deleted 0 existing cell and moved 0 existing cell
+INFO: [Physopt 32-1123] No candidate cells found for Shift Register to Pipeline optimization
+INFO: [Physopt 32-775] End 2 Pass. Optimized 0 net or cell. Created 0 new cell, deleted 0 existing cell and moved 0 existing cell
+INFO: [Physopt 32-1402] Pass 1: Identified 1 candidate cell for Shift Register optimization.
+INFO: [Physopt 32-775] End 1 Pass. Optimized 1 net or cell. Created 1 new cell, deleted 0 existing cell and moved 0 existing cell
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 617 ; free virtual = 6209
+INFO: [Physopt 32-526] No candidate cells for BRAM register optimization found in the design
+INFO: [Physopt 32-775] End 1 Pass. Optimized 0 net or cell. Created 0 new cell, deleted 0 existing cell and moved 0 existing cell
+INFO: [Physopt 32-846] No candidate cells for URAM register optimization found in the design
+INFO: [Physopt 32-775] End 1 Pass. Optimized 0 net or cell. Created 0 new cell, deleted 0 existing cell and moved 0 existing cell
+INFO: [Physopt 32-846] No candidate cells for URAM register optimization found in the design
+INFO: [Physopt 32-775] End 1 Pass. Optimized 0 net or cell. Created 0 new cell, deleted 0 existing cell and moved 0 existing cell
+INFO: [Physopt 32-949] No candidate nets found for dynamic/static region interface net replication
+INFO: [Physopt 32-775] End 1 Pass. Optimized 0 net or cell. Created 0 new cell, deleted 0 existing cell and moved 0 existing cell
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 617 ; free virtual = 6209
+
+Summary of Physical Synthesis Optimizations
+============================================
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+|  Optimization                                     |  Added Cells  |  Removed Cells  |  Optimized Cells/Nets  |  Dont Touch  |  Iterations  |  Elapsed   |
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+|  LUT Combining                                    |            6  |            241  |                   247  |           0  |           1  |  00:00:01  |
+|  Retime                                           |            0  |              0  |                     0  |           0  |           1  |  00:00:00  |
+|  Very High Fanout                                 |            0  |              0  |                     0  |           0  |           1  |  00:00:00  |
+|  DSP Register                                     |            0  |              0  |                     0  |          16  |           1  |  00:00:00  |
+|  Shift Register to Pipeline                       |            0  |              0  |                     0  |           0  |           1  |  00:00:00  |
+|  Shift Register                                   |            1  |              0  |                     1  |           0  |           1  |  00:00:00  |
+|  BRAM Register                                    |            0  |              0  |                     0  |           0  |           1  |  00:00:00  |
+|  URAM Register                                    |            0  |              0  |                     0  |           0  |           1  |  00:00:00  |
+|  Dynamic/Static Region Interface Net Replication  |            0  |              0  |                     0  |           0  |           1  |  00:00:00  |
+|  Total                                            |            7  |            241  |                   248  |          16  |           9  |  00:00:01  |
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Phase 2.5.2 Physical Synthesis In Placer | Checksum: 193be2588
+
+Time (s): cpu = 00:01:28 ; elapsed = 00:00:27 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 617 ; free virtual = 6208
+Phase 2.5 Global Place Phase2 | Checksum: 1a3baad78
+
+Time (s): cpu = 00:01:55 ; elapsed = 00:00:32 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 625 ; free virtual = 6219
+Phase 2 Global Placement | Checksum: 1a3baad78
+
+Time (s): cpu = 00:01:55 ; elapsed = 00:00:32 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 625 ; free virtual = 6219
+
+Phase 3 Detail Placement
+
+Phase 3.1 Commit Multi Column Macros
+Phase 3.1 Commit Multi Column Macros | Checksum: 181feacd5
+
+Time (s): cpu = 00:01:59 ; elapsed = 00:00:33 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 625 ; free virtual = 6220
+
+Phase 3.2 Commit Most Macros & LUTRAMs
+Phase 3.2 Commit Most Macros & LUTRAMs | Checksum: 20c883f53
+
+Time (s): cpu = 00:02:08 ; elapsed = 00:00:35 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 626 ; free virtual = 6222
+
+Phase 3.3 Area Swap Optimization
+Phase 3.3 Area Swap Optimization | Checksum: 19ea68ab7
+
+Time (s): cpu = 00:02:09 ; elapsed = 00:00:36 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 643 ; free virtual = 6240
+
+Phase 3.4 Pipeline Register Optimization
+Phase 3.4 Pipeline Register Optimization | Checksum: 1d671132e
+
+Time (s): cpu = 00:02:09 ; elapsed = 00:00:36 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 627 ; free virtual = 6224
+
+Phase 3.5 Fast Optimization
+Phase 3.5 Fast Optimization | Checksum: 192a526eb
+
+Time (s): cpu = 00:02:20 ; elapsed = 00:00:38 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 618 ; free virtual = 6211
+
+Phase 3.6 Small Shape Detail Placement
+Phase 3.6 Small Shape Detail Placement | Checksum: 1646533e4
+
+Time (s): cpu = 00:02:27 ; elapsed = 00:00:44 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 599 ; free virtual = 6196
+
+Phase 3.7 Re-assign LUT pins
+Phase 3.7 Re-assign LUT pins | Checksum: 18d4d0c72
+
+Time (s): cpu = 00:02:28 ; elapsed = 00:00:45 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 620 ; free virtual = 6218
+
+Phase 3.8 Pipeline Register Optimization
+Phase 3.8 Pipeline Register Optimization | Checksum: 1fd6d8ba2
+
+Time (s): cpu = 00:02:28 ; elapsed = 00:00:45 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 600 ; free virtual = 6198
+Phase 3 Detail Placement | Checksum: 1fd6d8ba2
+
+Time (s): cpu = 00:02:28 ; elapsed = 00:00:45 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 600 ; free virtual = 6198
+
+Phase 4 Post Placement Optimization and Clean-Up
+
+Phase 4.1 Post Commit Optimization
+INFO: [Constraints 18-483] create_clock: no pin(s)/port(s)/net(s) specified as objects, only virtual clock 'system_gmii_to_rgmii_0_0_rgmii_rx_clk' will be created. If you don't want this, please specify pin(s)/ports(s)/net(s) as objects to the command. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:7]
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+
+Phase 4.1.1 Post Placement Optimization
+Post Placement Optimization Initialization | Checksum: 1523144af
+
+Phase 4.1.1.1 BUFG Insertion
+
+Starting Physical Synthesis Task
+
+Phase 1 Physical Synthesis Initialization
+INFO: [Physopt 32-721] Multithreading enabled for phys_opt_design using a maximum of 8 CPUs
+INFO: [Physopt 32-619] Estimated Timing Summary | WNS=0.144 | TNS=0.000 |
+Phase 1 Physical Synthesis Initialization | Checksum: 1b2cbe921
+
+Time (s): cpu = 00:00:02 ; elapsed = 00:00:00.36 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 599 ; free virtual = 6205
+INFO: [Place 46-33] Processed net i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/btle_rx_i/packet_abort_early_term_i/PR_OUT_DFF[0].FDRE_PER_8, BUFG insertion was skipped due to placement/routing conflicts.
+INFO: [Place 46-56] BUFG insertion identified 1 candidate nets. Inserted BUFG: 0, Replicated BUFG Driver: 0, Skipped due to Placement/Routing Conflicts: 1, Skipped due to Timing Degradation: 0, Skipped due to netlist editing failed: 0.
+Ending Physical Synthesis Task | Checksum: 192b828c0
+
+Time (s): cpu = 00:00:02 ; elapsed = 00:00:00.7 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 579 ; free virtual = 6185
+Phase 4.1.1.1 BUFG Insertion | Checksum: 1523144af
+
+Time (s): cpu = 00:02:44 ; elapsed = 00:00:49 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 579 ; free virtual = 6185
+
+Phase 4.1.1.2 Post Placement Timing Optimization
+INFO: [Place 30-746] Post Placement Timing Summary WNS=0.318. For the most accurate timing information please run report_timing.
+Phase 4.1.1.2 Post Placement Timing Optimization | Checksum: 1baf0a055
+
+Time (s): cpu = 00:02:59 ; elapsed = 00:00:55 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 548 ; free virtual = 6158
+
+Time (s): cpu = 00:02:59 ; elapsed = 00:00:55 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 548 ; free virtual = 6158
+Phase 4.1 Post Commit Optimization | Checksum: 1baf0a055
+
+Time (s): cpu = 00:03:00 ; elapsed = 00:00:55 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 548 ; free virtual = 6158
+
+Phase 4.2 Post Placement Cleanup
+Phase 4.2 Post Placement Cleanup | Checksum: 1baf0a055
+
+Time (s): cpu = 00:03:00 ; elapsed = 00:00:55 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 548 ; free virtual = 6158
+
+Phase 4.3 Placer Reporting
+
+Phase 4.3.1 Print Estimated Congestion
+INFO: [Place 30-612] Post-Placement Estimated Congestion 
+ ____________________________________________________
+|           | Global Congestion | Short Congestion  |
+| Direction | Region Size       | Region Size       |
+|___________|___________________|___________________|
+|      North|                1x1|                4x4|
+|___________|___________________|___________________|
+|      South|                2x2|                4x4|
+|___________|___________________|___________________|
+|       East|                1x1|                8x8|
+|___________|___________________|___________________|
+|       West|                1x1|                8x8|
+|___________|___________________|___________________|
+
+Phase 4.3.1 Print Estimated Congestion | Checksum: 1baf0a055
+
+Time (s): cpu = 00:03:00 ; elapsed = 00:00:55 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 548 ; free virtual = 6158
+Phase 4.3 Placer Reporting | Checksum: 1baf0a055
+
+Time (s): cpu = 00:03:01 ; elapsed = 00:00:55 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 568 ; free virtual = 6177
+
+Phase 4.4 Final Placement Cleanup
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 568 ; free virtual = 6177
+
+Time (s): cpu = 00:03:01 ; elapsed = 00:00:55 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 568 ; free virtual = 6177
+Phase 4 Post Placement Optimization and Clean-Up | Checksum: 10ee630db
+
+Time (s): cpu = 00:03:01 ; elapsed = 00:00:55 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 568 ; free virtual = 6177
+Ending Placer Task | Checksum: 7b644d23
+
+Time (s): cpu = 00:03:01 ; elapsed = 00:00:55 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 547 ; free virtual = 6157
+126 Infos, 24 Warnings, 29 Critical Warnings and 0 Errors encountered.
+place_design completed successfully
+place_design: Time (s): cpu = 00:03:07 ; elapsed = 00:00:57 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 546 ; free virtual = 6157
+INFO: [Vivado 12-24838] Running report commands "report_control_sets, report_io, report_utilization" in parallel.
+Running report generation with 3 threads.
+INFO: [Vivado 12-24828] Executing command : report_control_sets -verbose -file system_top_control_sets_placed.rpt
+report_control_sets: Time (s): cpu = 00:00:00.34 ; elapsed = 00:00:00.19 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 535 ; free virtual = 6146
+INFO: [Vivado 12-24828] Executing command : report_io -file system_top_io_placed.rpt
+report_io: Time (s): cpu = 00:00:00.41 ; elapsed = 00:00:00.22 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 537 ; free virtual = 6148
+INFO: [Vivado 12-24828] Executing command : report_utilization -file system_top_utilization_placed.rpt -pb system_top_utilization_placed.pb
+INFO: [Timing 38-480] Writing timing data to binary archive.
+Write ShapeDB Complete: Time (s): cpu = 00:00:00.26 ; elapsed = 00:00:00.05 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 549 ; free virtual = 6167
+Wrote PlaceDB: Time (s): cpu = 00:00:04 ; elapsed = 00:00:01 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 521 ; free virtual = 6172
+Wrote PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 521 ; free virtual = 6172
+Writing XDEF routing.
+Writing XDEF routing logical nets.
+Writing XDEF routing special nets.
+Wrote RouteStorage: Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.04 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 521 ; free virtual = 6173
+Wrote Netlist Cache: Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.02 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 521 ; free virtual = 6174
+Wrote Device Cache: Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 521 ; free virtual = 6175
+Write Physdb Complete: Time (s): cpu = 00:00:04 ; elapsed = 00:00:02 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 521 ; free virtual = 6175
+INFO: [Common 17-1381] The checkpoint '/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/btle_antsdr_e200/btle_antsdr_e200.runs/impl_1/system_top_placed.dcp' has been generated.
+Command: phys_opt_design
+Attempting to get a license for feature 'Implementation' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xc7z020'
+
+Starting Initial Update Timing Task
+
+Time (s): cpu = 00:00:11 ; elapsed = 00:00:02 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 530 ; free virtual = 6157
+INFO: [Vivado_Tcl 4-2279] Estimated Timing Summary | WNS= 0.289 | TNS= 0.000 | 
+INFO: [Vivado_Tcl 4-383] Design worst setup slack (WNS) is greater than or equal to 0.000 ns. All physical synthesis setup optimizations will be skipped.
+INFO: [Vivado_Tcl 4-232] No setup violation found. The netlist was not modified.
+INFO: [Common 17-83] Releasing license: Implementation
+137 Infos, 24 Warnings, 29 Critical Warnings and 0 Errors encountered.
+phys_opt_design completed successfully
+INFO: [Timing 38-480] Writing timing data to binary archive.
+Write ShapeDB Complete: Time (s): cpu = 00:00:00.24 ; elapsed = 00:00:00.06 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 527 ; free virtual = 6159
+Wrote PlaceDB: Time (s): cpu = 00:00:04 ; elapsed = 00:00:01 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 503 ; free virtual = 6165
+Wrote PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 503 ; free virtual = 6165
+Writing XDEF routing.
+Writing XDEF routing logical nets.
+Writing XDEF routing special nets.
+Wrote RouteStorage: Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.04 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 503 ; free virtual = 6165
+Wrote Netlist Cache: Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.02 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 500 ; free virtual = 6163
+Wrote Device Cache: Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 500 ; free virtual = 6164
+Write Physdb Complete: Time (s): cpu = 00:00:04 ; elapsed = 00:00:01 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 500 ; free virtual = 6164
+INFO: [Common 17-1381] The checkpoint '/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/btle_antsdr_e200/btle_antsdr_e200.runs/impl_1/system_top_physopt.dcp' has been generated.
+Command: route_design
+Attempting to get a license for feature 'Implementation' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xc7z020'
+
+
+Starting Routing Task
+INFO: [Route 35-254] Multithreading enabled for route_design using a maximum of 8 CPUs
+
+Phase 1 Build RT Design
+Checksum: PlaceDB: 13ff6b87 ConstDB: 0 ShapeSum: 516b6eac RouteDB: 15f972f0
+Post Restoration Checksum: NetGraph: bda4f1c9 | NumContArr: 9407e318 | Constraints: c2a8fa9d | Timing: c2a8fa9d
+Phase 1 Build RT Design | Checksum: 2d6feca1b
+
+Time (s): cpu = 00:00:33 ; elapsed = 00:00:20 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 375 ; free virtual = 6058
+
+Phase 2 Router Initialization
+
+Phase 2.1 Fix Topology Constraints
+Phase 2.1 Fix Topology Constraints | Checksum: 2d6feca1b
+
+Time (s): cpu = 00:00:33 ; elapsed = 00:00:21 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 366 ; free virtual = 6069
+
+Phase 2.2 Pre Route Cleanup
+Phase 2.2 Pre Route Cleanup | Checksum: 2d6feca1b
+
+Time (s): cpu = 00:00:33 ; elapsed = 00:00:21 . Memory (MB): peak = 3343.445 ; gain = 0.000 ; free physical = 366 ; free virtual = 6069
+ Number of Nodes with overlaps = 0
+
+Phase 2.3 Update Timing
+Phase 2.3 Update Timing | Checksum: 2757c20d2
+
+Time (s): cpu = 00:00:50 ; elapsed = 00:00:25 . Memory (MB): peak = 3361.105 ; gain = 17.660 ; free physical = 300 ; free virtual = 6012
+INFO: [Route 35-416] Intermediate Timing Summary | WNS=0.232  | TNS=0.000  | WHS=-0.554 | THS=-341.138|
+
+
+Phase 2.4 Soft Constraint Pins - Fast Budgeting
+Phase 2.4 Soft Constraint Pins - Fast Budgeting | Checksum: 2b5cd9854
+
+Time (s): cpu = 00:00:56 ; elapsed = 00:00:27 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 289 ; free virtual = 6001
+
+Router Utilization Summary
+  Global Vertical Routing Utilization    = 0 %
+  Global Horizontal Routing Utilization  = 0 %
+  Routable Net Status*
+  *Does not include unroutable nets such as driverless and loadless.
+  Run report_route_status for detailed report.
+  Number of Failed Nets               = 29836
+    (Failed Nets is the sum of unrouted and partially routed nets)
+  Number of Unrouted Nets             = 29836
+  Number of Partially Routed Nets     = 0
+  Number of Node Overlaps             = 0
+
+Phase 2 Router Initialization | Checksum: 2908e06db
+
+Time (s): cpu = 00:00:57 ; elapsed = 00:00:27 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 293 ; free virtual = 6025
+
+Phase 3 Global Routing
+Phase 3 Global Routing | Checksum: 2908e06db
+
+Time (s): cpu = 00:00:57 ; elapsed = 00:00:27 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 293 ; free virtual = 6025
+
+Phase 4 Initial Routing
+
+Phase 4.1 Initial Net Routing Pass
+Phase 4.1 Initial Net Routing Pass | Checksum: 1d04dbe45
+
+Time (s): cpu = 00:01:06 ; elapsed = 00:00:29 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 239 ; free virtual = 5962
+Phase 4 Initial Routing | Checksum: 1d04dbe45
+
+Time (s): cpu = 00:01:06 ; elapsed = 00:00:29 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 239 ; free virtual = 5962
+
+Phase 5 Rip-up And Reroute
+
+Phase 5.1 Global Iteration 0
+ Number of Nodes with overlaps = 3244
+ Number of Nodes with overlaps = 258
+ Number of Nodes with overlaps = 68
+ Number of Nodes with overlaps = 36
+ Number of Nodes with overlaps = 18
+ Number of Nodes with overlaps = 12
+ Number of Nodes with overlaps = 2
+ Number of Nodes with overlaps = 0
+INFO: [Route 35-416] Intermediate Timing Summary | WNS=0.111  | TNS=0.000  | WHS=N/A    | THS=N/A    |
+
+Phase 5.1 Global Iteration 0 | Checksum: 1f08ef808
+
+Time (s): cpu = 00:01:34 ; elapsed = 00:00:44 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 597 ; free virtual = 6053
+
+Phase 5.2 Global Iteration 1
+ Number of Nodes with overlaps = 3
+ Number of Nodes with overlaps = 13
+ Number of Nodes with overlaps = 10
+ Number of Nodes with overlaps = 2
+ Number of Nodes with overlaps = 1
+ Number of Nodes with overlaps = 0
+INFO: [Route 35-416] Intermediate Timing Summary | WNS=0.124  | TNS=0.000  | WHS=N/A    | THS=N/A    |
+
+Phase 5.2 Global Iteration 1 | Checksum: 37152d42f
+
+Time (s): cpu = 00:01:38 ; elapsed = 00:00:47 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 596 ; free virtual = 6052
+Phase 5 Rip-up And Reroute | Checksum: 37152d42f
+
+Time (s): cpu = 00:01:38 ; elapsed = 00:00:47 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 588 ; free virtual = 6044
+
+Phase 6 Delay and Skew Optimization
+
+Phase 6.1 Delay CleanUp
+
+Phase 6.1.1 Update Timing
+Phase 6.1.1 Update Timing | Checksum: 2cc42c357
+
+Time (s): cpu = 00:01:40 ; elapsed = 00:00:48 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 600 ; free virtual = 6057
+INFO: [Route 35-416] Intermediate Timing Summary | WNS=0.274  | TNS=0.000  | WHS=N/A    | THS=N/A    |
+
+Phase 6.1 Delay CleanUp | Checksum: 2cc42c357
+
+Time (s): cpu = 00:01:40 ; elapsed = 00:00:48 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 600 ; free virtual = 6057
+
+Phase 6.2 Clock Skew Optimization
+Phase 6.2 Clock Skew Optimization | Checksum: 2cc42c357
+
+Time (s): cpu = 00:01:40 ; elapsed = 00:00:48 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 600 ; free virtual = 6057
+Phase 6 Delay and Skew Optimization | Checksum: 2cc42c357
+
+Time (s): cpu = 00:01:40 ; elapsed = 00:00:48 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 600 ; free virtual = 6057
+
+Phase 7 Post Hold Fix
+
+Phase 7.1 Hold Fix Iter
+INFO: [Route 35-416] Intermediate Timing Summary | WNS=0.248  | TNS=0.000  | WHS=0.027  | THS=0.000  |
+
+Phase 7.1 Hold Fix Iter | Checksum: 2af6b795c
+
+Time (s): cpu = 00:01:44 ; elapsed = 00:00:48 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 600 ; free virtual = 6057
+Phase 7 Post Hold Fix | Checksum: 2af6b795c
+
+Time (s): cpu = 00:01:44 ; elapsed = 00:00:48 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 600 ; free virtual = 6057
+
+Phase 8 Route finalize
+
+Router Utilization Summary
+  Global Vertical Routing Utilization    = 5.70514 %
+  Global Horizontal Routing Utilization  = 8.506 %
+  Routable Net Status*
+  *Does not include unroutable nets such as driverless and loadless.
+  Run report_route_status for detailed report.
+  Number of Failed Nets               = 0
+    (Failed Nets is the sum of unrouted and partially routed nets)
+  Number of Unrouted Nets             = 0
+  Number of Partially Routed Nets     = 0
+  Number of Node Overlaps             = 0
+
+Phase 8 Route finalize | Checksum: 2af6b795c
+
+Time (s): cpu = 00:01:44 ; elapsed = 00:00:48 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 620 ; free virtual = 6077
+
+Phase 9 Verifying routed nets
+
+ Verification completed successfully
+Phase 9 Verifying routed nets | Checksum: 2af6b795c
+
+Time (s): cpu = 00:01:44 ; elapsed = 00:00:48 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 620 ; free virtual = 6077
+
+Phase 10 Depositing Routes
+Phase 10 Depositing Routes | Checksum: 2cf00d5ce
+
+Time (s): cpu = 00:01:47 ; elapsed = 00:00:50 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 591 ; free virtual = 6051
+
+Phase 11 Post Process Routing
+Phase 11 Post Process Routing | Checksum: 2cf00d5ce
+
+Time (s): cpu = 00:01:47 ; elapsed = 00:00:50 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 591 ; free virtual = 6052
+
+Phase 12 Post Router Timing
+INFO: [Route 35-57] Estimated Timing Summary | WNS=0.248  | TNS=0.000  | WHS=0.027  | THS=0.000  |
+
+INFO: [Route 35-327] The final timing numbers are based on the router estimated timing analysis. For a complete and accurate timing signoff, please run report_timing_summary.
+Phase 12 Post Router Timing | Checksum: 2cf00d5ce
+
+Time (s): cpu = 00:01:47 ; elapsed = 00:00:50 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 591 ; free virtual = 6052
+Total Elapsed time in route_design: 50.21 secs
+
+Phase 13 Post-Route Event Processing
+Phase 13 Post-Route Event Processing | Checksum: fc52d8bc
+
+Time (s): cpu = 00:01:48 ; elapsed = 00:00:50 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 591 ; free virtual = 6053
+INFO: [Route 35-16] Router Completed Successfully
+Ending Routing Task | Checksum: fc52d8bc
+
+Time (s): cpu = 00:01:48 ; elapsed = 00:00:51 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 590 ; free virtual = 6052
+
+Routing Is Done.
+INFO: [Common 17-83] Releasing license: Implementation
+150 Infos, 24 Warnings, 29 Critical Warnings and 0 Errors encountered.
+route_design completed successfully
+route_design: Time (s): cpu = 00:01:49 ; elapsed = 00:00:51 . Memory (MB): peak = 3394.230 ; gain = 50.785 ; free physical = 597 ; free virtual = 6059
+INFO: [Vivado 12-24828] Executing command : report_drc -file system_top_drc_routed.rpt -pb system_top_drc_routed.pb -rpx system_top_drc_routed.rpx
+Command: report_drc -file system_top_drc_routed.rpt -pb system_top_drc_routed.pb -rpx system_top_drc_routed.rpx
+INFO: [IP_Flow 19-1839] IP Catalog is up to date.
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Vivado_Tcl 2-168] The results of DRC are in file /home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/btle_antsdr_e200/btle_antsdr_e200.runs/impl_1/system_top_drc_routed.rpt.
+report_drc completed successfully
+INFO: [Vivado 12-24828] Executing command : report_methodology -file system_top_methodology_drc_routed.rpt -pb system_top_methodology_drc_routed.pb -rpx system_top_methodology_drc_routed.rpx
+Command: report_methodology -file system_top_methodology_drc_routed.rpt -pb system_top_methodology_drc_routed.pb -rpx system_top_methodology_drc_routed.rpx
+INFO: [Constraints 18-483] create_clock: no pin(s)/port(s)/net(s) specified as objects, only virtual clock 'system_gmii_to_rgmii_0_0_rgmii_rx_clk' will be created. If you don't want this, please specify pin(s)/ports(s)/net(s) as objects to the command. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:7]
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [DRC 23-133] Running Methodology with 8 threads
+INFO: [Vivado_Tcl 2-1520] The results of Report Methodology are in file /home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/btle_antsdr_e200/btle_antsdr_e200.runs/impl_1/system_top_methodology_drc_routed.rpt.
+report_methodology completed successfully
+report_methodology: Time (s): cpu = 00:00:34 ; elapsed = 00:00:07 . Memory (MB): peak = 3439.824 ; gain = 5.938 ; free physical = 210 ; free virtual = 5555
+INFO: [Vivado 12-24828] Executing command : report_timing_summary -max_paths 10 -routable_nets -report_unconstrained -file system_top_timing_summary_routed.rpt -pb system_top_timing_summary_routed.pb -rpx system_top_timing_summary_routed.rpx -warn_on_violation 
+INFO: [Constraints 18-483] create_clock: no pin(s)/port(s)/net(s) specified as objects, only virtual clock 'system_gmii_to_rgmii_0_0_rgmii_rx_clk' will be created. If you don't want this, please specify pin(s)/ports(s)/net(s) as objects to the command. [/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/src/ip/system_gmii_to_rgmii_0_0/synth/system_gmii_to_rgmii_0_0_clocks.xdc:7]
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -1, Delay Type: min_max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 8 CPUs
+INFO: [Vivado 12-24838] Running report commands "report_bus_skew, report_incremental_reuse, report_route_status" in parallel.
+Running report generation with 3 threads.
+INFO: [Vivado 12-24828] Executing command : report_incremental_reuse -file system_top_incremental_reuse_routed.rpt
+INFO: [Vivado_Tcl 4-1062] Incremental flow is disabled. No incremental reuse Info to report.
+INFO: [Vivado 12-24828] Executing command : report_bus_skew -warn_on_violation -file system_top_bus_skew_routed.rpt -pb system_top_bus_skew_routed.pb -rpx system_top_bus_skew_routed.rpx
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -1, Delay Type: min_max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 8 CPUs
+INFO: [Vivado 12-24828] Executing command : report_route_status -file system_top_route_status.rpt -pb system_top_route_status.pb
+INFO: [Vivado 12-24828] Executing command : report_power -file system_top_power_routed.rpt -pb system_top_power_summary_routed.pb -rpx system_top_power_routed.rpx
+Command: report_power -file system_top_power_routed.rpt -pb system_top_power_summary_routed.pb -rpx system_top_power_routed.rpx
+Running Vector-less Activity Propagation...
+
+Finished Running Vector-less Activity Propagation
+WARNING: [Power 33-332] Found switching activity that implies high-fanout reset nets being asserted for excessive periods of time which may result in inaccurate power analysis.
+Resolution: To review and fix problems, please run Power Constraints Advisor in the GUI from Tools > Power Constraints Advisor or run report_power with the -advisory option to generate a text report.
+172 Infos, 25 Warnings, 29 Critical Warnings and 0 Errors encountered.
+report_power completed successfully
+INFO: [Vivado 12-24828] Executing command : report_clock_utilization -file system_top_clock_utilization_routed.rpt
+generate_parallel_reports: Time (s): cpu = 00:01:10 ; elapsed = 00:00:18 . Memory (MB): peak = 3546.922 ; gain = 152.691 ; free physical = 560 ; free virtual = 6018
+INFO: [Timing 38-480] Writing timing data to binary archive.
+Write ShapeDB Complete: Time (s): cpu = 00:00:00.43 ; elapsed = 00:00:00.1 . Memory (MB): peak = 3546.922 ; gain = 0.000 ; free physical = 555 ; free virtual = 6026
+Wrote PlaceDB: Time (s): cpu = 00:00:04 ; elapsed = 00:00:01 . Memory (MB): peak = 3546.922 ; gain = 0.000 ; free physical = 521 ; free virtual = 6044
+Wrote PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3546.922 ; gain = 0.000 ; free physical = 521 ; free virtual = 6044
+Writing XDEF routing.
+Writing XDEF routing logical nets.
+Writing XDEF routing special nets.
+Wrote RouteStorage: Time (s): cpu = 00:00:00.4 ; elapsed = 00:00:00.23 . Memory (MB): peak = 3546.922 ; gain = 0.000 ; free physical = 518 ; free virtual = 6045
+Wrote Netlist Cache: Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3546.922 ; gain = 0.000 ; free physical = 518 ; free virtual = 6047
+Wrote Device Cache: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3546.922 ; gain = 0.000 ; free physical = 516 ; free virtual = 6046
+Write Physdb Complete: Time (s): cpu = 00:00:04 ; elapsed = 00:00:02 . Memory (MB): peak = 3546.922 ; gain = 0.000 ; free physical = 516 ; free virtual = 6046
+INFO: [Common 17-1381] The checkpoint '/home/vishwaksen/pentarisc/projects/clash/BTLE/fpga/pr/btle_antsdr_e200/btle_antsdr_e200.runs/impl_1/system_top_routed.dcp' has been generated.
+INFO: [Common 17-206] Exiting Vivado at Fri Jun 12 15:03:58 2026...

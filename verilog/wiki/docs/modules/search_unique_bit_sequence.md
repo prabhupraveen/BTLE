@@ -8,9 +8,12 @@ This module acts as a strict pattern matcher, looking for an exact bit sequence 
 ## Inputs
 - clk
 - rst
+- phy_bit
+- bit_valid
+- unique_bit_sequence
 
 ## Outputs
-
+- hit_flag
 ## Calls
 
 ## Called By

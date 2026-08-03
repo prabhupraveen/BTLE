@@ -4,5 +4,6 @@
 # // SPDX-FileCopyrightText: 2025 Xianjun Jiao
 # // SPDX-License-Identifier: Apache-2.0 license
 
-source ~/Xilinx/Vivado/2022.2/settings64.sh
+source ../helpers/env.sh
+source "$XILINX_VIVADO_ROOT/settings64.sh"
 vivado -source ./btle.tcl

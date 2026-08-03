@@ -70,6 +70,8 @@ module btle_ll # (
   `KEEP_FOR_DBG output wire [NUM_BIT_PAYLOAD_LENGTH:0] tx_pdu_octet_mem_addr,  // 1 more addr bit is needed: the octet_valid actually will output 2 bytes header, payload length, 3 bytes CRC
   `KEEP_FOR_DBG output wire tx_start,
   `KEEP_FOR_DBG input  wire tx_iq_valid_last,
+  `KEEP_FOR_DBG output wire phy_2m_mode,
+  `KEEP_FOR_DBG output wire [2:0] phy_test_mode,
 
   // =========to phy rx=======
   output wire [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0]  rx_unique_bit_sequence,
@@ -264,6 +266,8 @@ localparam [2:0] STANDBY                  = 0,
 `KEEP_FOR_DBG reg  rx_crc_ok_axi_lock;
 
 `KEEP_FOR_DBG wire [15:0] reg_gpio_axi;
+`KEEP_FOR_DBG wire phy_2m_mode_axi;
+`KEEP_FOR_DBG wire [2:0] phy_test_mode_axi;
 
 `KEEP_FOR_DBG wire [(C_S00_AXI_DATA_WIDTH-1) : 0] event0_counter_axi;
 `KEEP_FOR_DBG wire [(C_S00_AXI_DATA_WIDTH-1) : 0] event1_counter_axi;
@@ -349,6 +353,9 @@ assign rx_channel_number_axi          = slv_reg11[(CHANNEL_NUMBER_BIT_WIDTH-1) :
 assign rx_crc_state_init_bit_axi      = slv_reg12[(CRC_STATE_BIT_WIDTH-1) : 0];
 
 // assign rx_pdu_octet_mem_addr          = slv_reg13[5 : 0];
+
+assign phy_2m_mode_axi                = slv_reg14[0];
+assign phy_test_mode_axi              = slv_reg15[2 : 0];
 
 assign data_frame                     = slv_reg47[(FRAME_WD-1) : 0];
 assign frame_en                       = slv_reg47[FRAME_WD];
@@ -589,6 +596,8 @@ end
 clk_cross_bus #
 (
   .DATA_WIDTH(16+
+              1+
+              3+
               4+
               GAUSS_FILTER_BIT_WIDTH+
               SIN_COS_ADDR_BIT_WIDTH+
@@ -611,6 +620,8 @@ clk_cross_bus #
   .rst(~axi_aresetn),
 
   .write_data({reg_gpio_axi,
+               phy_2m_mode_axi,
+               phy_test_mode_axi,
                tx_gauss_filter_tap_index_axi, 
                tx_gauss_filter_tap_value_axi, 
                tx_cos_table_write_address_axi, 
@@ -631,6 +642,8 @@ clk_cross_bus #
 
   .read_clk(bb_clk),
   .read_data({reg_gpio,
+              phy_2m_mode,
+              phy_test_mode,
               tx_gauss_filter_tap_index, 
               tx_gauss_filter_tap_value, 
               tx_cos_table_write_address, 

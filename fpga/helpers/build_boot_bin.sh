@@ -62,13 +62,14 @@ fi
 
 HARDWARE=$1
 
-HW_BASE_DIR=../../BTLE-hw-img/fpga
+# HW_BASE_DIR=../../BTLE-hw-img/fpga
+HW_BASE_DIR=..
 UBOOT_IMAGE=./u-boot.elf
 
 BUILD_DIR=build_boot_bin
 OUTPUT_DIR=output_boot_bin
 
-XSA_FILE=${HW_BASE_DIR}/${HARDWARE}/system_top.xsa
+XSA_FILE=${HW_BASE_DIR}/${HARDWARE}/btle_${HARDWARE}/system_top.xsa
 
 ###############################################################################
 # Sanity checks

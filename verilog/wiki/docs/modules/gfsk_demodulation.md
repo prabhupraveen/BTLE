@@ -10,9 +10,15 @@ This module converts raw I/Q radio samples back into digital bits by calculating
 - clk
 - rst
 - phy_2m_mode
-- decision_threshold
+- i
+- q
+- iq_valid
 
 ## Outputs
+- signal_for_decision
+- signal_for_decision_valid
+- phy_bit
+- bit_valid
 
 ## Calls
 

@@ -39,6 +39,7 @@
 #define BTLE_LL_REG_RX_CHANNEL_NUMBER_IDX 11
 #define BTLE_LL_REG_RX_CRC_INIT_BIT_IDX   12
 #define BTLE_LL_REG_RX_PDU_MEM_ADDR_IDX   13
+#define BTLE_LL_REG_PHY_2M_MODE_IDX       14
 
 #define BLE_CMD_PORT 50000
 #define BLE_DATA_PORT 50001
@@ -412,6 +413,7 @@ static inline void print_usage() {
   printf("  -n channel number : such as 37\n");
   printf("  -c CRC init value : such as 0x555555\n");
   printf("  -a access address : such as 0x8E89BED6\n");
+  printf("  -M PHY 2M mode : 0 or 1 (default: 0)\n");
 }
 
 int main(int argc, char *argv[])
@@ -441,8 +443,9 @@ int main(int argc, char *argv[])
   uint32_t channel_number = 37; // default to channel 37
   uint32_t crc_init = 0x555555; // default to 0x555555
   uint32_t unique_bit_seq = 0x8E89BED6; // default to 0x8E89BED6 packet_word
+  uint32_t phy_2m_mode = 0; // default to 1M PHY
 
-  while ((opt = getopt(argc, argv, "n:c:a:H:P:L:")) != -1) {
+  while ((opt = getopt(argc, argv, "n:c:a:H:P:L:M:")) != -1) {
     switch (opt) {
       case 'H':
         strncpy(host_ip, optarg, sizeof(host_ip) - 1);
@@ -487,6 +490,15 @@ int main(int argc, char *argv[])
         }
         unique_bit_seq = (uint32_t)tmp;
         break;
+      case 'M':
+        errno = 0;
+        tmp = strtoul(optarg, NULL, 0);
+        if (errno != 0 || tmp > 1) {
+          fprintf(stderr, "Invalid PHY 2M mode value: %s\n", optarg);
+          return EXIT_FAILURE;
+        }
+        phy_2m_mode = (uint32_t)tmp;
+        break;
       default:
         print_usage();
         exit(EXIT_FAILURE);
@@ -498,6 +510,7 @@ int main(int argc, char *argv[])
   printf("Channel number: %u\n", channel_number);
   printf("CRC init: 0x%06X\n", crc_init);
   printf("Access address: 0x%08X\n", unique_bit_seq);
+  printf("PHY 2M mode: %u\n", phy_2m_mode);
 
   fd_uio0 = open("/dev/uio0", O_RDWR);
   // int fd1 = open("/dev/uio1", O_RDWR);
@@ -553,6 +566,7 @@ int main(int argc, char *argv[])
   fpga_regs[BTLE_LL_REG_RX_CRC_INIT_BIT_IDX] = crc_init;
   fpga_regs[BTLE_LL_REG_RX_PDU_MEM_ADDR_IDX] = 0;
   fpga_regs[BTLE_LL_REG_RX_UNIQUE_BIT_SEQ_IDX] = unique_bit_seq; // this is the right setting!
+  fpga_regs[BTLE_LL_REG_PHY_2M_MODE_IDX] = phy_2m_mode;
 
   __sync_synchronize();
   fpga_regs[0] = 0;
